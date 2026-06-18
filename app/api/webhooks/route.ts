@@ -64,7 +64,12 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const tenantId = resolvedTenantId || "I25kX3T0e7bqUybWxvYvzhAW4R8NFO9F";
+  if (!resolvedTenantId) {
+    console.warn("Webhook received but no tenant ID could be resolved. Skipping processing to prevent account mismatch.");
+    return new Response("No resolved tenant ID", { status: 200 });
+  }
+
+  const tenantId = resolvedTenantId;
 
   console.info(`Webhook received for tenant: "${tenantId}", processing...`);
 

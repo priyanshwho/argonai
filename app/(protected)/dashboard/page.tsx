@@ -23,6 +23,27 @@ export default async function DashboardPage() {
   const hasGmail = accounts.some((a) => a.integration.name === "gmail");
   const hasCalendar = accounts.some((a) => a.integration.name === "googlecalendar");
 
+  // Fetch past conversations and messages to ensure persistence
+  const dbConversations = await prisma.conversation.findMany({
+    where: { userId: session.user.id },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      messages: {
+        orderBy: { timestamp: "asc" },
+      },
+    },
+  });
+
+  const initialConversations = dbConversations.map((c) => ({
+    id: c.id,
+    title: c.title,
+    messages: c.messages.map((m) => ({
+      id: m.id,
+      role: m.role as "user" | "assistant" | "system",
+      content: m.content,
+    })),
+  }));
+
   return (
     <WorkspaceClient
       userId={session.user.id}
@@ -31,6 +52,8 @@ export default async function DashboardPage() {
       userImage={session.user.image}
       initialHasGmail={hasGmail}
       initialHasCalendar={hasCalendar}
+      initialConversations={initialConversations}
     />
   );
 }
+

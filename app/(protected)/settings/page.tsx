@@ -38,13 +38,13 @@ export default async function SettingsPage() {
 
   if (gmailAccount) {
     emailCount = await prisma.corsairEntity.count({
-      where: { accountId: gmailAccount.id, entityType: "message" },
+      where: { accountId: gmailAccount.id, entityType: "messages" },
     });
   }
 
   if (calendarAccount) {
     eventCount = await prisma.corsairEntity.count({
-      where: { accountId: calendarAccount.id, entityType: "event" },
+      where: { accountId: calendarAccount.id, entityType: "events" },
     });
   }
 

@@ -1,7 +1,7 @@
 import { processOAuthCallback } from 'corsair/oauth';
 import { corsair } from '@/lib/corsair';
 import { NextResponse } from 'next/server';
-import { setupWatches, syncGmailCache, syncCalendarCache } from '@/lib/sync';
+import { setupGmailWatch, setupCalendarWatch, syncGmailCache, syncCalendarCache } from '@/lib/sync';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -26,12 +26,14 @@ export async function GET(req: Request) {
 
     console.info(`OAuth callback succeeded for plugin "${plugin}", tenant: "${tenantId}". Launching watch and cache sync...`);
 
-    // Dynamic webhook and initial cache setup
+    // Only set up the watch for the specific plugin that just connected.
+    // Calling setupWatches for both causes a race condition when Gmail connects
+    // first and tries to validate a Calendar token that doesn't exist yet.
     if (plugin === 'gmail') {
-      await setupWatches(tenantId);
+      await setupGmailWatch(tenantId);
       await syncGmailCache(tenantId);
     } else if (plugin === 'googlecalendar') {
-      await setupWatches(tenantId);
+      await setupCalendarWatch(tenantId);
       await syncCalendarCache(tenantId);
     }
     
@@ -42,4 +44,5 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL('/dashboard?tab=configuration&error=CallbackFailed', appUrl));
   }
 }
+
 

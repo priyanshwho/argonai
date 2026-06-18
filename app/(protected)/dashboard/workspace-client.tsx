@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useSearchParams, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import {
+  Command,
   CommandDialog,
   CommandInput,
   CommandList,
@@ -21,6 +22,9 @@ import {
   CommandItem,
   CommandShortcut,
 } from "@/components/ui/command";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 
 
 // Types
@@ -31,7 +35,9 @@ interface WorkspaceClientProps {
   userImage?: string | null;
   initialHasGmail: boolean;
   initialHasCalendar: boolean;
+  initialConversations?: ChatConversation[];
 }
+
 
 interface EmailItem {
   id: string;
@@ -68,8 +74,46 @@ function getMessageText(message: any): string {
       .map((p: any) => p.text)
       .join("");
   }
-  return "";
+  return message.content || "";
 }
+
+function MarkdownMessage({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+        h1: ({ children }) => <h1 className="text-sm font-bold mb-2 text-zinc-100">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-xs font-bold mb-1.5 text-zinc-100">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-xs font-semibold mb-1 text-zinc-200">{children}</h3>,
+        ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-0.5 pl-1">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-0.5 pl-1">{children}</ol>,
+        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+        strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
+        em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
+        code: ({ children, className }) => {
+          const isBlock = className?.includes("language-");
+          return isBlock ? (
+            <code className="block bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 my-2 text-[10px] font-mono text-emerald-400 overflow-x-auto whitespace-pre">{children}</code>
+          ) : (
+            <code className="bg-zinc-800 rounded px-1 py-0.5 text-[10px] font-mono text-emerald-400">{children}</code>
+          );
+        },
+        pre: ({ children }) => <pre className="my-2">{children}</pre>,
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-zinc-600 pl-3 my-2 text-zinc-400 italic">{children}</blockquote>
+        ),
+        a: ({ href, children }) => (
+          <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">{children}</a>
+        ),
+        hr: () => <hr className="border-zinc-800 my-3" />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+}
+
 
 function formatDateTimeLocal(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
@@ -88,6 +132,7 @@ export function WorkspaceClient({
   userImage,
   initialHasGmail,
   initialHasCalendar,
+  initialConversations = [],
 }: WorkspaceClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -175,24 +220,50 @@ export function WorkspaceClient({
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Chat conversation threads management
-  const [conversations, setConversations] = useState<ChatConversation[]>([
-    { id: "default-chat", title: "New Conversation", messages: [] },
-  ]);
-  const [activeChatId, setActiveChatId] = useState<string>("default-chat");
+  const [conversations, setConversations] = useState<ChatConversation[]>(
+    initialConversations.length > 0
+      ? initialConversations
+      : [{ id: "default-chat", title: "New Conversation", messages: [] }]
+  );
+  const [activeChatId, setActiveChatId] = useState<string>(
+    initialConversations.length > 0 ? initialConversations[0].id : "default-chat"
+  );
   const [input, setInput] = useState("");
 
   // Vercel AI SDK chat hook using Gemini 3.1 Flash-Lite
   const { messages, sendMessage, setMessages, status } = useChat({
     onFinish: ({ message }) => {
       setConversations((prev) => 
-        prev.map((c) => 
-          c.id === activeChatId 
-            ? { ...c, messages: [...messages as any, { id: message.id, role: "assistant", content: getMessageText(message) }] } 
-            : c
-        )
+        prev.map((c) => {
+          if (c.id === activeChatId) {
+            const allMessages = [...messages as any, { id: message.id, role: "assistant" as const, content: getMessageText(message) }];
+            // Update title on first assistant response
+            let title = c.title;
+            if (c.title.startsWith("New Conversation") || c.title.startsWith("Conversation ")) {
+              const firstUserMsg = allMessages.find(m => m.role === "user");
+              if (firstUserMsg) {
+                title = getMessageText(firstUserMsg).slice(0, 30) || c.title;
+              }
+            }
+            return {
+              ...c,
+              title,
+              messages: allMessages,
+            };
+          }
+          return c;
+        })
       );
     }
   });
+
+  // Sync initial conversation messages into useChat hook on mount
+  useEffect(() => {
+    const activeConv = conversations.find(c => c.id === activeChatId);
+    if (activeConv && activeConv.messages.length > 0) {
+      setMessages(activeConv.messages as any);
+    }
+  }, []);
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -730,7 +801,11 @@ export function WorkspaceClient({
                         <div className={`rounded-2xl px-4 py-2.5 max-w-[85%] text-xs leading-relaxed ${
                           m.role === "user" ? "bg-zinc-800 text-zinc-100 font-medium" : "bg-zinc-900 border border-zinc-900/50 text-zinc-300"
                         }`}>
-                          <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
+                          {m.role === "user" ? (
+                            <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
+                          ) : (
+                            <MarkdownMessage content={getMessageText(m)} />
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1229,6 +1304,7 @@ export function WorkspaceClient({
       </section>
 
       <CommandDialog open={openCommandPalette} onOpenChange={setOpenCommandPalette}>
+        <Command>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
@@ -1328,6 +1404,7 @@ export function WorkspaceClient({
             </CommandItem>
           </CommandGroup>
         </CommandList>
+        </Command>
       </CommandDialog>
 
     </div>
