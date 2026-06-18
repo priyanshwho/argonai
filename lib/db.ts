@@ -10,8 +10,10 @@ const globalForDb = globalThis as unknown as {
   pool: pg.Pool | undefined;
 };
 
-const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL is not defined");
+const url = process.env.DATABASE_URL || "postgres://dummy:dummy@localhost:5432/dummy";
+if (!process.env.DATABASE_URL) {
+  console.warn("⚠️ DATABASE_URL is not defined. Using dummy URL to pass build. Real queries will fail.");
+}
 
 export const pool = globalForDb.pool ?? new pg.Pool({
   connectionString: url,
