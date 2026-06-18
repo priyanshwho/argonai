@@ -1,0 +1,228 @@
+Implementation Plan — Atria AI-Powered Email & Calendar Command Center
+Atria is a unified workspace where users connect Gmail and Google Calendar, managing both through a single dashboard and an AI agent. This document details the application architecture, database schema, route structure, component boundaries, and integration flows, organized into 5 Phases and 25 detailed steps.
+
+Application Architecture
+⚠️ Failed to render Mermaid diagram: Lexical error on line 10. Unrecognized text.
+... AuthRoute[/api/auth] ChatRoute[
+-----------------------^
+graph TD
+    subgraph Frontend [Next.js Client]
+        UI[UI Dashboard /workspace]
+        CP[Command Palette ⌘K]
+        Chat[AI Chat Interface]
+        AuthClient[Better Auth Client]
+    end
+
+    subgraph Backend [Next.js Route Handlers / Server Actions]
+        AuthRoute[/api/auth]
+        ChatRoute[/api/chat]
+        WebhookRoute[/api/webhooks]
+        McpRoute[/api/mcp]
+        Prisma[Prisma ORM Client]
+        VAI[Vercel AI SDK + Gemini]
+    end
+
+    subgraph Integration [Corsair Engine]
+        CE[Corsair Core Client]
+        GM[Gmail Integration]
+        GC[Google Calendar Integration]
+    end
+
+    subgraph Database [Neon PostgreSQL]
+        UserDB[(App Users / Sessions)]
+        CacheDB[(Gmail & Calendar Caches)]
+        CorsairDB[(Corsair Internal Sync Tables)]
+    end
+
+    UI --> ChatRoute
+    UI --> McpRoute
+    ChatInterface --> VAI
+    VAI -->|MCP Client / buildCorsairToolDefs| CE
+    CE --> CorsairDB
+    Prisma --> UserDB
+    Prisma --> CacheDB
+    WebhookRoute --> CE
+    WebhookRoute -->|Update Caches| CacheDB
+Database Schema
+We will extend prisma/schema.prisma to include models for chat persistence, email caching, and calendar event caching.
+
+prisma
+
+model Conversation {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+  @@index([userId])
+  @@map("conversation")
+}
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String       // "user" | "assistant" | "system"
+  content        String
+  timestamp      DateTime     @default(now())
+  @@index([conversationId])
+  @@map("message")
+}
+model GmailCache {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gmailId    String   @unique
+  threadId   String
+  subject    String
+  sender     String
+  snippet    String
+  receivedAt DateTime
+  createdAt  DateTime @default(now())
+  @@index([userId])
+  @@index([receivedAt])
+  @@map("gmail_messages")
+}
+model CalendarEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String   @unique
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  attendees Json     // Array of attendee email strings
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([startTime])
+  @@map("calendar_events")
+}
+User Review Required
+IMPORTANT
+
+Database Host Migration: Since you've configured Corsair setups (gmail, googlecalendar) on your Docker container instance in google-demo, we will migrate the Corsair sync database tables (corsair_integrations, corsair_accounts, corsair_entities, corsair_events) to your Neon PostgreSQL instance so everything runs out of a single cloud DB.
+
+Open Questions
+IMPORTANT
+
+Sync Strategy: Should we manually copy integration data into gmail_messages and calendar_events inside our webhook controller, OR is it acceptable to bypass duplicate tables and directly search/list using Corsair's native .db API methods (e.g., corsair.withTenant(userId).gmail.db.messages.list()) which uses the underlying corsair_entities table?
+
+Recommended: We implement both. We use Corsair's native .db client for fast retrieval & searches, but also populate GmailCache and CalendarEvent on webhook events for clean Prisma joins if needed.
+
+NOTE
+
+LLM Provider: We plan to use the Vercel AI SDK with Google Gemini (using the GOOGLE_GENERATIVE_AI_API_KEY from your .env). Let us know if you prefer OpenAI or another LLM model instead.
+
+Proposed Changes & Steps
+The execution is divided into 5 Phases and 25 detailed steps:
+
+Phase 1: Environment & Schema Preparation
+1. Step 1: Install Integration Dependencies
+Install the required packages in 
+package.json
+:
+
+corsair
+@corsair-dev/gmail
+@corsair-dev/googlecalendar
+@corsair-dev/mcp
+@ai-sdk/google
+ai
+2. Step 2: Update Prisma Schema
+Edit prisma/schema.prisma to add:
+
+Conversation, Message, GmailCache, CalendarEvent models
+Relations linking to the User model.
+3. Step 3: Run Database Migrations
+Execute prisma migrate dev to create the new tables on Neon PostgreSQL and regenerate the Prisma Client.
+
+4. Step 4: Configure Environments
+Copy CORSAIR_KEK and GOOGLE_GENERATIVE_AI_API_KEY to .env in the main workspace directory.
+
+5. Step 5: Establish Corsair Client Core
+Create lib/corsair.ts to initialize and export the Corsair engine with:
+
+gmail() and googlecalendar() plugins
+multiTenancy: true (scoped by user session ID)
+Shared database connection pool.
+Phase 2: Webhooks & Sync Infrastructure
+6. Step 6: Next.js Webhook Route Handler
+Create app/api/webhooks/route.ts to handle incoming Corsair Pub/Sub webhooks. It will run processWebhook to sync Google integration changes.
+
+7. Step 7: Webhook Data Mirroring logic
+Write background logic inside the webhook handler to identify updated messages/events, parsing the webhook payload, and syncing them into the GmailCache and CalendarEvent tables.
+
+8. Step 8: Webhook Validation & Securing
+Add secret verification to ensure incoming webhook calls originate securely from Google/Corsair.
+
+9. Step 9: Establish Server-Sent Events / SSE route
+Create app/api/sync/events/route.ts to push real-time refresh commands to the client workspace whenever webhooks execute.
+
+10. Step 10: Sync Tunnel and Testing
+Configure local environment webhooks utilizing ngrok, executing a testing command to verify Google Pub/Sub signals hit the Next.js API.
+
+Phase 3: AI Agent & MCP Layer
+11. Step 11: Create MCP Route Handler
+Create app/api/mcp/route.ts to bridge Express-like MCP router to Next.js route format so that external MCP clients can interact with the app.
+
+12. Step 12: Configure Gemini Vercel AI SDK Client
+Create lib/ai.ts importing @ai-sdk/google to structure standard LLM options using Gemini.
+
+13. Step 13: Corsair Tool-to-SDK Converter
+Build helper function in lib/ai-tools.ts converting Corsair's tool definitions from buildCorsairToolDefs directly into execution tools compatible with Vercel AI SDK.
+
+14. Step 14: System Rules & Assistant Prompting
+Define agent roles: instructing Gemini how to read email caches, look up calendar availability, write email drafts, and trigger calendar creations.
+
+15. Step 15: Create Chat Route Endpoint
+Write app/api/chat/route.ts accepting conversation threads, executing generateText with the mapped tools, and updating the database with new user & assistant message turns.
+
+Phase 4: Page Layouts & Frontends
+16. Step 16: Landing Page Redesign
+Replace 
+app/page.tsx
+ with a high-fidelity dark-themed marketing page featuring landing animations, visual cards, and CTAs.
+
+17. Step 17: Build Onboarding Wizard
+Create app/onboarding/page.tsx containing step modules to connect Google accounts and trigger initial sync processes.
+
+18. Step 18: Build Chat Sidebar
+Create workspace sidebar showing chat history list, options to spawn + New Chat, and shortcuts to jump between inbox/calendar views.
+
+19. Step 19: Build Unified Search Controller
+Implement a multi-source search query parsing logic returning matched emails, meetings, and contacts from both integration caches.
+
+20. Step 20: Develop Workspace Main Layout (/workspace)
+Implement the triple-column dashboard view:
+
+Sidebar (navigation + recent conversations)
+Inbox Workspace (emails list + thread detailed view + AI quick summary/reply options)
+Calendar Workspace (visual daily grid + event creation panel)
+Phase 5: Palette, Styling & Verification
+21. Step 21: Command Palette Controller (⌘K)
+Implement cmdk-based command palette supporting quick searches, event scheduling templates, and draft creators.
+
+22. Step 22: Settings Panel
+Create /settings page configuring integration auth details, webhook subscription metrics, and sync statistics.
+
+23. Step 23: UI Detailing & Framer Motion transitions
+Implement micro-interactions (hover glass overlays, smooth sidebar collapsing, fade-in transition lists).
+
+24. Step 24: Test Integration Harness
+Write a test script checking that Gemini triggers Corsair tools and fetches correctly without rate-limiting.
+
+25. Step 25: Build & Run Verification
+Run Next.js build verification and lint checks ensuring no typescript warnings persist before final execution.
+
+Verification Plan
+Automated Tests
+Run pnpm run build to verify standard compile correctness.
+Run database studio using npx prisma studio to monitor table rows.
+Run local script /server/test.ts to assert Corsair's internal cache retrieval works.
+Manual Verification
+Sign in using Better Auth.
+Complete Google OAuth connection onboarding.
+Post calendar event via chat workspace: "Schedule meeting tomorrow at 10 AM with HR".
+Validate event creation in Google Calendar.
+Trigger incoming Gmail webhooks using mock notification payloads to check automatic cache synchronization.

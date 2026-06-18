@@ -19,8 +19,9 @@ export async function signInWithGoogle(formData: FormData) {
   });
 
   if (result.url) {
-    redirect(result.url);
+    return { url: result.url };
   }
+  return { error: "Failed to authenticate" };
 }
 
 export async function signInWithGithub(formData: FormData) {
@@ -37,8 +38,9 @@ export async function signInWithGithub(formData: FormData) {
   });
 
   if (result.url) {
-    redirect(result.url);
+    return { url: result.url };
   }
+  return { error: "Failed to authenticate" };
 }
 
 export async function getServerSession() {

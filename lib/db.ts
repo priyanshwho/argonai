@@ -1,3 +1,6 @@
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 import pg from "pg";
@@ -13,9 +16,9 @@ if (!url) throw new Error("DATABASE_URL is not defined");
 export const pool = globalForDb.pool ?? new pg.Pool({
   connectionString: url,
   keepAlive: true,
-  idleTimeoutMillis: 3 * 60 * 1000,
+  idleTimeoutMillis: 15_000,
   connectionTimeoutMillis: 10_000,
-  max: 5,
+  max: 10,
 });
 
 pool.on("error", (err: Error) => {

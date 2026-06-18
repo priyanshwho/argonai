@@ -48,7 +48,12 @@ export function OAuthSignIn({ callbackUrl }: OAuthSignInProps) {
     setLoadingProvider("google");
     const formData = new FormData(e.currentTarget);
     try {
-      await signInWithGoogle(formData);
+      const res = await signInWithGoogle(formData);
+      if (res && "url" in res && res.url) {
+        window.location.href = res.url;
+      } else {
+        setLoadingProvider(null);
+      }
     } catch (err) {
       console.error(err);
       setLoadingProvider(null);
@@ -60,7 +65,12 @@ export function OAuthSignIn({ callbackUrl }: OAuthSignInProps) {
     setLoadingProvider("github");
     const formData = new FormData(e.currentTarget);
     try {
-      await signInWithGithub(formData);
+      const res = await signInWithGithub(formData);
+      if (res && "url" in res && res.url) {
+        window.location.href = res.url;
+      } else {
+        setLoadingProvider(null);
+      }
     } catch (err) {
       console.error(err);
       setLoadingProvider(null);
