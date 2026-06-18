@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { generateText } from 'ai';
-import { googleModel } from '@/lib/ai';
+import { getGoogleModel } from '@/lib/ai';
 
 function getEmailBody(messageData: any): string {
   if (!messageData) return '';
@@ -77,8 +77,10 @@ export async function POST(req: Request) {
 
     const emailContext = `Subject: ${subject}\nSender: ${sender}\nDate: ${receivedAt}\nSnippet: ${data.snippet || ''}\nBody:\n${bodyText}`.trim();
 
+    const model = await getGoogleModel();
+
     const result = await generateText({
-      model: googleModel,
+      model,
       system: 'You are an email summarization assistant. Generate a brief, clear, bulleted summary of the provided email content. Focus on actionable tasks, requests, and critical details. Keep it under 150 words.',
       prompt: emailContext,
     });

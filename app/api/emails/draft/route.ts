@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { generateText } from 'ai';
-import { googleModel } from '@/lib/ai';
+import { getGoogleModel } from '@/lib/ai';
 
 function getEmailBody(messageData: any): string {
   if (!messageData) return '';
@@ -75,8 +75,10 @@ export async function POST(req: Request) {
 
     const emailContext = `From: ${sender}\nSubject: ${subject}\nSnippet: ${data.snippet || ''}\nBody:\n${bodyText}`.trim();
 
+    const model = await getGoogleModel();
+
     const result = await generateText({
-      model: googleModel,
+      model,
       system: 'You are an email drafting assistant. Draft a professional, contextual reply to the provided email. Adhere to any special instructions provided. Write only the email reply text body, without template fields or subject lines.',
       prompt: `Email received:\n${emailContext}\n\nDrafting instructions: ${instructions || 'Write a polite, professional reply.'}`,
     });

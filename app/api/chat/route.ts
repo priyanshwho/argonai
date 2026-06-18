@@ -1,5 +1,5 @@
 import { streamText, stepCountIs } from 'ai';
-import { googleModel } from '@/lib/ai';
+import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
@@ -67,8 +67,10 @@ export async function POST(req: Request) {
     content: getMessageText(m),
   }));
 
+  const model = await getGoogleModel();
+
   const result = streamText({
-    model: googleModel,
+    model,
     system: `You are Atria, an AI-powered workspace assistant.
 You manage the user's Gmail and Google Calendar.
 You can read their emails, draft responses, find calendar availability, and schedule meetings.

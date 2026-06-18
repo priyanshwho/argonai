@@ -1,5 +1,5 @@
 import { generateText, stepCountIs } from 'ai';
-import { googleModel } from '../lib/ai';
+import { getGoogleModel } from '../lib/ai';
 import { getCorsairAiTools } from '../lib/ai-tools';
 import * as dotenv from 'dotenv';
 import path from 'path';
@@ -13,8 +13,9 @@ async function main() {
   console.log('Available Corsair tools:', Object.keys(tools));
   
   console.log('Querying Gemini model with prompt and stopWhen constraint...');
+  const model = await getGoogleModel();
   const result = await generateText({
-    model: googleModel,
+    model,
     tools,
     stopWhen: stepCountIs(10),
     prompt: 'Check the gmail tools. What are their names and description?',
