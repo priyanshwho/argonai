@@ -230,22 +230,22 @@ export default function LandingClient() {
       <div className="preloader">
         <div className="preloader-images">
           <div className="preloader-img">
-            <img src="/_.jpeg" alt="" />
+            <img src="/Yuya_M (@yuyar33) on X.jpeg" alt="" />
           </div>
           <div className="preloader-img">
-            <img src="/Nature's Simplicity_ A Two-Tone Ode to Beauty.jpeg" alt="" />
+            <img src="/Fushimi Inari.jpeg" alt="" />
           </div>
           <div className="preloader-img">
-            <img src="/Silent Mystic Haven.jpeg" alt="" />
+            <img src="/Fushimi Inari Taisha,  Kyoto.jpeg" alt="" />
           </div>
           <div className="preloader-img">
-            <img src="/Wallpaper programmer.jpeg" alt="" />
+            <img src="/Fuji, Japan.jpeg" alt="" />
           </div>
           <div className="preloader-img">
-            <img src="/_ (1).jpeg" alt="" />
+            <img src="/_ (4).jpeg" alt="" />
           </div>
           <div className="preloader-img">
-            <img src="/_ (2).jpeg" alt="" />
+            <img src="/_ (3).jpeg" alt="" />
           </div>
         </div>
 
@@ -286,32 +286,32 @@ export default function LandingClient() {
         <div className="absolute inset-0 z-2 pointer-events-none">
           <ImageTrail containerRef={containerRef as any}>
             <img
-              src="/_.jpeg"
+              src="/Yuya_M (@yuyar33) on X.jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
             <img
-              src="/Nature's Simplicity_ A Two-Tone Ode to Beauty.jpeg"
+              src="/Fushimi Inari.jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
             <img
-              src="/Silent Mystic Haven.jpeg"
+              src="/Fushimi Inari Taisha,  Kyoto.jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
             <img
-              src="/Wallpaper programmer.jpeg"
+              src="/Fuji, Japan.jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
             <img
-              src="/_ (1).jpeg"
+              src="/_ (4).jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
             <img
-              src="/_ (2).jpeg"
+              src="/_ (3).jpeg"
               alt=""
               className="w-[50px] h-[60px] object-cover rounded-md border border-[#e0e2db]/20 shadow-xl dark:border-[#141414]/20"
             />
