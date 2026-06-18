@@ -9,8 +9,10 @@ import {
   ChevronRight, CalendarDays, Edit3, Clipboard, FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/components/providers/loading-provider";
 import { authClient } from "@/lib/auth-client";
 import {
   Command,
@@ -46,6 +48,7 @@ interface EmailItem {
   subject: string;
   sender: string;
   snippet: string;
+  body?: string;
   receivedAt: string;
 }
 
@@ -588,10 +591,10 @@ export function WorkspaceClient({
                 <button
                   key={c.id}
                   onClick={() => selectConversation(c.id)}
-                  className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs transition-all text-left truncate ${
+                  className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-all text-left truncate ${
                     activeTab === "chat" && activeChatId === c.id && !showSearchResults
                       ? "bg-zinc-800 text-white font-medium"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+                      : "text-zinc-350 hover:bg-zinc-900 hover:text-zinc-250"
                   }`}
                 >
                   <MessageSquare className="h-3.5 w-3.5 shrink-0 opacity-60" />
@@ -672,6 +675,9 @@ export function WorkspaceClient({
             >
               <span className="font-mono text-[10px]">⌘K</span>
             </Button>
+            <div className="h-8 w-8 flex items-center justify-center border border-zinc-850 bg-zinc-900 hover:bg-zinc-800 rounded-xl overflow-hidden shrink-0">
+              <ModeToggle />
+            </div>
           </div>
         </header>
 
@@ -712,11 +718,11 @@ export function WorkspaceClient({
                             className="w-full p-4 flex flex-col gap-1 items-start text-left hover:bg-zinc-900/60 transition-colors"
                           >
                             <div className="flex items-center justify-between w-full">
-                              <span className="text-xs font-bold text-zinc-350">{email.sender}</span>
-                              <span className="text-[10px] text-zinc-500">{new Date(email.receivedAt).toLocaleDateString()}</span>
+                              <span className="text-sm font-bold text-zinc-300">{email.sender}</span>
+                              <span className="text-xs text-zinc-550">{new Date(email.receivedAt).toLocaleDateString()}</span>
                             </div>
-                            <span className="text-xs text-white font-semibold line-clamp-1">{email.subject}</span>
-                            <span className="text-[11px] text-zinc-500 line-clamp-1">{email.snippet}</span>
+                            <span className="text-sm text-white font-semibold line-clamp-1">{email.subject}</span>
+                            <span className="text-xs text-zinc-450 line-clamp-1">{email.snippet}</span>
                           </button>
                         ))}
                       </div>
@@ -739,10 +745,10 @@ export function WorkspaceClient({
                             className="w-full p-4 flex flex-col gap-1 items-start text-left hover:bg-zinc-900/60 transition-colors"
                           >
                             <div className="flex items-center justify-between w-full">
-                              <span className="text-xs font-bold text-zinc-300">{event.title}</span>
-                              <span className="text-[10px] text-zinc-550">{new Date(event.startTime).toLocaleDateString()}</span>
+                              <span className="text-sm font-bold text-zinc-200">{event.title}</span>
+                              <span className="text-xs text-zinc-550">{new Date(event.startTime).toLocaleDateString()}</span>
                             </div>
-                            <span className="text-[11px] text-zinc-400">
+                            <span className="text-xs text-zinc-405">
                               Time: {new Date(event.startTime).toLocaleTimeString()} - {new Date(event.endTime).toLocaleTimeString()}
                             </span>
                           </button>
@@ -760,17 +766,22 @@ export function WorkspaceClient({
             <div className="h-full flex flex-col justify-between">
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
                 {messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center max-w-sm mx-auto text-center space-y-6">
-                    <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-350 shadow-inner">
-                      <Sparkles className="h-6 w-6 text-zinc-150" />
+                  <div className="h-full flex flex-col items-center justify-center max-w-xl mx-auto text-center space-y-8 py-10">
+                    <div className="h-16 w-16 rounded-2xl bg-zinc-900 border border-zinc-850 flex items-center justify-center text-zinc-350 shadow-lg relative group transition-all duration-300 hover:border-zinc-700">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-zinc-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Sparkles className="h-7 w-7 text-zinc-200" />
                     </div>
-                    <div className="space-y-1">
-                      <h2 className="text-lg font-bold font-serif text-white">Workspace AI Assistant</h2>
-                      <p className="text-xs text-zinc-500 leading-relaxed">
+                    
+                    <div className="space-y-2">
+                      <h2 className="text-3xl font-extrabold font-serif text-white tracking-tight leading-tight">
+                        Workspace AI Assistant
+                      </h2>
+                      <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
                         Query your cached correspondence, draft response text, check calendar conflicts, or trigger direct event creation via command parameters.
                       </p>
                     </div>
-                    <div className="grid gap-2.5 w-full pt-4">
+
+                    <div className="grid gap-3 w-full pt-4">
                       {[
                         "Summarize my recent Gmail messages",
                         "Do I have any calendar conflicts tomorrow?",
@@ -779,16 +790,19 @@ export function WorkspaceClient({
                         <button
                           key={i}
                           onClick={() => setInput(promptText)}
-                          className="p-3 text-left rounded-xl border border-zinc-900 bg-zinc-900/20 text-xs text-zinc-350 hover:border-zinc-800 hover:bg-zinc-900/60 transition-all font-semibold"
+                          className="group p-4 flex items-center justify-between text-left rounded-xl border border-zinc-800/80 bg-zinc-900/35 text-sm text-zinc-350 hover:text-white hover:border-zinc-700 hover:bg-zinc-900/70 transition-all duration-200 font-semibold shadow-sm cursor-pointer"
                         >
-                          {promptText}
+                          <span>{promptText}</span>
+                          <ArrowRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 group-hover:translate-x-1 transition-all duration-200" />
                         </button>
                       ))}
                     </div>
                   </div>
                 ) : (
                   <div className="max-w-2xl mx-auto space-y-6">
-                    {messages.map((m) => (
+                    {messages
+                      .filter(m => getMessageText(m).trim() !== "" || m.role === "user")
+                      .map((m) => (
                       <div
                         key={m.id}
                         className={`flex gap-3.5 items-start ${m.role === "user" ? "flex-row-reverse" : ""}`}
@@ -798,8 +812,8 @@ export function WorkspaceClient({
                         }`}>
                           {m.role === "user" ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5 text-zinc-250" />}
                         </div>
-                        <div className={`rounded-2xl px-4 py-2.5 max-w-[85%] text-xs leading-relaxed ${
-                          m.role === "user" ? "bg-zinc-800 text-zinc-100 font-medium" : "bg-zinc-900 border border-zinc-900/50 text-zinc-300"
+                        <div className={`rounded-2xl px-4 py-3.5 max-w-[85%] text-sm leading-relaxed ${
+                          m.role === "user" ? "bg-zinc-800 text-zinc-100 font-medium animate-in fade-in slide-in-from-bottom-2 duration-300" : "bg-zinc-900 border border-zinc-900/50 text-zinc-200 animate-in fade-in slide-in-from-bottom-2 duration-300"
                         }`}>
                           {m.role === "user" ? (
                             <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
@@ -810,11 +824,17 @@ export function WorkspaceClient({
                       </div>
                     ))}
                     {isLoading && (
+                      (() => {
+                        const visibleMessages = messages.filter(m => getMessageText(m).trim() !== "" || m.role === "user");
+                        const lastVisible = visibleMessages[visibleMessages.length - 1];
+                        return !lastVisible || lastVisible.role !== "assistant";
+                      })()
+                    ) && (
                       <div className="flex gap-3.5 items-start">
-                        <div className="h-7 w-7 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold bg-zinc-800 border border-zinc-700 text-zinc-250">
+                        <div className="h-7 w-7 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold bg-zinc-850 border border-zinc-700 text-zinc-200">
                           <Bot className="h-3.5 w-3.5 text-zinc-250" />
                         </div>
-                        <div className="rounded-2xl px-4 py-2 bg-zinc-900 text-zinc-500 text-[11px] flex items-center gap-2">
+                        <div className="rounded-2xl px-4 py-2 bg-zinc-900 border border-zinc-900/50 text-zinc-500 text-[11px] flex items-center gap-2">
                           <RefreshCw className="h-3 w-3 animate-spin text-zinc-550" />
                           <span>Atria is thinking...</span>
                         </div>
@@ -831,21 +851,21 @@ export function WorkspaceClient({
                   onSubmit={handleChatSubmit}
                   className="max-w-2xl mx-auto relative flex items-center bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-1.5 hover:border-zinc-700 focus-within:border-zinc-650 transition-all shadow-inner"
                 >
-                  <input
+                  <input 
+                    type="text" 
+                    placeholder="Ask AI assistant to search mail or book meetings..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask AI assistant to search mail or book meetings..."
-                    className="flex-1 bg-transparent border-0 outline-none ring-0 text-xs py-1.5 placeholder-zinc-550 text-zinc-150 focus:outline-none"
                     disabled={isLoading}
+                    className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 py-2.5 pr-14 focus:outline-none focus:ring-0"
                   />
-                  <Button 
+                  <button
                     type="submit"
-                    size="icon"
-                    className="h-7 w-7 rounded-lg bg-zinc-100 text-zinc-950 hover:bg-zinc-200 shrink-0 shadow-sm"
                     disabled={isLoading || !input.trim()}
+                    className="absolute right-3 p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-950 disabled:opacity-30 disabled:hover:bg-zinc-100 transition-all cursor-pointer shadow-sm"
                   >
-                    <Send className="h-3.5 w-3.5 text-zinc-950" />
-                  </Button>
+                    <Send className="h-4.5 w-4.5" />
+                  </button>
                 </form>
               </div>
             </div>
@@ -881,13 +901,13 @@ export function WorkspaceClient({
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-bold text-zinc-350">{email.sender}</span>
-                        <span className="text-[10px] text-zinc-500">
+                        <span className="text-sm font-bold text-zinc-300">{email.sender}</span>
+                        <span className="text-xs text-zinc-500">
                           {new Date(email.receivedAt).toLocaleDateString()} {new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-white line-clamp-1">{email.subject}</span>
-                      <span className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed">{email.snippet}</span>
+                      <span className="text-sm font-semibold text-white line-clamp-1">{email.subject}</span>
+                      <span className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{email.snippet}</span>
                     </button>
                   ))}
                 </div>
@@ -922,20 +942,20 @@ export function WorkspaceClient({
                     return (
                       <div key={event.id} className="p-4 rounded-xl border border-zinc-900 bg-zinc-900/20 hover:bg-zinc-900/40 transition-colors flex justify-between items-start gap-4">
                         <div className="space-y-1">
-                          <h4 className="text-xs font-bold text-white leading-tight">{event.title}</h4>
-                          <p className="text-[11px] text-zinc-400">
+                          <h4 className="text-sm font-bold text-white leading-tight">{event.title}</h4>
+                          <p className="text-xs text-zinc-400">
                             {start.toLocaleDateString()} @ {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                           {guests.length > 0 && (
                             <div className="flex items-center gap-1.5 pt-1">
-                              <UserCheck className="h-3 w-3 text-zinc-500" />
-                              <span className="text-[10px] text-zinc-500 truncate max-w-sm">
+                              <UserCheck className="h-3.5 w-3.5 text-zinc-500" />
+                              <span className="text-xs text-zinc-550 truncate max-w-sm">
                                 Guests: {guests.join(", ")}
                               </span>
                             </div>
                           )}
                         </div>
-                        <div className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded font-mono shrink-0">
+                        <div className="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded font-sans shrink-0">
                           Primary
                         </div>
                       </div>
@@ -1068,148 +1088,116 @@ export function WorkspaceClient({
       </section>
 
       {/* 3. RIGHT COLUMN: Context panels */}
-      <section className="w-80 bg-zinc-900/50 flex flex-col overflow-y-auto shrink-0 p-4 space-y-6">
-        
-        {/* A. CONTEXT: CHAT TAB */}
-        {activeTab === "chat" && (
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Workspace Context</h3>
-              <p className="text-[11px] text-zinc-500 leading-normal">
-                Atria coordinates cache queries and active integrations. Use natural language to schedule meetings or write email drafts.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 space-y-3">
-              <h4 className="text-xs font-semibold text-zinc-300">Integration Checklist</h4>
-              <div className="space-y-2">
-                {[
-                  { name: "Gmail Connection", active: initialHasGmail },
-                  { name: "Calendar Connection", active: initialHasCalendar },
-                  { name: "Prisma Sync Cache Pool", active: initialHasGmail && initialHasCalendar },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs">
-                    <CheckCircle2 className={`h-4 w-4 shrink-0 ${item.active ? "text-emerald-400" : "text-zinc-650"}`} />
-                    <span className={item.active ? "text-zinc-300" : "text-zinc-500"}>{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 space-y-2 text-xs">
-              <h4 className="text-xs font-semibold text-zinc-300">System Commands</h4>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
-                Type <code className="text-zinc-305 font-mono bg-zinc-900 border border-zinc-800 px-1 rounded">Summarize emails</code> or <code className="text-zinc-305 font-mono bg-zinc-900 border border-zinc-800 px-1 rounded">Book slot</code> to interact with Gmail or Google Calendar.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* B. CONTEXT: INBOX TAB */}
-        {activeTab === "inbox" && (
-          <div className="space-y-6">
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Email Details</h3>
-            
-            {!selectedEmail ? (
-              <div className="text-center py-12 space-y-2">
-                <FileText className="h-8 w-8 text-zinc-700 mx-auto" />
-                <p className="text-xs text-zinc-500 font-medium">Select an email from the inbox list to read details.</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                
-                {/* Details layout */}
-                <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40 space-y-2.5 text-xs">
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase font-bold">Sender</span>
-                    <p className="font-semibold text-zinc-200 line-clamp-1">{selectedEmail.sender}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase font-bold">Subject</span>
-                    <p className="font-bold text-white leading-snug">{selectedEmail.subject}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase font-bold">Received</span>
-                    <p className="text-zinc-400">{new Date(selectedEmail.receivedAt).toLocaleString()}</p>
-                  </div>
-                  <div className="pt-2 border-t border-zinc-900">
-                    <span className="text-[10px] text-zinc-500 uppercase font-bold">Snippet</span>
-                    <p className="text-zinc-405 leading-relaxed pt-1 select-text">{selectedEmail.snippet}</p>
-                  </div>
+      {activeTab !== "chat" && (
+        <section className={`${activeTab === "inbox" ? "w-[400px]" : "w-80"} bg-zinc-900/50 flex flex-col overflow-y-auto shrink-0 p-5 space-y-6 border-l border-zinc-900`}>
+          
+          {/* B. CONTEXT: INBOX TAB */}
+          {activeTab === "inbox" && (
+            <div className="space-y-6">
+              <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">Email Details</h3>
+              
+              {!selectedEmail ? (
+                <div className="text-center py-16 space-y-3">
+                  <FileText className="h-10 w-10 text-zinc-650 mx-auto" />
+                  <p className="text-sm text-zinc-500 font-medium">Select an email from the inbox list to read details.</p>
                 </div>
-
-                {/* AI Actions */}
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-zinc-300">AI Assistant Actions</h4>
+              ) : (
+                <div className="space-y-6">
                   
-                  {/* Summary action */}
-                  <div className="space-y-2">
-                    <Button 
-                      onClick={() => handleSummarizeEmail(selectedEmail.gmailId)}
-                      disabled={aiSummaryLoading}
-                      size="xs"
-                      className="w-full bg-zinc-850 hover:bg-zinc-800 text-zinc-200 text-xs py-1.5 flex items-center justify-center gap-1.5 border border-zinc-800"
-                    >
-                      {aiSummaryLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-yellow-500 animate-pulse" />}
-                      <span>Generate Bullet Summary</span>
-                    </Button>
-
-                    {aiSummary && (
-                      <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/20 text-xs text-zinc-300 leading-relaxed relative whitespace-pre-wrap select-text">
-                        <button 
-                          onClick={() => copyToClipboard(aiSummary)}
-                          className="absolute right-2 top-2 p-1 text-zinc-500 hover:text-zinc-200 rounded hover:bg-zinc-900 transition-colors"
-                          title="Copy Summary"
-                        >
-                          <Clipboard className="h-3.5 w-3.5" />
-                        </button>
-                        <strong className="text-[10px] font-bold text-zinc-500 uppercase block pb-1.5">AI Summary</strong>
-                        {aiSummary}
+                  {/* Details layout - premium card */}
+                  <div className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950/50 space-y-4 shadow-xl">
+                    <div>
+                      <span className="text-xs font-bold text-zinc-550 uppercase tracking-wider block mb-1">Sender</span>
+                      <p className="text-sm font-bold text-zinc-100 break-words leading-snug">{selectedEmail.sender}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-zinc-550 uppercase tracking-wider block mb-1">Subject</span>
+                      <p className="text-base font-extrabold text-white leading-snug break-words">{selectedEmail.subject}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-zinc-550 uppercase tracking-wider block mb-1">Received</span>
+                      <p className="text-sm text-zinc-400 font-medium">{new Date(selectedEmail.receivedAt).toLocaleString()}</p>
+                    </div>
+                    <div className="pt-4 border-t border-zinc-900">
+                      <span className="text-xs font-bold text-zinc-550 uppercase tracking-wider block mb-2">{selectedEmail.body ? "Message Content" : "Snippet"}</span>
+                      <div className="text-sm text-zinc-300 leading-relaxed break-words select-text whitespace-pre-wrap max-h-[300px] overflow-y-auto pr-1">
+                        {selectedEmail.body || selectedEmail.snippet}
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  {/* AI drafting replies */}
-                  <div className="space-y-2.5 pt-2 border-t border-zinc-900">
-                    <span className="text-[10px] text-zinc-500 uppercase font-bold block">Drafting instructions (optional)</span>
-                    <input 
-                      type="text" 
-                      placeholder="e.g., politely decline, ask to reschedule..." 
-                      value={draftInstructions}
-                      onChange={(e) => setDraftInstructions(e.target.value)}
-                      className="w-full bg-zinc-955 border border-zinc-850 rounded-lg p-2 text-xs text-zinc-200 placeholder-zinc-650 focus:outline-none focus:border-zinc-700"
-                    />
+                  {/* AI Actions */}
+                  <div className="space-y-5">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">AI Assistant Actions</h4>
+                    
+                    {/* Summary action */}
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={() => handleSummarizeEmail(selectedEmail.gmailId)}
+                        disabled={aiSummaryLoading}
+                        className="w-full bg-zinc-850 hover:bg-zinc-800 text-zinc-250 text-xs py-2 h-10 flex items-center justify-center gap-1.5 border border-zinc-800 rounded-xl"
+                      >
+                        {aiSummaryLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-yellow-500 animate-pulse" />}
+                        <span>Generate Bullet Summary</span>
+                      </Button>
 
-                    <Button 
-                      onClick={() => handleDraftReply(selectedEmail.gmailId)}
-                      disabled={aiDraftLoading}
-                      size="xs"
-                      className="w-full bg-zinc-850 hover:bg-zinc-800 text-zinc-200 text-xs py-1.5 flex items-center justify-center gap-1.5 border border-zinc-800"
-                    >
-                      {aiDraftLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Edit3 className="h-3.5 w-3.5 text-zinc-300" />}
-                      <span>Generate Response Draft</span>
-                    </Button>
+                      {aiSummary && (
+                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/35 text-sm text-zinc-300 leading-relaxed relative whitespace-pre-wrap select-text shadow-inner">
+                          <button 
+                            onClick={() => copyToClipboard(aiSummary)}
+                            className="absolute right-3 top-3 p-1.5 text-zinc-500 hover:text-zinc-200 rounded hover:bg-zinc-900 transition-colors"
+                            title="Copy Summary"
+                          >
+                            <Clipboard className="h-4 w-4" />
+                          </button>
+                          <strong className="text-xs font-bold text-zinc-550 uppercase tracking-wider block pb-2">AI Summary</strong>
+                          {aiSummary}
+                        </div>
+                      )}
+                    </div>
 
-                    {aiDraft && (
-                      <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/20 text-xs text-zinc-300 leading-relaxed relative whitespace-pre-wrap select-text">
-                        <button 
-                          onClick={() => copyToClipboard(aiDraft)}
-                          className="absolute right-2 top-2 p-1 text-zinc-500 hover:text-zinc-200 rounded hover:bg-zinc-900 transition-colors"
-                          title="Copy Draft"
-                        >
-                          <Clipboard className="h-3.5 w-3.5" />
-                        </button>
-                        <strong className="text-[10px] font-bold text-zinc-500 uppercase block pb-1.5">Reply Draft</strong>
-                        {aiDraft}
+                    {/* AI drafting replies */}
+                    <div className="space-y-3.5 pt-4 border-t border-zinc-900">
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-semibold text-zinc-450 block">Drafting instructions (optional)</span>
+                        <input 
+                          type="text" 
+                          placeholder="e.g., politely decline, ask to reschedule..." 
+                          value={draftInstructions}
+                          onChange={(e) => setDraftInstructions(e.target.value)}
+                          className="w-full bg-zinc-955 border border-zinc-850 rounded-xl p-3 h-10 text-sm text-zinc-200 placeholder-zinc-650 focus:outline-none focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+                        />
                       </div>
-                    )}
+
+                      <Button 
+                        onClick={() => handleDraftReply(selectedEmail.gmailId)}
+                        disabled={aiDraftLoading}
+                        className="w-full bg-zinc-850 hover:bg-zinc-800 text-zinc-250 text-xs py-2 h-10 flex items-center justify-center gap-1.5 border border-zinc-800 rounded-xl"
+                      >
+                        {aiDraftLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Edit3 className="h-4 w-4 text-zinc-300" />}
+                        <span>Generate Response Draft</span>
+                      </Button>
+
+                      {aiDraft && (
+                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/35 text-sm text-zinc-300 leading-relaxed relative whitespace-pre-wrap select-text shadow-inner">
+                          <button 
+                            onClick={() => copyToClipboard(aiDraft)}
+                            className="absolute right-3 top-3 p-1.5 text-zinc-500 hover:text-zinc-200 rounded hover:bg-zinc-900 transition-colors"
+                            title="Copy Draft"
+                          >
+                            <Clipboard className="h-4 w-4" />
+                          </button>
+                          <strong className="text-xs font-bold text-zinc-550 uppercase tracking-wider block pb-2">Reply Draft</strong>
+                          {aiDraft}
+                        </div>
+                      )}
+                    </div>
+
                   </div>
 
                 </div>
-
-              </div>
-            )}
-          </div>
+              )}
+            </div>
         )}
 
         {/* C. CONTEXT: CALENDAR TAB */}
@@ -1299,9 +1287,10 @@ export function WorkspaceClient({
               </Button>
             </form>
           </div>
-        )}
+          )}
 
-      </section>
+        </section>
+      )}
 
       <CommandDialog open={openCommandPalette} onOpenChange={setOpenCommandPalette}>
         <Command>

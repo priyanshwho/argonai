@@ -4,110 +4,11 @@ import crypto from "node:crypto";
 
 
 export async function syncGmailCache(userId: string) {
-  try {
-    // Query all Gmail message entities for this user in corsair_entities
-    const entities = await prisma.corsairEntity.findMany({
-      where: {
-        account: {
-          tenantId: userId
-        },
-        entityType: "messages"
-      }
-    });
-
-    console.info(`Syncing ${entities.length} Gmail cache messages for tenant ${userId}...`);
-
-    for (const entity of entities) {
-      const data = entity.data as any;
-      if (!data) continue;
-
-      // Extract subject and sender from payload headers safely
-      const headers = data.payload?.headers || [];
-      const subject = headers.find((h: any) => h.name.toLowerCase() === "subject")?.value || "No Subject";
-      const sender = headers.find((h: any) => h.name.toLowerCase() === "from")?.value || "Unknown Sender";
-      
-      // Google internalDate is string timestamp in ms
-      const receivedAtMs = parseInt(data.internalDate);
-      const receivedAt = isNaN(receivedAtMs) ? new Date() : new Date(receivedAtMs);
-
-      await prisma.gmailCache.upsert({
-        where: { gmailId: entity.entityId },
-        update: {
-          threadId: data.threadId || "",
-          subject,
-          sender,
-          snippet: data.snippet || "",
-          receivedAt
-        },
-        create: {
-          userId,
-          gmailId: entity.entityId,
-          threadId: data.threadId || "",
-          subject,
-          sender,
-          snippet: data.snippet || "",
-          receivedAt
-        }
-      });
-    }
-    console.info(`Gmail cache sync complete for tenant ${userId}.`);
-  } catch (err) {
-    console.error(`Error syncing Gmail cache for user ${userId}:`, err);
-  }
+  console.info(`[DEPRECATED] syncGmailCache: Webhook syncs are now handled natively by Corsair via corsair_entities. No secondary caching required for user: ${userId}`);
 }
 
 export async function syncCalendarCache(userId: string) {
-  try {
-    // Query all Google Calendar event entities for this user in corsair_entities
-    const entities = await prisma.corsairEntity.findMany({
-      where: {
-        account: {
-          tenantId: userId
-        },
-        entityType: "events"
-      }
-    });
-
-    console.info(`Syncing ${entities.length} Google Calendar cache events for tenant ${userId}...`);
-
-    for (const entity of entities) {
-      const data = entity.data as any;
-      if (!data) continue;
-
-      const title = data.summary || "No Title";
-      
-      // Google Calendar date vs dateTime parsing
-      const startStr = data.start?.dateTime || data.start?.date;
-      const endStr = data.end?.dateTime || data.end?.date;
-
-      const startTime = startStr ? new Date(startStr) : new Date();
-      const endTime = endStr ? new Date(endStr) : new Date();
-      const attendees = (data.attendees || [])
-        .map((a: any) => a.email)
-        .filter(Boolean);
-
-      await prisma.calendarEvent.upsert({
-        where: { eventId: entity.entityId },
-        update: {
-          title,
-          startTime,
-          endTime,
-          attendees
-        },
-        create: {
-          userId,
-          eventId: entity.entityId,
-          title,
-          startTime,
-          endTime,
-          attendees
-        }
-      });
-    }
-    console.info(`Calendar cache sync complete for tenant ${userId}.`);
-  } catch (err) {
-    console.error(`Error syncing Calendar cache for user ${userId}:`, err);
-  }
+  console.info(`[DEPRECATED] syncCalendarCache: Webhook syncs are now handled natively by Corsair via corsair_entities. No secondary caching required for user: ${userId}`);
 }
 
 export async function setupGmailWatch(userId: string) {

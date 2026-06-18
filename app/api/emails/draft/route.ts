@@ -53,14 +53,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing gmailId' }, { status: 400 });
     }
 
-    const cacheRecord = await prisma.gmailCache.findUnique({
-      where: { gmailId },
-    });
-
-    if (!cacheRecord) {
-      return NextResponse.json({ error: 'Email cache record not found' }, { status: 404 });
-    }
-
+    // Look up entity directly from corsair_entities — avoids dependency on gmailCache table
     const entity = await prisma.corsairEntity.findFirst({
       where: {
         entityId: gmailId,
@@ -70,14 +63,17 @@ export async function POST(req: Request) {
       },
     });
 
-    const bodyText = getEmailBody(entity?.data);
-    const emailContext = `
-From: ${cacheRecord.sender}
-Subject: ${cacheRecord.subject}
-Snippet: ${cacheRecord.snippet}
-Body:
-${bodyText}
-    `.trim();
+    if (!entity) {
+      return NextResponse.json({ error: 'Email not found in cache' }, { status: 404 });
+    }
+
+    const data = entity.data as any || {};
+    const headersList = data.payload?.headers || [];
+    const subject = headersList.find((h: any) => h.name.toLowerCase() === 'subject')?.value || data.subject || 'No Subject';
+    const sender = headersList.find((h: any) => h.name.toLowerCase() === 'from')?.value || data.from || 'Unknown';
+    const bodyText = getEmailBody(data);
+
+    const emailContext = `From: ${sender}\nSubject: ${subject}\nSnippet: ${data.snippet || ''}\nBody:\n${bodyText}`.trim();
 
     const result = await generateText({
       model: googleModel,
@@ -91,3 +87,4 @@ ${bodyText}
     return NextResponse.json({ error: 'Failed to generate draft' }, { status: 500 });
   }
 }
+

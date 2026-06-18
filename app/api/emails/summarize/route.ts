@@ -53,15 +53,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing gmailId' }, { status: 400 });
     }
 
-    // Retrieve email content from cache
-    const cacheRecord = await prisma.gmailCache.findUnique({
-      where: { gmailId },
-    });
-
-    if (!cacheRecord) {
-      return NextResponse.json({ error: 'Email cache record not found' }, { status: 404 });
-    }
-
+    // Look up entity directly from corsair_entities — avoids dependency on gmailCache table
     const entity = await prisma.corsairEntity.findFirst({
       where: {
         entityId: gmailId,
@@ -71,15 +63,19 @@ export async function POST(req: Request) {
       },
     });
 
-    const bodyText = getEmailBody(entity?.data);
-    const emailContext = `
-Subject: ${cacheRecord.subject}
-Sender: ${cacheRecord.sender}
-Date: ${cacheRecord.receivedAt}
-Snippet: ${cacheRecord.snippet}
-Body:
-${bodyText}
-    `.trim();
+    if (!entity) {
+      return NextResponse.json({ error: 'Email not found in cache' }, { status: 404 });
+    }
+
+    const data = entity.data as any || {};
+    const headersList = data.payload?.headers || [];
+    const subject = headersList.find((h: any) => h.name.toLowerCase() === 'subject')?.value || data.subject || 'No Subject';
+    const sender = headersList.find((h: any) => h.name.toLowerCase() === 'from')?.value || data.from || 'Unknown';
+    const receivedAtMs = parseInt(data.internalDate);
+    const receivedAt = isNaN(receivedAtMs) ? 'Unknown date' : new Date(receivedAtMs).toLocaleString();
+    const bodyText = getEmailBody(data);
+
+    const emailContext = `Subject: ${subject}\nSender: ${sender}\nDate: ${receivedAt}\nSnippet: ${data.snippet || ''}\nBody:\n${bodyText}`.trim();
 
     const result = await generateText({
       model: googleModel,
