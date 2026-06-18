@@ -27,21 +27,21 @@ export default function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
                 <Zap className="h-4 w-4 fill-current text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold tracking-wider font-serif uppercase">
+              <span className="text-xl font-bold tracking-wider font-serif uppercase">
                 Locus
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed font-sans max-w-xs">
+            <p className="text-base text-muted-foreground leading-relaxed font-sans max-w-xs">
               AI-powered command center for Gmail and Google Calendar. Secure, multi-tenant workspace sync.
             </p>
           </div>
 
           {/* Links: Explore */}
           <div className="space-y-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-primary font-mono">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-primary font-mono">
               Explore
             </h4>
-            <ul className="space-y-3 text-sm text-muted-foreground font-sans">
+            <ul className="space-y-3 text-base text-muted-foreground font-sans">
               <li><a href="#features" className="hover:text-primary transition-colors">Features</a></li>
               <li><a href="#testimonials" className="hover:text-primary transition-colors">Testimonials</a></li>
               <li><a href="#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
@@ -51,10 +51,10 @@ export default function Footer() {
 
           {/* Links: Company */}
           <div className="space-y-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-primary font-mono">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-primary font-mono">
               Company
             </h4>
-            <ul className="space-y-3 text-sm text-muted-foreground font-sans">
+            <ul className="space-y-3 text-base text-muted-foreground font-sans">
               <li><a href="#" className="hover:text-primary transition-colors">About Us</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Careers</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
@@ -64,10 +64,10 @@ export default function Footer() {
 
           {/* Newsletter signup */}
           <div className="space-y-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-primary font-mono">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-primary font-mono">
               Newsletter
             </h4>
-            <p className="text-sm text-muted-foreground font-sans leading-relaxed">
+            <p className="text-base text-muted-foreground font-sans leading-relaxed">
               Get Locus product updates and shortcuts delivered to your inbox.
             </p>
             <form onSubmit={handleSubmit} className="flex gap-2.5 max-w-sm">
@@ -77,11 +77,11 @@ export default function Footer() {
                 placeholder="Your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-background border border-border/80 rounded-lg px-4 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary font-sans"
+                className="flex-1 bg-background border border-border/80 rounded-lg px-4 py-2.5 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary font-sans"
               />
               <button
                 type="submit"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-transform shrink-0 self-center cursor-pointer"
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-transform shrink-0 self-center cursor-pointer"
               >
                 <Send className="h-4 w-4 text-primary-foreground" />
               </button>
@@ -91,11 +91,11 @@ export default function Footer() {
 
         {/* Footer Bottom Block */}
         <div className="pt-12 flex flex-col md:flex-row items-center justify-between gap-8">
-          <span className="text-xs text-muted-foreground font-mono">
+          <span className="text-sm text-muted-foreground font-mono">
             &copy; 2026 Locus AI. All rights reserved.
           </span>
 
-          <span className="text-sm text-muted-foreground font-sans">
+          <span className="text-base text-muted-foreground font-sans">
             Made with 💖 for <span className="text-foreground font-semibold">Locus</span>
           </span>
 

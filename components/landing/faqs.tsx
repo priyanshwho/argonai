@@ -35,12 +35,12 @@ export default function FAQs() {
 
   return (
     <section id="faqs" className="py-32 md:py-40 border-t border-border bg-background text-foreground relative">
-      <div className="mx-auto max-w-3xl px-6 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-4xl px-6 sm:px-8 lg:px-12">
         <div className="text-center space-y-5 mb-20 md:mb-24">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-serif text-foreground tracking-tight uppercase leading-tight">
             Frequently Asked<br className="hidden sm:block" /> Questions
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto font-sans leading-relaxed">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto font-sans leading-relaxed">
             Got questions? We&apos;ve got answers.
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function FAQs() {
                   onClick={() => toggleFAQ(index)}
                   className="w-full flex items-center justify-between p-7 text-left transition-colors hover:bg-muted/10 cursor-pointer"
                 >
-                  <span className="text-sm md:text-base font-semibold text-foreground font-sans uppercase tracking-wide pr-4">
+                  <span className="text-base md:text-lg font-semibold text-foreground font-sans uppercase tracking-wide pr-4">
                     {faq.question}
                   </span>
                   {isOpen ? (
@@ -70,7 +70,7 @@ export default function FAQs() {
                 
                 {isOpen && (
                   <div className="px-7 pb-7 pt-0 border-t border-border/40 bg-card/10 animate-in fade-in duration-200">
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-sans pt-5">
+                    <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-sans pt-5">
                       {faq.answer}
                     </p>
                   </div>

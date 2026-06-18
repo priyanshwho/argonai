@@ -264,7 +264,7 @@ export default function LandingClient() {
         </div>
 
         {/* Center scrolling links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground bg-background/50 dark:bg-card/30 border border-border/10 rounded-full px-6 py-2 backdrop-blur-xs shadow-sm">
+        <div className="hidden md:flex items-center gap-8 text-base font-semibold text-muted-foreground bg-background/50 dark:bg-card/30 border border-border/10 rounded-full px-7 py-2.5 backdrop-blur-xs shadow-sm">
           <button onClick={() => scrollToSection("features")} className="cursor-pointer hover:text-primary transition-colors">Features</button>
           <button onClick={() => scrollToSection("testimonials")} className="cursor-pointer hover:text-primary transition-colors">Testimonials</button>
           <button onClick={() => scrollToSection("pricing")} className="cursor-pointer hover:text-primary transition-colors">Pricing</button>
@@ -272,8 +272,8 @@ export default function LandingClient() {
         </div>
 
         <div className="nav-links flex items-center gap-6">
-          <Link href="/sign-in" className="hover:text-primary transition-colors text-sm font-medium">Sign In</Link>
-          <Link href="/sign-up" className="flex h-9 items-center justify-center rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors uppercase tracking-wider font-mono">Sign Up ✦</Link>
+          <Link href="/sign-in" className="hover:text-primary transition-colors text-base font-medium">Sign In</Link>
+          <Link href="/sign-up" className="flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors uppercase tracking-wider font-mono">Sign Up ✦</Link>
           <div className="nav-toggle-fade flex items-center justify-center">
             <ModeToggle />
           </div>

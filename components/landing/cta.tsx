@@ -14,7 +14,7 @@ export default function CTA() {
           Ready to Supercharge<br className="hidden sm:block" /> Your Workspace?
         </h2>
         
-        <p className="mx-auto max-w-xl text-base md:text-lg text-muted-foreground leading-relaxed font-sans">
+        <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed font-sans">
           Take control of your inbox and schedule. Streamline Gmail & Google Calendar sync operations inside Locus.
         </p>
 
@@ -22,7 +22,7 @@ export default function CTA() {
         <div className="flex flex-col sm:flex-row gap-5 items-center justify-center pt-4">
           <Link
             href="/sign-up"
-            className="group flex h-13 items-center justify-center gap-2.5 rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all shadow-lg"
+            className="group flex h-14 items-center justify-center gap-2.5 rounded-full bg-primary px-10 text-base font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all shadow-lg"
           >
             <span>✦ Start for Free</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -31,14 +31,14 @@ export default function CTA() {
             href="https://youtube.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-13 items-center justify-center gap-2.5 rounded-full border border-border/80 bg-card/40 hover:bg-card/90 px-8 text-sm font-medium text-foreground backdrop-blur-sm active:scale-95 transition-all"
+            className="flex h-14 items-center justify-center gap-2.5 rounded-full border border-border/80 bg-card/40 hover:bg-card/90 px-10 text-base font-medium text-foreground backdrop-blur-sm active:scale-95 transition-all"
           >
             <Play className="h-4 w-4 fill-current text-primary" />
             <span>Watch Demo</span>
           </a>
         </div>
 
-        <p className="text-xs text-muted-foreground font-mono pt-2">
+        <p className="text-sm text-muted-foreground font-mono pt-2">
           No credit card required. Connect instantly.
         </p>
       </div>
