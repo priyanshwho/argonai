@@ -13,6 +13,43 @@ import Pricing from "@/components/landing/pricing";
 import FAQs from "@/components/landing/faqs";
 import CTA from "@/components/landing/cta";
 import Footer from "@/components/landing/footer";
+import { PulseBeams } from "@/components/ui/pulse-beams";
+import { WavePath } from "@/components/ui/wave-path";
+
+const heroBeams = [
+  {
+    path: "M 0,100 L 220,100",
+    gradientConfig: {
+      initial: { x1: "0%", x2: "0%", y1: "100", y2: "100" },
+      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["100", "100"], y2: ["100", "100"] },
+      transition: { duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 0.5 }
+    }
+  },
+  {
+    path: "M 600,100 L 380,100",
+    gradientConfig: {
+      initial: { x1: "100%", x2: "100%", y1: "100", y2: "100" },
+      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["100", "100"], y2: ["100", "100"] },
+      transition: { duration: 2.2, repeat: Infinity, ease: "linear", repeatDelay: 0.8 }
+    }
+  },
+  {
+    path: "M 100,0 C 100,50 150,100 220,100",
+    gradientConfig: {
+      initial: { x1: "0%", x2: "0%", y1: "0", y2: "0" },
+      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["0", "100"], y2: ["0", "100"] },
+      transition: { duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }
+    }
+  },
+  {
+    path: "M 500,200 C 500,150 450,100 380,100",
+    gradientConfig: {
+      initial: { x1: "100%", x2: "100%", y1: "200", y2: "200" },
+      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["200", "100"], y2: ["200", "100"] },
+      transition: { duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }
+    }
+  }
+];
 
 export default function LandingClient() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -433,13 +470,24 @@ export default function LandingClient() {
           <p>
             The intelligent command center for your entire digital life. Seamlessly manage emails, calendar events, and tasks all in one place.
           </p>
-          <div className="flex items-center gap-4">
-            <Link href="/sign-up" className="flex h-12 items-center justify-center px-8 text-sm uppercase tracking-wider font-bold sign-up-btn rounded-full">
-              Get Started <span className="inline-block ml-1">✦</span>
-            </Link>
-            <Link href="/sign-in" className="flex h-12 items-center justify-center px-8 text-sm uppercase tracking-wider font-bold rounded-full hero-demo-btn">
-              Live Demo
-            </Link>
+          <div className="w-full max-w-[600px] h-[160px] flex items-center justify-center relative">
+            <PulseBeams
+              beams={heroBeams}
+              width={600}
+              height={200}
+              baseColor="rgba(196, 30, 58, 0.12)"
+              accentColor="rgba(196, 30, 58, 0.3)"
+              gradientColors={{
+                start: "#c41e3a",
+                middle: "#ff4d6d",
+                end: "#c41e3a",
+              }}
+              className="w-full h-full"
+            >
+              <Link href="/sign-up" className="flex h-12 items-center justify-center px-10 text-sm uppercase tracking-wider font-bold sign-up-btn rounded-full relative z-20 shadow-[0_0_30px_rgba(196,30,58,0.3)]">
+                Get Started <span className="inline-block ml-1">✦</span>
+              </Link>
+            </PulseBeams>
           </div>
         </div>
       </section>
@@ -450,6 +498,9 @@ export default function LandingClient() {
       <Pricing />
       <FAQs />
       <CTA />
+      <div className="w-full bg-background text-foreground/30 hover:text-primary transition-colors duration-300 relative z-20">
+        <WavePath className="w-full" />
+      </div>
       <Footer />
     </div>
   );

@@ -15,7 +15,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-border bg-card text-foreground py-20 md:py-24">
+    <footer className="bg-card text-foreground py-20 md:py-24">
       <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
         
         {/* Footer Top Grid */}
@@ -27,8 +27,8 @@ export default function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
                 <Zap className="h-4 w-4 fill-current text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold tracking-wider font-serif uppercase">
-                Locus
+              <span className="text-xl font-bold tracking-wider uppercase" style={{ fontFamily: '"Audiowide", cursive' }}>
+                ARGON AI
               </span>
             </Link>
             <p className="text-base text-muted-foreground leading-relaxed font-sans max-w-xs">
@@ -68,7 +68,7 @@ export default function Footer() {
               Newsletter
             </h4>
             <p className="text-base text-muted-foreground font-sans leading-relaxed">
-              Get Locus product updates and shortcuts delivered to your inbox.
+              Get ARGON AI product updates and shortcuts delivered to your inbox.
             </p>
             <form onSubmit={handleSubmit} className="flex gap-2.5 max-w-sm">
               <input
@@ -92,11 +92,11 @@ export default function Footer() {
         {/* Footer Bottom Block */}
         <div className="pt-12 flex flex-col md:flex-row items-center justify-between gap-8">
           <span className="text-sm text-muted-foreground font-mono">
-            &copy; 2026 Locus AI. All rights reserved.
+            &copy; 2026 ARGON AI. All rights reserved.
           </span>
 
           <span className="text-base text-muted-foreground font-sans">
-            Made with 💖 for <span className="text-foreground font-semibold">Locus</span>
+             Made with 💖 for <span className="text-foreground font-semibold" style={{ fontFamily: '"Audiowide", cursive' }}>ARGON AI</span>
           </span>
 
           {/* Socials */}

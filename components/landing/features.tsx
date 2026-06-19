@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, Calendar, Cpu, Zap } from "lucide-react";
+import { GlowCard } from "@/components/ui/spotlight-card";
 
 export default function Features() {
   const featuresList = [
@@ -9,7 +10,7 @@ export default function Features() {
       title: "Unified Workspace Inbox",
       subtitle: "Secure Gmail Cache Synchronizer",
       description:
-        "Locus integrates directly with Gmail, parsing incoming threads and cache updates in real-time. Experience a clean, single-pane inbox designed for rapid navigation and search.",
+        "ARGON AI integrates directly with Gmail, parsing incoming threads and cache updates in real-time. Experience a clean, single-pane inbox designed for rapid navigation and search.",
     },
     {
       icon: Cpu,
@@ -23,7 +24,7 @@ export default function Features() {
       title: "Calendar Board Optimizer",
       subtitle: "Interactive Schedule & Slot Planner",
       description:
-        "Connect Google Calendar to let Locus check slot availability, schedule complex group invites, track time zones, and outline agenda sheets directly via text prompts.",
+        "Connect Google Calendar to let ARGON AI check slot availability, schedule complex group invites, track time zones, and outline agenda sheets directly via text prompts.",
     },
   ];
 
@@ -42,7 +43,7 @@ export default function Features() {
             A New Standard for<br className="hidden sm:block" /> Workspace Efficiency
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-sans leading-relaxed">
-            Locus integrates your tools into a single, high-fidelity command center powered by private AI models.
+            ARGON AI integrates your tools into a single, high-fidelity command center powered by private AI models.
           </p>
         </div>
 
@@ -51,9 +52,11 @@ export default function Features() {
           {featuresList.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div
+              <GlowCard
                 key={index}
-                className="rounded-2xl border border-border/60 bg-card/45 p-8 md:p-10 hover:border-primary/30 transition-all hover:bg-card/90 relative group overflow-hidden shadow-sm"
+                customSize
+                glowColor="red"
+                className="rounded-xl bg-card/45 p-8 md:p-10 transition-all hover:bg-card/90 relative group shadow-sm flex flex-col justify-start"
               >
                 {/* Decorative border highlight */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-primary/50 transition-all duration-500" />
@@ -73,7 +76,7 @@ export default function Features() {
                 <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-sans">
                   {feature.description}
                 </p>
-              </div>
+              </GlowCard>
             );
           })}
         </div>

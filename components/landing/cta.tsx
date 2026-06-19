@@ -15,7 +15,7 @@ export default function CTA() {
         </h2>
         
         <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed font-sans">
-          Take control of your inbox and schedule. Streamline Gmail & Google Calendar sync operations inside Locus.
+          Take control of your inbox and schedule. Streamline Gmail & Google Calendar sync operations inside ARGON AI.
         </p>
 
         {/* CTA Actions */}

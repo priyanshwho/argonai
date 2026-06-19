@@ -325,30 +325,7 @@
   text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
 }
 
-.hero-demo-btn {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #1a1a1a !important; /* Force dark text in light mode for readability */
-  backdrop-filter: blur(8px);
-}
 
-.dark .hero-demo-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white !important;
-}
-
-.hero-demo-btn:hover {
-  transform: translateY(-2px);
-  background-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.dark .hero-demo-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
-}
 
 .landing-page-container .header h1 {
   transition: color 0.3s ease;

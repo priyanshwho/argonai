@@ -8,9 +8,9 @@ export default function FAQs() {
 
   const faqList = [
     {
-      question: "What is Locus and how does it connect to my Workspace?",
+      question: "What is ARGON AI and how does it connect to my Workspace?",
       answer:
-        "Locus is an AI-powered command center that securely interfaces with your Gmail and Google Calendar. It syncs messages, digests threads, and maps appointments inside a single dashboard panel.",
+        "ARGON AI is an AI-powered command center that securely interfaces with your Gmail and Google Calendar. It syncs messages, digests threads, and maps appointments inside a single dashboard panel.",
     },
     {
       question: "How does the AI Assistant automate my tasks?",
