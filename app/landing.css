@@ -1,4 +1,5 @@
 @import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 
 .landing-page-container {
   --base-100: #fff;
@@ -114,6 +115,7 @@
 }
 
 .landing-page-container .preloader-header h1 {
+  font-family: 'Audiowide', cursive;
   text-transform: uppercase;
   font-size: clamp(2rem, 10vw, 15rem);
   line-height: 0.85;
@@ -177,7 +179,7 @@
 
 .landing-page-container .header {
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
   display: flex;
   justify-content: center;
@@ -189,20 +191,47 @@
 }
 
 .landing-page-container .header h1 {
+  font-family: 'Audiowide', cursive;
   text-transform: uppercase;
   font-size: clamp(2.5rem, 15vw, 25rem);
   line-height: 0.85;
 }
 
-.landing-page-container .hero-footer {
+.landing-page-container .hero-sub {
   position: absolute;
+  top: 58%;
+  left: 50%;
+  transform: translate(-50%, 0);
   width: 100%;
-  bottom: 0;
-  padding: 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0 1rem;
+}
+
+.landing-page-container .hero-sub p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--base-300);
+  opacity: 0.9;
+  max-width: 600px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--base-accent);
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .landing-page-container .char,
@@ -225,20 +254,100 @@
   }
 }
 
-.landing-page-container nav a {
-  transition: color 0.3s ease;
+/* Arkham nav clone animation */
+.nav-link-container {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
 }
 
-.landing-page-container nav a:hover {
-  color: var(--base-accent);
+.nav-link-text,
+.nav-link-text-clone {
+  display: block;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
 }
 
-.landing-page-container .hero-footer p {
-  transition: color 0.3s ease;
+.nav-link-text-clone {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  color: var(--base-accent); /* Red in dark mode / hover */
 }
 
-.landing-page-container .hero-footer a:hover p {
-  color: var(--base-accent);
+.nav-link-container:hover .nav-link-text {
+  transform: translateY(-100%);
+}
+
+.nav-link-container:hover .nav-link-text-clone {
+  transform: translateY(-100%);
+}
+
+/* Arkham Sign Up button */
+.sign-up-btn {
+  box-shadow: inset 0 -6px 8px rgba(150, 0, 0, 0.4), 0 4px 15px rgba(255, 77, 77, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ff4d4d, var(--base-accent));
+  color: white !important;
+  font-weight: 600;
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sign-up-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.sign-up-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 -4px 6px rgba(150, 0, 0, 0.5), 0 8px 25px rgba(255, 77, 77, 0.5);
+}
+
+.sign-up-btn:hover::after {
+  opacity: 1;
+}
+
+.sign-up-btn span {
+  transition: all 0.3s ease;
+}
+
+.sign-up-btn:hover span {
+  text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
+}
+
+.hero-demo-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1a1a1a !important; /* Force dark text in light mode for readability */
+  backdrop-filter: blur(8px);
+}
+
+.dark .hero-demo-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white !important;
+}
+
+.hero-demo-btn:hover {
+  transform: translateY(-2px);
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark .hero-demo-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
 }
 
 .landing-page-container .header h1 {

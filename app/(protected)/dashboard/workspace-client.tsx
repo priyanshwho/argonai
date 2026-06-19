@@ -6,10 +6,11 @@ import {
   Star, Bot, User, Send, Plus, Settings, LogOut, Mail, 
   Calendar, CheckCircle2, MessageSquare, AlertCircle, RefreshCw, 
   Sparkles, Search, ArrowRight, UserCheck, Inbox, ShieldAlert, 
-  ChevronRight, CalendarDays, Edit3, Clipboard, FileText
+  ChevronRight, CalendarDays, Edit3, Clipboard, FileText, Mic, MicOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/components/providers/loading-provider";
@@ -232,6 +233,47 @@ export function WorkspaceClient({
     initialConversations.length > 0 ? initialConversations[0].id : "default-chat"
   );
   const [input, setInput] = useState("");
+  const [isListening, setIsListening] = useState(false);
+
+  const toggleListening = () => {
+    if (isListening) {
+      setIsListening(false);
+    } else {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+        
+        recognition.onresult = (event: any) => {
+          const transcript = Array.from(event.results)
+            .map((result: any) => result[0])
+            .map((result: any) => result.transcript)
+            .join("");
+          setInput(transcript);
+        };
+        
+        recognition.onerror = (event: any) => {
+          if (event.error !== "no-speech") {
+            console.error("Speech recognition error", event.error);
+          }
+          setIsListening(false);
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+        
+        recognition.start();
+      } else {
+        alert("Speech Recognition is not supported in this browser.");
+      }
+    }
+  };
 
   // Vercel AI SDK chat hook using Gemini 3.1 Flash-Lite
   const { messages, sendMessage, setMessages, status } = useChat({
@@ -627,13 +669,16 @@ export function WorkspaceClient({
                 </div>
               )}
             </div>
-            <button 
-              onClick={handleSignOut}
-              className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors"
-              title="Sign Out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <AnimatedThemeToggler className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" />
+              <button 
+                onClick={handleSignOut}
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -675,9 +720,6 @@ export function WorkspaceClient({
             >
               <span className="font-mono text-[10px]">⌘K</span>
             </Button>
-            <div className="h-8 w-8 flex items-center justify-center border border-border/80 bg-card hover:bg-muted rounded-xl overflow-hidden shrink-0">
-              <ModeToggle />
-            </div>
           </div>
         </header>
 
@@ -856,60 +898,83 @@ export function WorkspaceClient({
                     placeholder="Ask AI assistant to search mail or book meetings..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    disabled={isLoading}
-                    className="w-full bg-transparent text-sm text-foreground placeholder-muted-foreground py-2.5 pr-14 focus:outline-none focus:ring-0"
+                    className="w-full bg-transparent text-sm text-foreground placeholder-muted-foreground py-2.5 pl-4 pr-24 focus:outline-none focus:ring-0"
                   />
-                  <button
-                    type="submit"
-                    disabled={isLoading || !input.trim()}
-                    className="absolute right-3 p-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 disabled:hover:bg-primary transition-all cursor-pointer shadow-sm animate-in fade-in"
-                  >
-                    <Send className="h-4.5 w-4.5" />
-                  </button>
+                  <div className="absolute right-3 flex items-center gap-2 z-10">
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      title="Voice input"
+                      className={`p-1.5 rounded-xl transition-all cursor-pointer shadow-sm ${
+                        isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                      }`}
+                    >
+                      {isListening ? <Mic className="h-4.5 w-4.5" /> : <MicOff className="h-4.5 w-4.5" />}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isLoading || !input.trim()}
+                      className="p-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 disabled:hover:bg-primary transition-all cursor-pointer shadow-sm animate-in fade-in"
+                    >
+                      <Send className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>
           )}
 
-          {/* B. INBOX TAB VIEWPORT */}
           {activeTab === "inbox" && !showSearchResults && (
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-3">
               {emailsLoading ? (
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-24">
                   <RefreshCw className="h-4 w-4 animate-spin" />
                   <span>Loading Gmail cache...</span>
                 </div>
               ) : emails.length === 0 ? (
-                <div className="text-center py-24 space-y-2">
-                  <Inbox className="h-12 w-12 text-muted-foreground/70 mx-auto" />
-                  <p className="text-xs text-muted-foreground">Inbox cache database is empty or links are initializing.</p>
+                <div className="text-center py-24 space-y-3">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto">
+                    <Inbox className="h-7 w-7 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground/60">No emails synced</p>
+                  <p className="text-xs text-muted-foreground">Connect Gmail to sync your inbox cache.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border border border-border rounded-xl bg-muted/10 overflow-hidden">
-                  {emails.map((email) => (
-                    <button
-                      key={email.id}
-                      onClick={() => {
-                        setSelectedEmail(email);
-                        setAiSummary("");
-                        setAiDraft("");
-                      }}
-                      className={`w-full p-4 flex flex-col gap-1 items-start text-left transition-colors ${
-                        selectedEmail?.id === email.id 
-                          ? "bg-muted hover:bg-muted" 
-                          : "hover:bg-muted/40"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-sm font-bold text-foreground/80">{email.sender}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(email.receivedAt).toLocaleDateString()} {new Date(email.receivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <span className="text-sm font-semibold text-foreground line-clamp-1">{email.subject}</span>
-                      <span className="text-xs text-muted-foreground/90 line-clamp-2 leading-relaxed">{email.snippet}</span>
-                    </button>
-                  ))}
+                <div className="space-y-1.5">
+                  {emails.map((email) => {
+                    const initials = email.sender.split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase();
+                    const colors = ["bg-red-500","bg-blue-500","bg-emerald-500","bg-violet-500","bg-amber-500","bg-pink-500"];
+                    const color = colors[email.sender.charCodeAt(0) % colors.length];
+                    return (
+                      <button
+                        key={email.id}
+                        onClick={() => {
+                          setSelectedEmail(email);
+                          setAiSummary("");
+                          setAiDraft("");
+                        }}
+                        className={`w-full p-3.5 flex items-start gap-3 text-left rounded-xl border transition-all ${
+                          selectedEmail?.id === email.id 
+                            ? "bg-accent border-primary/30 shadow-sm" 
+                            : "bg-card/60 border-border/60 hover:bg-muted/60 hover:border-border"
+                        }`}
+                      >
+                        <div className={`h-9 w-9 rounded-full ${color} flex items-center justify-center text-[11px] font-bold text-white shrink-0 shadow-sm`}>
+                          {initials || "?"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <span className="text-xs font-bold text-foreground truncate">{email.sender}</span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">
+                              {new Date(email.receivedAt).toLocaleDateString([], { month:'short', day:'numeric' })}
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold text-foreground/80 block truncate">{email.subject}</span>
+                          <span className="text-[11px] text-muted-foreground/70 line-clamp-1 leading-relaxed">{email.snippet}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -919,7 +984,7 @@ export function WorkspaceClient({
           {activeTab === "calendar" && !showSearchResults && (
             <div className="p-6 space-y-4">
               <div className="space-y-1">
-                <h2 className="text-base font-bold font-serif text-foreground">Upcoming Events List</h2>
+                <h2 className="text-base font-bold font-serif text-foreground">Upcoming Events</h2>
                 <p className="text-xs text-muted-foreground/60">Track date conflicts and guest responses linked under calendar.</p>
               </div>
 
@@ -929,34 +994,44 @@ export function WorkspaceClient({
                   <span>Loading events...</span>
                 </div>
               ) : events.length === 0 ? (
-                <div className="text-center py-24 space-y-2">
-                  <CalendarDays className="h-12 w-12 text-muted-foreground/70 mx-auto" />
-                  <p className="text-xs text-muted-foreground">No scheduled events found in calendar cache.</p>
+                <div className="text-center py-24 space-y-3">
+                  <div className="h-14 w-14 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto">
+                    <CalendarDays className="h-7 w-7 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground/60">No events found</p>
+                  <p className="text-xs text-muted-foreground">Connect Google Calendar to see your upcoming events.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {events.map((event) => {
                     const start = new Date(event.startTime);
                     const end = new Date(event.endTime);
                     const guests = Array.isArray(event.attendees) ? event.attendees : [];
+                    const isToday = start.toDateString() === new Date().toDateString();
                     return (
-                      <div key={event.id} className="p-4 rounded-xl border border-border bg-card/25 hover:bg-muted/40 transition-colors flex justify-between items-start gap-4 animate-in fade-in">
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-bold text-foreground leading-tight">{event.title}</h4>
+                      <div key={event.id} className="p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors flex gap-4 items-start animate-in fade-in group">
+                        <div className={`shrink-0 flex flex-col items-center justify-center rounded-xl w-12 h-12 text-center border shadow-sm ${
+                          isToday ? "bg-primary border-primary/30 text-primary-foreground" : "bg-muted/60 border-border text-foreground"
+                        }`}>
+                          <span className="text-[10px] font-bold uppercase opacity-70">{start.toLocaleDateString([],{month:'short'})}</span>
+                          <span className="text-lg font-extrabold leading-none">{start.getDate()}</span>
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <h4 className="text-sm font-bold text-foreground leading-tight truncate">{event.title}</h4>
                           <p className="text-xs text-muted-foreground">
-                            {start.toLocaleDateString()} @ {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                           {guests.length > 0 && (
-                            <div className="flex items-center gap-1.5 pt-1">
-                              <UserCheck className="h-3.5 w-3.5 text-muted-foreground/80" />
-                              <span className="text-xs text-muted-foreground/60 truncate max-w-sm">
-                                Guests: {guests.join(", ")}
-                              </span>
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                              <UserCheck className="h-3 w-3 text-muted-foreground/60" />
+                              <span className="text-[10px] text-muted-foreground/60 truncate">{guests.join(", ")}</span>
                             </div>
                           )}
                         </div>
-                        <div className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded font-sans shrink-0 border border-border/40">
-                          Primary
+                        <div className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 border ${
+                          isToday ? "bg-primary/10 text-primary border-primary/30" : "bg-muted text-muted-foreground border-border/40"
+                        }`}>
+                          {isToday ? "Today" : "Upcoming"}
                         </div>
                       </div>
                     );
