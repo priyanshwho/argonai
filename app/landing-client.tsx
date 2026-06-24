@@ -604,7 +604,7 @@ export default function LandingClient() {
       <div className="section-stack-wrapper" style={{ zIndex: 5 }}>
         <FAQs />
       </div>
-      <div className="section-stack-wrapper" style={{ zIndex: 8 }}>
+      <div className="section-stack-wrapper" style={{ zIndex: 6 }}>
         <CTA />
       </div>
       <div className="section-stack-wrapper bg-background" style={{ zIndex: 7 }}>
