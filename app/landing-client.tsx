@@ -427,9 +427,9 @@ export default function LandingClient() {
 
         <div className="nav-links flex items-center gap-6">
           <Link href="/sign-in" className="text-base font-medium">
-            <div className="nav-link-container">
-              <span className="nav-link-text">Sign In</span>
-              <span className="nav-link-text-clone">Sign In</span>
+            <div className="relative inline-block overflow-hidden group" style={{ height: "1.3em", verticalAlign: "middle" }}>
+              <span className="block transition-transform duration-[400ms] ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full" style={{ lineHeight: "1.3em" }}>Sign In</span>
+              <span className="absolute top-0 left-0 w-full h-full flex items-center translate-y-full transition-transform duration-[400ms] ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" style={{ color: "var(--base-accent)", lineHeight: "1.3em" }}>Sign In</span>
             </div>
           </Link>
           <Link href="/sign-up" className="inline-flex h-9 items-center justify-center px-7 text-xs uppercase tracking-wider font-serif sign-up-btn">

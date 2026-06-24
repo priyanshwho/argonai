@@ -48,7 +48,7 @@ export default function Testimonials() {
   const thirdColumn = [testimonials[4], testimonials[5]];
 
   return (
-    <section id="testimonials" className="min-h-screen flex flex-col justify-center pb-4 md:pb-5 pt-8 md:pt-10 border-t border-border bg-background text-foreground relative overflow-hidden">
+    <section id="testimonials" className="min-h-screen flex flex-col justify-center pb-4 md:pb-5 pt-12 md:pt-24 border-t border-border bg-background text-foreground relative overflow-hidden">
       {/* Glow effect */}
       <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[150px] pointer-events-none" />
 
@@ -61,7 +61,7 @@ export default function Testimonials() {
       />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-9 lg:px-14">
-        <div className="text-center space-y-3.5 mb-9 md:mb-11">
+        <div className="text-center space-y-3.5 mb-3 md:mb-5">
           <h2 className="text-[33px] md:text-[44px] lg:text-[55px] font-extrabold font-serif text-foreground tracking-tight uppercase leading-tight">
             Testimonials
           </h2>

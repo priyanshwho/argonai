@@ -29,7 +29,7 @@ export default function Features() {
   ];
 
   return (
-    <section id="features" className="min-h-screen flex flex-col justify-center py-10 md:py-12 border-t border-border bg-background text-foreground relative overflow-hidden">
+    <section id="features" className="min-h-screen flex flex-col justify-center  pb-4 md:pb-6 pt-20 md:pt-28 border-t border-border bg-background text-foreground relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[150px] pointer-events-none" />
 
