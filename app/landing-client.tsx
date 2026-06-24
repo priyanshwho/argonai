@@ -58,6 +58,7 @@ export default function LandingClient() {
   const [activeSection, setActiveSection] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     // Only show if the user hasn't scrolled past it in a previous session
@@ -70,10 +71,17 @@ export default function LandingClient() {
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
+        setIsScrolled(true);
         setShowScrollIndicator(false);
         localStorage.setItem("hasScrolledPastHero", "true");
+      } else {
+        setIsScrolled(false);
       }
     };
+    
+    // Check initial scroll state
+    handleScroll();
+    
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -423,11 +431,11 @@ export default function LandingClient() {
       </div>
 
       {/* Navigation */}
-      <nav className="font-serif flex items-center justify-between w-full px-8 py-2 z-50 text-black dark:text-foreground">
+      <nav className="font-serif flex items-center justify-between z-50 text-black dark:text-foreground transition-all duration-300">
         <div className="nav-logo flex items-center select-none">
           <Link href="/" className="flex items-center">
-            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-20 md:h-24 w-auto" />
-            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-20 md:h-24 w-auto" />
+            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden w-auto h-10 md:h-12" />
+            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block w-auto h-10 md:h-12" />
           </Link>
         </div>
 
@@ -608,10 +616,12 @@ export default function LandingClient() {
         <CTA />
       </div>
       <div className="section-stack-wrapper bg-background" style={{ zIndex: 7 }}>
-        <div className="w-full bg-background text-foreground/30 hover:text-primary transition-colors duration-300 relative">
+        <div className="w-full bg-background text-foreground/30 hover:text-primary transition-colors duration-300 relative z-10">
           <WavePath className="w-full" />
         </div>
-        <Footer />
+        <div className="relative z-0">
+          <Footer />
+        </div>
       </div>
     </div>
   );
