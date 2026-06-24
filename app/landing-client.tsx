@@ -394,7 +394,7 @@ export default function LandingClient() {
         </div>
 
         {/* Center scrolling links */}
-        <div className="hidden md:flex items-center gap-8 text-base font-semibold text-black dark:text-muted-foreground bg-background/50 dark:bg-card/30 border border-border/10 rounded-full px-7 pt-2.5 pb-1.5 backdrop-blur-xs shadow-sm">
+        <div className="hidden md:flex items-center gap-8 text-base font-semibold text-black dark:text-muted-foreground/80 bg-transparent px-2 py-1.5">
           <button onClick={() => scrollToSection("features")} className="cursor-pointer flex items-center relative">
             {activeSection === "features" && <span className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary"></span>}
             <div className="nav-link-container">
@@ -535,7 +535,7 @@ export default function LandingClient() {
       <div className="section-stack-wrapper" style={{ zIndex: 5 }}>
         <FAQs />
       </div>
-      <div className="section-stack-wrapper" style={{ zIndex: 6 }}>
+      <div className="section-stack-wrapper" style={{ zIndex: 8 }}>
         <CTA />
       </div>
       <div className="section-stack-wrapper bg-background" style={{ zIndex: 7 }}>

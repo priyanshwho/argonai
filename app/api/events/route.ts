@@ -17,8 +17,27 @@ export async function GET(req: Request) {
   try {
     const tenantClient = corsair.withTenant(session.user.id);
 
-    // Step 1: Try direct cache from Corsair DB client first
-    let rawEvents = await tenantClient.googlecalendar.db.events.list({});
+    // Step 1: Try direct cache from Corsair DB client first (limited to most recent 50 events to optimize Neon network transfer)
+    const corsairAccount = await prisma.corsairAccount.findFirst({
+      where: {
+        tenantId: session.user.id,
+        integrationId: 'googlecalendar',
+      },
+    });
+
+    let rawEvents = [];
+    if (corsairAccount) {
+      rawEvents = await prisma.corsairEntity.findMany({
+        where: {
+          accountId: corsairAccount.id,
+          entityType: 'events',
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 50,
+      });
+    }
     let formattedEvents: any[] = [];
     
     // Step 2: Fall back to live API if cache is empty

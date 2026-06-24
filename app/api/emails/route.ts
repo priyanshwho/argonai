@@ -83,8 +83,27 @@ export async function GET(req: Request) {
   try {
     const tenantClient = corsair.withTenant(session.user.id);
 
-    // Step 1: Try DB cache first
-    let messages = await tenantClient.gmail.db.messages.list({});
+    // Step 1: Try DB cache first (limited to most recent 50 messages to optimize Neon network transfer)
+    const corsairAccount = await prisma.corsairAccount.findFirst({
+      where: {
+        tenantId: session.user.id,
+        integrationId: 'gmail',
+      },
+    });
+
+    let messages = [];
+    if (corsairAccount) {
+      messages = await prisma.corsairEntity.findMany({
+        where: {
+          accountId: corsairAccount.id,
+          entityType: 'messages',
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 50,
+      });
+    }
 
     // Step 2: Map and filter out stub entries with no data
     let formattedEmails = (messages || [])
