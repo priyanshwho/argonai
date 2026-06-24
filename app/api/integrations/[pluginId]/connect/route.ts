@@ -27,8 +27,11 @@ export async function GET(
     });
 
     return NextResponse.redirect(url);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating OAuth URL:', error);
-    return NextResponse.redirect(new URL('/dashboard?error=AuthLinkFailed', req.url));
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.redirect(
+      new URL(`/dashboard?error=AuthLinkFailed&message=${encodeURIComponent(errorMessage)}`, req.url)
+    );
   }
 }
