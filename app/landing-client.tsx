@@ -566,7 +566,7 @@ export default function LandingClient() {
               initial={{ opacity: 0, y: 15, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 15, transition: { duration: 0.4 } }}
-              className="absolute bottom-14 left-[49.5%] flex flex-col items-center gap-2 cursor-pointer z-20"
+              className="absolute bottom-14 left-[50.3%] flex flex-col items-center gap-2 cursor-pointer z-20"
               onClick={handleScrollClick}
             >
               <span className="text-[10px] text-foreground/50 uppercase tracking-[0.2em] font-medium select-none font-mono">
