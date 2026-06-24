@@ -105,6 +105,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Prune webhook event logs older than 48 hours to prevent database storage bloat (non-blocking background query)
+  const pruneCutoff = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  prisma.corsairEvent.deleteMany({
+    where: {
+      createdAt: { lt: pruneCutoff }
+    }
+  }).catch(err => {
+    console.error("Failed to prune old CorsairEvent records:", err);
+  });
+
   console.info(`Webhook received for tenant: "${tenantId}", processing...`);
 
   // Set the tenant context so the console.error interceptor knows which tenant hit a 429
