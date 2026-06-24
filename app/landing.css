@@ -138,32 +138,39 @@ html, body {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  top: 1rem;
-  width: calc(100% - 2rem);
-  max-w: 1000px;
-  padding: 0.5rem 2rem;
+  top: 0;
+  width: 100%;
+  max-w: 100%;
+  padding: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   /* Must be above all section-stack-wrappers (max z-index 7) */
   z-index: 200;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-page-container nav.scrolled {
+  width: calc(100% - 2rem);
+  max-w: 1200px; /* matches content-width of other sections */
+  top: 1rem;
+  padding: 0.5rem 2rem;
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06);
-  transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
 }
 
-.dark .landing-page-container nav {
-  background: rgba(10, 10, 10, 0.75);
+.dark .landing-page-container nav.scrolled {
+  background: rgba(10, 10, 10, 0.7);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
 }
 
 @media (min-width: 768px) {
-  .landing-page-container nav {
+  .landing-page-container nav.scrolled {
     width: calc(100% - 4rem);
     top: 1.5rem;
     padding: 0.75rem 2rem;

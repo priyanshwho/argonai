@@ -58,7 +58,6 @@ export default function LandingClient() {
   const [activeSection, setActiveSection] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     // Only show if the user hasn't scrolled past it in a previous session
@@ -71,11 +70,8 @@ export default function LandingClient() {
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true);
         setShowScrollIndicator(false);
         localStorage.setItem("hasScrolledPastHero", "true");
-      } else {
-        setIsScrolled(false);
       }
     };
     
@@ -434,8 +430,8 @@ export default function LandingClient() {
       <nav className="font-serif flex items-center justify-between z-50 text-black dark:text-foreground transition-all duration-300">
         <div className="nav-logo flex items-center select-none">
           <Link href="/" className="flex items-center">
-            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden w-auto h-10 md:h-12" />
-            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block w-auto h-10 md:h-12" />
+            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden w-auto transition-all duration-300 h-20 md:h-24" />
+            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block w-auto transition-all duration-300 h-20 md:h-24" />
           </Link>
         </div>
 
