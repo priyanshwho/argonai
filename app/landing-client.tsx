@@ -21,32 +21,32 @@ const heroBeams = [
   {
     path: "M 0,100 L 220,100",
     gradientConfig: {
-      initial: { x1: "0%", x2: "0%", y1: "100", y2: "100" },
-      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["100", "100"], y2: ["100", "100"] },
+      initial: { x1: "0%", x2: "0%", y1: "50%", y2: "50%" },
+      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["50%", "50%"], y2: ["50%", "50%"] },
       transition: { duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 0.5 }
     }
   },
   {
     path: "M 600,100 L 380,100",
     gradientConfig: {
-      initial: { x1: "100%", x2: "100%", y1: "100", y2: "100" },
-      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["100", "100"], y2: ["100", "100"] },
+      initial: { x1: "100%", x2: "100%", y1: "50%", y2: "50%" },
+      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["50%", "50%"], y2: ["50%", "50%"] },
       transition: { duration: 2.2, repeat: Infinity, ease: "linear", repeatDelay: 0.8 }
     }
   },
   {
     path: "M 100,0 C 100,50 150,100 220,100",
     gradientConfig: {
-      initial: { x1: "0%", x2: "0%", y1: "0", y2: "0" },
-      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["0", "100"], y2: ["0", "100"] },
+      initial: { x1: "0%", x2: "0%", y1: "0%", y2: "0%" },
+      animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["0%", "50%"], y2: ["0%", "50%"] },
       transition: { duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }
     }
   },
   {
     path: "M 500,200 C 500,150 450,100 380,100",
     gradientConfig: {
-      initial: { x1: "100%", x2: "100%", y1: "200", y2: "200" },
-      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["200", "100"], y2: ["200", "100"] },
+      initial: { x1: "100%", x2: "100%", y1: "100%", y2: "100%" },
+      animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["100%", "50%"], y2: ["100%", "50%"] },
       transition: { duration: 2.8, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }
     }
   }
@@ -316,17 +316,20 @@ export default function LandingClient() {
       4.75
     );
 
-    // 9.5. Animate navbar toggle in
-    tl.to(
-      containerRef.current.querySelectorAll(".nav-toggle-fade"),
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "hop",
-      },
-      "<"
-    );
+    // 9.5. Animate navbar toggle in if it exists in DOM
+    const navToggle = containerRef.current.querySelectorAll(".nav-toggle-fade");
+    if (navToggle.length > 0) {
+      tl.to(
+        navToggle,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "hop",
+        },
+        "<"
+      );
+    }
 
     // 10. Animate hero sub text in
     tl.to(
