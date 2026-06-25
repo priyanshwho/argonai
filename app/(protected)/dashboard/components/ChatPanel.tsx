@@ -284,6 +284,7 @@ export function ChatPanel({
               </p>
             </div>
           </div>
+        ) : (
           /* ── Message list ── */
           <div key={renderKey} className={`${compact ? "w-full" : "max-w-2xl mx-auto"} space-y-4 px-4`}>
             {visibleMessages.map((m) => {
