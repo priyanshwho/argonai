@@ -178,6 +178,15 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [renderKey, setRenderKey] = useState(0);
+  const prevStatusRef = useRef(status);
+
+  useEffect(() => {
+    if (prevStatusRef.current !== 'ready' && status === 'ready') {
+      setRenderKey(k => k + 1);
+    }
+    prevStatusRef.current = status;
+  }, [status]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -275,9 +284,8 @@ export function ChatPanel({
               </p>
             </div>
           </div>
-        ) : (
           /* ── Message list ── */
-          <div className={`${compact ? "w-full" : "max-w-2xl mx-auto"} space-y-4 px-4`}>
+          <div key={renderKey} className={`${compact ? "w-full" : "max-w-2xl mx-auto"} space-y-4 px-4`}>
             {visibleMessages.map((m) => {
               const toolParts = getToolParts(m);
 
@@ -334,9 +342,6 @@ export function ChatPanel({
 
                           // ── Email Draft Card ──────────────────────────────
                           if (toolName === "draft_email") {
-                            // Wait until at least input-available with full args
-                            if (!args?.to || !args?.subject || !args?.body) return null;
-
                             // Collect file attachments from preceding user message
                             let messageAttachments: EmailAttachment[] = [];
                             const msgIndex = messages.findIndex((msg) => msg.id === m.id);
@@ -352,30 +357,30 @@ export function ChatPanel({
                             return (
                               <EmailDraftCard
                                 key={toolCallId}
-                                to={args.to}
-                                subject={args.subject}
-                                body={args.body}
-                                attachments={args.attachments || messageAttachments}
-                                threadId={args.threadId}
+                                to={args?.to || ""}
+                                subject={args?.subject || ""}
+                                body={args?.body || ""}
+                                attachments={args?.attachments || messageAttachments}
+                                threadId={args?.threadId}
                                 toolCallId={toolCallId}
                                 addToolResult={addToolResult}
+                                isLoading={state === "input-streaming"}
                               />
                             );
                           }
 
                           // ── Calendar Draft Card ───────────────────────────
                           if (toolName === "draft_calendar_event") {
-                            if (!args?.title || !args?.startTime || !args?.endTime) return null;
-
                             return (
                               <CalendarDraftCard
                                 key={toolCallId}
-                                title={args.title}
-                                startTime={args.startTime}
-                                endTime={args.endTime}
-                                attendees={args.attendees || []}
+                                title={args?.title || ""}
+                                startTime={args?.startTime || ""}
+                                endTime={args?.endTime || ""}
+                                attendees={args?.attendees || []}
                                 toolCallId={toolCallId}
                                 addToolResult={addToolResult}
+                                isLoading={state === "input-streaming"}
                               />
                             );
                           }
