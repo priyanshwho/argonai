@@ -1,4 +1,4 @@
-import { streamText, tool } from 'ai';
+import { streamText, tool, hasToolCall } from 'ai';
 import { z } from 'zod';
 import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
@@ -45,12 +45,23 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
     } else if (m.role === 'system') {
       modelMessages.push({ role: 'system', content: getMessageText(m) });
     } else if (m.role === 'assistant') {
-      const toolInvocations = m.toolInvocations || [];
-      const resolvedCalls = toolInvocations.filter(
+      // SDK v6: tool calls live in m.parts as { type: 'tool-<name>', toolCallId, input, output, state }
+      const toolParts = Array.isArray(m.parts)
+        ? m.parts.filter((p: any) => typeof p.type === 'string' && p.type.startsWith('tool-'))
+        : [];
+      
+      const resolvedParts = toolParts.filter(
+        (p: any) => p.state === 'output-available' || p.state === 'output-error'
+      );
+
+      // Also support legacy SDK v5 format (m.toolInvocations) for DB-restored messages
+      const legacyInvocations = (m.toolInvocations || []).filter(
         (t: any) => t.state === 'result' || t.result !== undefined
       );
 
-      if (resolvedCalls.length === 0) {
+      const hasCalls = resolvedParts.length > 0 || legacyInvocations.length > 0;
+
+      if (!hasCalls) {
         modelMessages.push({ role: 'assistant', content: getMessageText(m) });
       } else {
         const assistantContent: any[] = [];
@@ -58,26 +69,54 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
         if (contentText) {
           assistantContent.push({ type: 'text', text: contentText });
         }
-        
-        for (const call of resolvedCalls) {
+
+        // SDK v6 parts
+        for (const part of resolvedParts) {
+          const toolName = part.type.replace(/^tool-/, '');
+          assistantContent.push({
+            type: 'tool-call',
+            toolCallId: part.toolCallId,
+            toolName,
+            args: part.input ?? {}
+          });
+        }
+
+        // Legacy v5 toolInvocations
+        for (const call of legacyInvocations) {
           assistantContent.push({
             type: 'tool-call',
             toolCallId: call.toolCallId,
             toolName: call.toolName,
-            args: call.args
+            args: call.args ?? {}
           });
         }
-        
+
         modelMessages.push({ role: 'assistant', content: assistantContent });
-        
-        const toolResults = resolvedCalls.map((t: any) => ({
-          type: 'tool-result',
-          toolCallId: t.toolCallId,
-          toolName: t.toolName,
-          result: t.result
-        }));
-          
-        modelMessages.push({ role: 'tool', content: toolResults });
+
+        // Tool results
+        const toolResultContent: any[] = [];
+
+        for (const part of resolvedParts) {
+          const toolName = part.type.replace(/^tool-/, '');
+          toolResultContent.push({
+            type: 'tool-result',
+            toolCallId: part.toolCallId,
+            toolName,
+            result: part.output ?? part.errorText ?? {}
+          });
+        }
+        for (const t of legacyInvocations) {
+          toolResultContent.push({
+            type: 'tool-result',
+            toolCallId: t.toolCallId,
+            toolName: t.toolName,
+            result: t.result ?? {}
+          });
+        }
+
+        if (toolResultContent.length > 0) {
+          modelMessages.push({ role: 'tool', content: toolResultContent });
+        }
       }
     }
   }
@@ -287,15 +326,10 @@ Always write return statements inside your "run_script" code.`,
     tools: aiTools,
     // Stop immediately after a draft card tool completes so the model
     // doesn't emit a follow-up text step that hides the interactive card.
-    stopWhen: ({ steps }) => {
-      const lastStep = steps[steps.length - 1];
-      return (
-        lastStep?.toolResults?.some(
-          (r: any) =>
-            r.toolName === 'draft_email' || r.toolName === 'draft_calendar_event'
-        ) ?? false
-      );
-    },
+    stopWhen: [
+      hasToolCall('draft_email'),
+      hasToolCall('draft_calendar_event'),
+    ],
     async onFinish({ text, toolCalls, toolResults }) {
       if (conversationId) {
         let contentToSave = text;
