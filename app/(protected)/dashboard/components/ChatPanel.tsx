@@ -237,21 +237,21 @@ export function ChatPanel({
       <div className="flex-1 overflow-y-auto py-6">
         {isEmpty ? (
           /* ── Empty state ── */
-          <div className={`${compact ? "w-full px-4" : "max-w-2xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
-            <div className="text-center space-y-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-lg">
-                <Sparkles className="h-7 w-7 text-primary" />
+          <div className={`${compact ? "w-full px-4" : "max-w-3xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
+            <div className="text-center space-y-4">
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-lg">
+                <Sparkles className="h-8 w-8 text-primary animate-pulse" />
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Argon AI Assistant</h2>
-                <p className="text-base text-muted-foreground mt-1">
+              <div className="space-y-1.5">
+                <h2 className="text-3xl font-extrabold tracking-tight text-foreground">Argon AI Assistant</h2>
+                <p className="text-lg text-muted-foreground max-w-md mx-auto">
                   Your AI-powered Gmail & Calendar command center
                 </p>
               </div>
             </div>
 
             {!compact && (
-              <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+              <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
                 {[
                   { icon: "📧", title: "Read & Summarize", desc: "Summarize your recent emails", prompt: "Summarize my 5 most recent emails" },
                   { icon: "✉️", title: "Draft Emails", desc: "Compose and send messages", prompt: "Draft an email to" },
@@ -261,24 +261,24 @@ export function ChatPanel({
                   <button
                     key={item.title}
                     onClick={() => setInput(item.prompt)}
-                    className="p-3 text-left rounded-xl border border-border bg-card/50 hover:bg-muted/60 transition-all group cursor-pointer"
+                    className="p-5 text-left rounded-2xl border border-border bg-card/50 hover:bg-muted/60 transition-all group cursor-pointer shadow-sm"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-lg">{item.icon}</span>
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-3xl">{item.icon}</span>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <p className="text-base font-bold text-foreground">{item.title}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
+                    <p className="text-lg font-extrabold text-foreground">{item.title}</p>
+                    <p className="text-base text-muted-foreground mt-1">{item.desc}</p>
                   </button>
                 ))}
               </div>
             )}
 
-            <div className="text-center space-y-1.5 max-w-xs">
-              <p className="text-sm text-muted-foreground/70 font-semibold uppercase tracking-wider">
+            <div className="text-center space-y-2 max-w-md">
+              <p className="text-sm text-muted-foreground/80 font-bold uppercase tracking-wider">
                 Operations Guide
               </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-base text-muted-foreground leading-relaxed">
                 Query your cached correspondence, draft response text, check calendar conflicts,
                 or trigger direct event creation via command parameters.
               </p>
