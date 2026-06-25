@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Check, RefreshCw, Paperclip, Trash2, AlertCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmailAttachment } from "./types";
@@ -11,7 +11,8 @@ export function EmailDraftCard({
   attachments: initialAttachments = [],
   threadId,
   toolCallId,
-  addToolResult
+  addToolResult,
+  isLoading
 }: {
   to: string;
   subject: string;
@@ -20,6 +21,7 @@ export function EmailDraftCard({
   threadId?: string | null;
   toolCallId: string;
   addToolResult: (args: any) => void;
+  isLoading?: boolean;
 }) {
   const [to, setTo] = useState(initialTo);
   const [subject, setSubject] = useState(initialSubject);
@@ -28,6 +30,16 @@ export function EmailDraftCard({
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState<'draft' | 'refining' | 'sending' | 'sent' | 'error'>('draft');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Sync state with props while loading (streaming)
+  useEffect(() => {
+    if (isLoading) {
+      setTo(initialTo || '');
+      setSubject(initialSubject || '');
+      setBody(initialBody || '');
+      setAttachments(initialAttachments || []);
+    }
+  }, [initialTo, initialSubject, initialBody, initialAttachments, isLoading]);
 
   const handleRefine = async (tone: string) => {
     setStatus('refining');
@@ -94,6 +106,37 @@ export function EmailDraftCard({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-5 rounded-2xl border border-border bg-card/45 backdrop-blur-md space-y-4 shadow-lg w-full max-w-xl animate-pulse my-3">
+        <div className="flex items-center justify-between pb-2 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <div className="h-2.5 w-2.5 rounded-full bg-primary/40" />
+            <div className="h-3 w-32 bg-muted rounded" />
+          </div>
+          <div className="h-3 w-16 bg-muted rounded" />
+        </div>
+        <div className="space-y-3">
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold text-muted-foreground/40 w-16 uppercase">To:</span>
+            <div className="h-4 flex-1 bg-muted/65 rounded" />
+          </div>
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold text-muted-foreground/40 w-16 uppercase">Subject:</span>
+            <div className="h-4 flex-1 bg-muted/65 rounded" />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-muted-foreground/40 uppercase block">Message Body:</span>
+            <div className="space-y-2 p-3 bg-muted/20 border border-border/20 rounded-xl">
+              <div className="h-3 w-full bg-muted/65 rounded" />
+              <div className="h-3 w-5/6 bg-muted/65 rounded" />
+              <div className="h-3 w-4/5 bg-muted/65 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4 shadow-lg w-full max-w-xl animate-in fade-in zoom-in-95 duration-200 my-3">
