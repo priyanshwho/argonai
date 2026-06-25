@@ -84,7 +84,7 @@ export function DashboardSidebar({
               <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-9 max-w-none w-auto object-contain" />
             </Link>
           ) : (
-            <Link href="/" className="flex items-center shrink-0 -mt-1">
+            <Link href="/" className="flex items-center shrink-0 -mt-1 pl-2">
               <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-14 w-auto object-contain" />
               <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-14 w-auto object-contain" />
             </Link>
@@ -112,8 +112,8 @@ export function DashboardSidebar({
               createNewChat();
             }
           }}
-          className={`flex items-center gap-2 border border-border bg-background text-foreground hover:bg-muted hover:text-foreground transition-all rounded-lg font-medium text-sm ${
-            sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3 py-2"
+          className={`flex items-center gap-2 border border-border bg-background text-foreground hover:bg-muted hover:text-foreground transition-all rounded-lg font-semibold text-base ${
+            sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2"
           }`}
           title={sidebarCollapsed ? "New Chat" : undefined}
         >
@@ -139,11 +139,11 @@ export function DashboardSidebar({
                 href={tab.href}
                 onClick={handleClick}
                 title={tab.label}
-                className={`flex items-center rounded-lg text-sm transition-all text-left relative group ${
+                className={`flex items-center rounded-lg text-base transition-all text-left relative group ${
                   isTabActive
                     ? "bg-accent text-accent-foreground font-medium shadow-sm"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                } ${sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3 py-2 gap-2.5"}`}
+                } ${sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2.5 gap-2.5"}`}
               >
                 <tab.icon className="h-4.5 w-4.5 shrink-0 opacity-85" />
                 {!sidebarCollapsed && (
@@ -176,7 +176,7 @@ export function DashboardSidebar({
         {/* Conversations List */}
         {!sidebarCollapsed && (
           <div className="flex-1 overflow-y-auto space-y-1.5 pt-3 pr-1 transition-opacity duration-300">
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 pb-1.5">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
               Recent Conversations
             </div>
             {conversations
@@ -187,7 +187,7 @@ export function DashboardSidebar({
                   <div key={c.id} className="group relative flex items-center w-full">
                     <Link
                       href={`/dashboard/${c.id}`}
-                      className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-sm transition-all text-left truncate ${
+                      className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-base transition-all text-left truncate ${
                         isActive
                           ? "bg-accent text-accent-foreground font-medium"
                           : "text-muted-foreground/90 hover:bg-muted hover:text-foreground"
@@ -227,8 +227,8 @@ export function DashboardSidebar({
             )}
             {!sidebarCollapsed && (
               <div className="flex flex-col truncate transition-opacity duration-300">
-                <span className="text-xs font-semibold text-foreground truncate">{userName}</span>
-                <span className="text-[10px] text-muted-foreground truncate">{userEmail}</span>
+                <span className="text-sm font-semibold text-foreground truncate">{userName}</span>
+                <span className="text-xs text-muted-foreground truncate">{userEmail}</span>
               </div>
             )}
           </div>
