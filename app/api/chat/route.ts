@@ -1,4 +1,5 @@
-import { streamText, stepCountIs } from 'ai';
+import { streamText, stepCountIs, tool } from 'ai';
+import { z } from 'zod';
 import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
 import { auth } from '@/lib/auth';
@@ -69,7 +70,44 @@ export async function POST(req: Request) {
   const hasGmail = accounts.some((a) => a.integration.name === "gmail");
   const hasCalendar = accounts.some((a) => a.integration.name === "googlecalendar");
 
-  const aiTools = getCorsairAiTools(session.user.id);
+  const rawAiTools = getCorsairAiTools(session.user.id);
+  const aiTools = {
+    ...rawAiTools,
+    draft_email: tool({
+      description: 'Use this tool to draft an email when the user wants to send an email or message via Gmail. This will present a draft card to the user for confirmation, editing, tone refinement, and attachment selection before sending.',
+      parameters: z.object({
+        to: z.string().describe('The email address of the recipient.'),
+        subject: z.string().describe('The subject line of the email.'),
+        body: z.string().describe('The body text of the email.')
+      }),
+      execute: async (args) => {
+        return {
+          to: args.to,
+          subject: args.subject,
+          body: args.body,
+          status: 'draft'
+        };
+      }
+    }),
+    draft_calendar_event: tool({
+      description: 'Use this tool to draft a Google Calendar event when the user wants to schedule a meeting, event, or reminder. This will present the event details to the user for animated conflict checking and approval before scheduling.',
+      parameters: z.object({
+        title: z.string().describe('The title of the meeting or event.'),
+        startTime: z.string().describe('The start date and time of the event (ISO 8601 string or simple datetime).'),
+        endTime: z.string().describe('The end date and time of the event (ISO 8601 string or simple datetime).'),
+        attendees: z.array(z.string()).optional().describe('List of email addresses of attendees.')
+      }),
+      execute: async (args) => {
+        return {
+          title: args.title,
+          startTime: args.startTime,
+          endTime: args.endTime,
+          attendees: args.attendees || [],
+          status: 'draft'
+        };
+      }
+    })
+  };
   const coreMessages = (messages || []).map((m: any) => ({
     role: m.role,
     content: getMessageText(m),
@@ -83,6 +121,10 @@ export async function POST(req: Request) {
 You manage the user's Gmail and Google Calendar.
 You can read their emails, draft responses, find calendar availability, and schedule meetings.
 Be concise, helpful, and professional.
+
+CRITICAL: When the user wants to send an email, do NOT use "run_script" to send it directly. Instead, you MUST call the "draft_email" tool to present a draft card to the user.
+When the user wants to schedule or create a calendar event, do NOT use "run_script" to create it directly. Instead, you MUST call the "draft_calendar_event" tool to present the event details to the user for approval.
+Do NOT execute send or event creation via "run_script".
 
 ${(!hasGmail || !hasCalendar) ? `
 CRITICAL: Gmail and/or Google Calendar integrations are not configured for this user.
