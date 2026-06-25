@@ -172,6 +172,7 @@ export function InboxPanel({
             })}
           </div>
         )}
+        </div>
       </div>
 
       {/* Email Detail */}
