@@ -621,6 +621,8 @@ export function WorkspaceClient({
                 router.push(`/dashboard/${activeChatId}`);
               }}
               copyToClipboard={(text) => navigator.clipboard.writeText(text)}
+              activeLabel={activeLabel}
+              onFilterChange={(lbl) => fetchEmails(lbl)}
             />
           )}
 
