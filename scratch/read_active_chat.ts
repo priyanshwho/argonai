@@ -14,9 +14,8 @@ for (const file of envFiles) {
   }
 }
 
-import { prisma } from '../lib/db';
-
 async function main() {
+  const { prisma } = await import('../lib/db');
   try {
     const messages = await prisma.message.findMany({
       where: {
