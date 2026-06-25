@@ -252,10 +252,10 @@ export function CalendarDraftCard({
                 type="datetime-local"
                 value={endTime.slice(0, 16)}
                 onChange={e => setEndTime(new Date(e.target.value).toISOString())}
-                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
               />
             ) : (
-              <span className="text-sm text-foreground">{new Date(endTime).toLocaleString()}</span>
+              <span className="text-base text-foreground">{new Date(endTime).toLocaleString()}</span>
             )}
           </div>
 

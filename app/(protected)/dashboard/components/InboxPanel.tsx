@@ -30,6 +30,8 @@ interface InboxPanelProps {
   onSendReply: () => void;
   onAskAI: (subject: string, sender: string, threadId: string) => void;
   copyToClipboard: (text: string) => void;
+  activeLabel: string;
+  onFilterChange: (label: string) => void;
 }
 
 export function InboxPanel({
@@ -53,31 +55,63 @@ export function InboxPanel({
   onSendReply,
   onAskAI,
   copyToClipboard,
+  activeLabel,
+  onFilterChange,
 }: InboxPanelProps) {
+  const filters = [
+    { id: "INBOX", label: "Inbox" },
+    { id: "SENT", label: "Sent" },
+    { id: "SPAM", label: "Spam" },
+    { id: "TRASH", label: "Trash" },
+    { id: "ALL", label: "All Mails" }
+  ];
+
   return (
-    <div className="flex h-full divide-x divide-border/60 overflow-hidden w-full">
-      {/* Email List */}
+    <div className="flex h-full divide-x divide-border/60 overflow-hidden w-full bg-background">
+      {/* Email List Workspace */}
       <div
-        className={`overflow-y-auto p-4 space-y-3 shrink-0 transition-all ${
+        className={`flex flex-col h-full shrink-0 transition-all ${
           selectedEmail ? "w-[360px]" : "flex-1"
         }`}
       >
-        {emailsLoading ? (
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-24">
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            <span>Loading Gmail cache...</span>
-          </div>
-        ) : emails.length === 0 ? (
-          <div className="text-center py-24 space-y-3">
-            <div className="h-14 w-14 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto">
-              <Inbox className="h-7 w-7 text-muted-foreground/50" />
+        {/* Sticky Filters row */}
+        <div className="p-3 border-b border-border/60 bg-background/95 backdrop-blur-md flex flex-wrap gap-1.5 shrink-0 z-10">
+          {filters.map((f) => {
+            const isActive = activeLabel === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => onFilterChange(f.id)}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm font-bold scale-[1.02]"
+                    : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Scrollable Email List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {emailsLoading ? (
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-24">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              <span>Loading Gmail cache...</span>
             </div>
-            <p className="text-sm font-semibold text-foreground/60">No emails synced</p>
-            <p className="text-xs text-muted-foreground">
-              Connect Gmail to sync your inbox cache.
-            </p>
-          </div>
-        ) : (
+          ) : emails.length === 0 ? (
+            <div className="text-center py-24 space-y-3">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto">
+                <Inbox className="h-7 w-7 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm font-semibold text-foreground/60">No emails found</p>
+              <p className="text-xs text-muted-foreground">
+                No emails synced for this label.
+              </p>
+            </div>
+          ) : (
           <div className="space-y-1.5">
             {emails.map((email) => {
               const initials = email.sender
