@@ -22,15 +22,18 @@ function getMessageText(message: any): string {
 function convertClientMessagesToModelMessages(messages: any[]): any[] {
   const modelMessages: any[] = [];
 
-  for (const m of messages) {
+  for (const m of messages || []) {
     if (m.role === 'user') {
       modelMessages.push({ role: 'user', content: m.content });
     } else if (m.role === 'system') {
       modelMessages.push({ role: 'system', content: m.content });
     } else if (m.role === 'assistant') {
-      const hasToolCalls = m.toolInvocations && m.toolInvocations.length > 0;
-      
-      if (!hasToolCalls) {
+      const toolInvocations = m.toolInvocations || [];
+      const resolvedCalls = toolInvocations.filter(
+        (t: any) => t.state === 'result' || t.result !== undefined
+      );
+
+      if (resolvedCalls.length === 0) {
         modelMessages.push({ role: 'assistant', content: m.content || '' });
       } else {
         const assistantContent: any[] = [];
@@ -38,33 +41,25 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
           assistantContent.push({ type: 'text', text: m.content });
         }
         
-        for (const call of m.toolInvocations) {
+        for (const call of resolvedCalls) {
           assistantContent.push({
             type: 'tool-call',
             toolCallId: call.toolCallId,
             toolName: call.toolName,
-            input: call.args
+            args: call.args
           });
         }
         
         modelMessages.push({ role: 'assistant', content: assistantContent });
         
-        const toolResults = m.toolInvocations
-          .filter((t: any) => t.state === 'result' || t.result !== undefined)
-          .map((t: any) => ({
-            type: 'tool-result',
-            toolCallId: t.toolCallId,
-            toolName: t.toolName,
-            input: t.args,
-            output: {
-              type: 'json',
-              value: t.result
-            }
-          }));
+        const toolResults = resolvedCalls.map((t: any) => ({
+          type: 'tool-result',
+          toolCallId: t.toolCallId,
+          toolName: t.toolName,
+          result: t.result
+        }));
           
-        if (toolResults.length > 0) {
-          modelMessages.push({ role: 'tool', content: toolResults });
-        }
+        modelMessages.push({ role: 'tool', content: toolResults });
       }
     }
   }
