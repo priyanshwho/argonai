@@ -65,7 +65,7 @@ export async function POST(req: Request) {
           const itemStart = new Date(startStr);
           const itemEnd = new Date(endStr);
           if (itemStart < proposedEnd && itemEnd > proposedStart) {
-            conflictsMap.set(item.id, {
+            conflictsMap.set(item.id || Math.random().toString(), {
               title: item.summary || 'Busy',
               startTime: itemStart.toISOString(),
               endTime: itemEnd.toISOString(),

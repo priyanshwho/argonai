@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { to, subject, body, attachments = [] } = await req.json();
+    const { to, subject, body, attachments = [], threadId } = await req.json();
 
     if (!to || !subject || !body) {
       return NextResponse.json({ error: 'Missing required fields (to, subject, body)' }, { status: 400 });
@@ -85,7 +85,10 @@ export async function POST(req: Request) {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
 
-    const result = await tenantClient.gmail.api.messages.send({ raw: base64Safe });
+    const result = await tenantClient.gmail.api.messages.send({
+      raw: base64Safe,
+      threadId: threadId || undefined,
+    });
 
     return NextResponse.json({ success: true, result });
   } catch (err: any) {

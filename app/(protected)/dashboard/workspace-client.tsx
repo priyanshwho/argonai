@@ -216,7 +216,7 @@ function EmailDraftCard({
   body: string;
   threadId?: string | null;
   toolCallId: string;
-  addToolResult: (args: { toolCallId: string; result: any }) => void;
+  addToolResult: (args: any) => void;
 }) {
   const [to, setTo] = useState(initialTo);
   const [subject, setSubject] = useState(initialSubject);
@@ -272,14 +272,16 @@ function EmailDraftCard({
       const res = await fetch('/api/emails/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, body, attachments })
+        body: JSON.stringify({ to, subject, body, attachments, threadId })
       });
       const data = await res.json();
       if (data.success) {
         setStatus('sent');
         addToolResult({
           toolCallId,
-          result: { success: true, message: 'Email sent successfully' }
+          tool: 'draft_email',
+          state: 'output-available',
+          output: { success: true, message: 'Email sent successfully' }
         });
       } else {
         throw new Error(data.error || 'Failed to send email');
@@ -429,7 +431,7 @@ function CalendarDraftCard({
   endTime: string;
   attendees: string[];
   toolCallId: string;
-  addToolResult: (args: { toolCallId: string; result: any }) => void;
+  addToolResult: (args: any) => void;
 }) {
   const [title, setTitle] = useState(initialTitle);
   const [startTime, setStartTime] = useState(initialStartTime);
@@ -520,7 +522,9 @@ function CalendarDraftCard({
         setStatus('created');
         addToolResult({
           toolCallId,
-          result: { success: true, message: 'Event scheduled successfully' }
+          tool: 'draft_calendar_event',
+          state: 'output-available',
+          output: { success: true, message: 'Event scheduled successfully' }
         });
       } else {
         throw new Error(data.error || 'Failed to schedule event');
@@ -791,6 +795,8 @@ export function WorkspaceClient({
   const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
   const [aiDraft, setAiDraft] = useState<string>("");
   const [aiDraftLoading, setAiDraftLoading] = useState(false);
+  const [sendingInboxReply, setSendingInboxReply] = useState(false);
+  const [inboxReplyStatus, setInboxReplyStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [draftInstructions, setDraftInstructions] = useState("");
 
   // Event creation form state
@@ -860,7 +866,7 @@ export function WorkspaceClient({
   };
 
   // Vercel AI SDK chat hook using Gemini 3.1 Flash-Lite
-  const { messages, sendMessage, setMessages, status } = useChat({
+  const { messages, sendMessage, setMessages, status, addToolResult } = useChat({
     onFinish: ({ message }) => {
       setConversations((prev) => 
         prev.map((c) => {
@@ -1006,6 +1012,39 @@ export function WorkspaceClient({
       setAiDraft("Error calling AI draft editor.");
     } finally {
       setAiDraftLoading(false);
+    }
+  };
+
+  const handleSendInboxReply = async () => {
+    if (!selectedEmail || !aiDraft) return;
+    setSendingInboxReply(true);
+    setInboxReplyStatus(null);
+    try {
+      const subject = selectedEmail.subject.toLowerCase().startsWith('re:') 
+        ? selectedEmail.subject 
+        : `Re: ${selectedEmail.subject}`;
+      const res = await fetch('/api/emails/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: selectedEmail.sender,
+          subject,
+          body: aiDraft,
+          threadId: selectedEmail.threadId
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInboxReplyStatus({ type: 'success', message: 'Reply sent successfully!' });
+        setAiDraft('');
+        setDraftInstructions('');
+      } else {
+        throw new Error(data.error || 'Failed to send reply');
+      }
+    } catch (err: any) {
+      setInboxReplyStatus({ type: 'error', message: err.message || 'Failed to send reply' });
+    } finally {
+      setSendingInboxReply(false);
     }
   };
 
@@ -1447,7 +1486,89 @@ export function WorkspaceClient({
                           {m.role === "user" ? (
                             <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
                           ) : (
-                            <MarkdownMessage content={getMessageText(m)} />
+                            <>
+                              <MarkdownMessage content={getMessageText(m)} />
+                              
+                              {/* Custom tool card rendering */}
+                              {(m as any).toolInvocations && (m as any).toolInvocations.map((toolInvocation: any) => {
+                                const { toolCallId, toolName, result, args } = toolInvocation;
+                                
+                                if (toolName === 'draft_email') {
+                                  return (
+                                    <EmailDraftCard
+                                      key={toolCallId}
+                                      to={args.to}
+                                      subject={args.subject}
+                                      body={args.body}
+                                      threadId={args.threadId}
+                                      toolCallId={toolCallId}
+                                      addToolResult={addToolResult}
+                                    />
+                                  );
+                                }
+                                
+                                if (toolName === 'draft_calendar_event') {
+                                  return (
+                                    <CalendarDraftCard
+                                      key={toolCallId}
+                                      title={args.title}
+                                      startTime={args.startTime}
+                                      endTime={args.endTime}
+                                      attendees={args.attendees || []}
+                                      toolCallId={toolCallId}
+                                      addToolResult={addToolResult}
+                                    />
+                                  );
+                                }
+
+                                if (toolName === 'run_script' && result) {
+                                  const list = Array.isArray(result) ? result : Array.isArray(result.emails) ? result.emails : [];
+                                  if (list.length > 0 && (list[0].subject || list[0].sender || list[0].from || list[0].snippet)) {
+                                    return (
+                                      <div key={toolCallId} className="mt-3 space-y-2 w-full max-w-xl text-left">
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Found Emails:</p>
+                                        {list.map((email: any, idx: number) => {
+                                          const subject = email.subject || 'No Subject';
+                                          const sender = email.sender || email.from || 'Unknown Sender';
+                                          const snippet = email.snippet || '';
+                                          const threadId = email.threadId || '';
+                                          return (
+                                            <div key={idx} className="p-3.5 rounded-xl border border-border/85 bg-card/45 hover:bg-card/90 transition flex flex-col gap-2 shadow-sm select-text">
+                                              <div>
+                                                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase block">Sender</span>
+                                                <span className="text-xs font-bold text-foreground">{sender}</span>
+                                              </div>
+                                              <div>
+                                                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase block">Subject</span>
+                                                <span className="text-xs font-extrabold text-foreground">{subject}</span>
+                                              </div>
+                                              <div>
+                                                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase block">Snippet</span>
+                                                <span className="text-xs text-muted-foreground leading-relaxed">{snippet}</span>
+                                              </div>
+                                              <div className="flex justify-end pt-1">
+                                                <Button
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setInput(`Reply to email: "${subject}" from "${sender}" (threadId: ${threadId})`);
+                                                  }}
+                                                  className="text-[10px] h-7 px-3 bg-secondary hover:bg-muted text-secondary-foreground border border-border rounded-lg flex items-center gap-1 cursor-pointer"
+                                                >
+                                                  <Edit3 className="h-3 w-3" />
+                                                  <span>Reply</span>
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    );
+                                  }
+                                }
+                                
+                                return null;
+                              })}
+                            </>
                           )}
                         </div>
                       </div>
@@ -1841,16 +1962,43 @@ export function WorkspaceClient({
                       </Button>
 
                       {aiDraft && (
-                        <div className="p-4 rounded-2xl border border-border bg-card/35 text-sm text-foreground/90 leading-relaxed relative whitespace-pre-wrap select-text shadow-inner">
-                          <button 
-                            onClick={() => copyToClipboard(aiDraft)}
-                            className="absolute right-3 top-3 p-1.5 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors cursor-pointer"
-                            title="Copy Draft"
+                        <div className="space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="relative">
+                            <textarea
+                              value={aiDraft}
+                              onChange={(e) => setAiDraft(e.target.value)}
+                              rows={8}
+                              className="w-full bg-background border border-border rounded-xl p-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80 focus:ring-1 focus:ring-ring select-text leading-relaxed resize-y shadow-inner"
+                              placeholder="Edit the reply draft here..."
+                            />
+                            <button 
+                              onClick={() => copyToClipboard(aiDraft)}
+                              className="absolute right-3 top-3 p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                              title="Copy Draft"
+                            >
+                              <Clipboard className="h-4 w-4" />
+                            </button>
+                          </div>
+
+                          {inboxReplyStatus && (
+                            <div className={`p-3 rounded-xl border text-xs flex items-center gap-2 animate-in fade-in duration-150 ${
+                              inboxReplyStatus.type === 'success' 
+                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                                : 'bg-destructive/10 border-destructive/20 text-destructive'
+                            }`}>
+                              {inboxReplyStatus.type === 'success' ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                              <span>{inboxReplyStatus.message}</span>
+                            </div>
+                          )}
+
+                          <Button
+                            onClick={handleSendInboxReply}
+                            disabled={sendingInboxReply}
+                            className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs py-2 h-10 flex items-center justify-center gap-1.5 rounded-xl font-bold shadow-md cursor-pointer transition-all duration-200 active:scale-[0.98]"
                           >
-                            <Clipboard className="h-4 w-4" />
-                          </button>
-                          <strong className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block pb-2">Reply Draft</strong>
-                          {aiDraft}
+                            {sendingInboxReply ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            <span>Send Reply</span>
+                          </Button>
                         </div>
                       )}
                     </div>

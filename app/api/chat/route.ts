@@ -75,13 +75,13 @@ export async function POST(req: Request) {
     ...rawAiTools,
     draft_email: tool({
       description: 'Use this tool to draft an email when the user wants to send an email or message via Gmail. This will present a draft card to the user for confirmation, editing, tone refinement, and attachment selection before sending.',
-      parameters: z.object({
+      inputSchema: z.object({
         to: z.string().describe('The email address of the recipient.'),
         subject: z.string().describe('The subject line of the email.'),
         body: z.string().describe('The body text of the email.'),
         threadId: z.string().optional().describe('The threadId if this email is a reply to an existing conversation thread.')
       }),
-      execute: async (args) => {
+      execute: async (args: any) => {
         return {
           to: args.to,
           subject: args.subject,
@@ -93,13 +93,13 @@ export async function POST(req: Request) {
     }),
     draft_calendar_event: tool({
       description: 'Use this tool to draft a Google Calendar event when the user wants to schedule a meeting, event, or reminder. This will present the event details to the user for animated conflict checking and approval before scheduling.',
-      parameters: z.object({
+      inputSchema: z.object({
         title: z.string().describe('The title of the meeting or event.'),
         startTime: z.string().describe('The start date and time of the event (ISO 8601 string or simple datetime).'),
         endTime: z.string().describe('The end date and time of the event (ISO 8601 string or simple datetime).'),
         attendees: z.array(z.string()).optional().describe('List of email addresses of attendees.')
       }),
-      execute: async (args) => {
+      execute: async (args: any) => {
         return {
           title: args.title,
           startTime: args.startTime,
