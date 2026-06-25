@@ -256,40 +256,51 @@ The "corsair" client variable is ALREADY in scope and pre-scoped to the user's t
 
 ## DATA FETCHING STRATEGY — CRITICAL RULE
 
-Always follow this two-step pattern when reading data:
+Always follow this pattern when reading data:
 
-STEP 1 — Try the local cache first (.db). It is fast and avoids Google rate limits.
-STEP 2 — Fall back to the live API (.api) in any of the following scenarios:
-  a) The local .db query returns an empty list [].
-  b) The user is requesting a total count/number of messages/events in their inbox/calendar (the local cache only holds recent/synced messages; the live API contains the true inbox count).
-  c) The user asks to see/check a specific item index or range (e.g. "my 35th email", "emails from last month") that exceeds the size of the cached local list (if the cache has 31 items, you must query .api with maxResults set higher, e.g., 50 or 100, to check older emails).
-
-Never tell the user their inbox or calendar is empty or that they only have N items based solely on the .db result if they are asking for more. Always query the live API (.api) first.
-
-Example fallback pattern:
-  let messages = await corsair.gmail.db.messages.list({});
-  // Fall back if cache is cold, or if user requests more messages than the cache length
-  if (!messages || messages.length < 40) {
-    messages = await corsair.gmail.api.messages.list({ userId: 'me', maxResults: 50 });
-  }
-  return messages;
+1. For queries asking for "recent", "latest", "last", or real-time emails, you MUST query the live Gmail API (.api) first. This is because the local database cache (.db) is not updated in real-time unless the user manually visits the inbox workspace.
+2. For Gmail list and search operations using the live API (.api), the list call only returns message stubs (ID and threadId). You MUST concurrently fetch full message details using Promise.all and corsair.gmail.api.messages.get for the top 5-10 stubs to read the subjects, senders, dates, and snippets.
+3. Map all email responses to a simple, consistent JSON array format containing fields: id, subject, sender, date, snippet. This ensures you can easily inspect and list them.
 
 ## OPERATIONS GUIDE
 
-1. List Gmail messages (DB-first, API fallback):
-   let messages = await corsair.gmail.db.messages.list({});
-   if (!messages || messages.length === 0) {
-     messages = await corsair.gmail.api.messages.list({ userId: 'me', maxResults: 20 });
-   }
-   return messages;
-   // Each message data has: { id, data: { snippet, payload: { headers: [{name, value}] }, internalDate } }
+1. List recent/latest Gmail messages (Real-time Live API query):
+   const listRes = await corsair.gmail.api.messages.list({ userId: 'me', maxResults: 10 });
+   const stubs = listRes.messages || [];
+   const emails = await Promise.all(stubs.map(async (stub) => {
+     try {
+       const msg = await corsair.gmail.api.messages.get({ userId: 'me', id: stub.id });
+       return {
+         id: msg.id,
+         subject: msg.payload?.headers?.find(h => h.name.toLowerCase() === 'subject')?.value || 'No Subject',
+         sender: msg.payload?.headers?.find(h => h.name.toLowerCase() === 'from')?.value || 'Unknown Sender',
+         date: msg.internalDate ? new Date(parseInt(msg.internalDate)).toLocaleString() : '',
+         snippet: msg.snippet || ''
+       };
+     } catch {
+       return null;
+     }
+   }));
+   return emails.filter(Boolean);
 
-2. Search Gmail messages (DB-first, API fallback):
-   let messages = await corsair.gmail.db.messages.search({ data: { snippet: { contains: "searchTerm" } } });
-   if (!messages || messages.length === 0) {
-     messages = await corsair.gmail.api.messages.list({ userId: 'me', q: 'searchTerm', maxResults: 20 });
-   }
-   return messages;
+2. Search Gmail messages (Real-time Live API query):
+   const listRes = await corsair.gmail.api.messages.list({ userId: 'me', q: 'searchTerm', maxResults: 10 });
+   const stubs = listRes.messages || [];
+   const emails = await Promise.all(stubs.map(async (stub) => {
+     try {
+       const msg = await corsair.gmail.api.messages.get({ userId: 'me', id: stub.id });
+       return {
+         id: msg.id,
+         subject: msg.payload?.headers?.find(h => h.name.toLowerCase() === 'subject')?.value || 'No Subject',
+         sender: msg.payload?.headers?.find(h => h.name.toLowerCase() === 'from')?.value || 'Unknown Sender',
+         date: msg.internalDate ? new Date(parseInt(msg.internalDate)).toLocaleString() : '',
+         snippet: msg.snippet || ''
+       };
+     } catch {
+       return null;
+     }
+   }));
+   return emails.filter(Boolean);
 
 3. List Calendar events (DB-first, API fallback):
    let events = await corsair.googlecalendar.db.events.list({});
