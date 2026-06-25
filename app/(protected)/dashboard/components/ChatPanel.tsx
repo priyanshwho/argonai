@@ -188,8 +188,19 @@ export function ChatPanel({
     prevStatusRef.current = status;
   }, [status]);
 
+  const prevFirstMessageId = useRef<string | undefined>(messages[0]?.id);
+  const prevMessagesLength = useRef(messages.length);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const isSameChat = messages[0]?.id === prevFirstMessageId.current;
+    const isAppend = isSameChat && messages.length > prevMessagesLength.current && messages.length - prevMessagesLength.current <= 2;
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: isAppend ? "smooth" : "auto"
+    });
+
+    prevFirstMessageId.current = messages[0]?.id;
+    prevMessagesLength.current = messages.length;
   }, [messages]);
 
   const removeFile = (idx: number) => {

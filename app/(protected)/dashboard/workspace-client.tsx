@@ -345,30 +345,49 @@ export function WorkspaceClient({
     });
   }, [messages, activeChatId]);
 
-  // Sync URL active chat ID with conversations state and restore messages
-  // This ONLY depends on activeChatId to prevent rendering loops when conversations list updates
+  // Sync URL active chat ID or server props change with conversations state and restore messages
   useEffect(() => {
     setInput("");
     setSelectedFiles([]);
     setConversations((prev) => {
-      const hasChat = prev.some((c) => c.id === activeChatId);
-      if (activeChatId && !hasChat) {
-        setMessages([]);
-        return [
-          { id: activeChatId, title: "New Conversation", messages: [] },
-          ...prev,
-        ];
-      } else {
-        const active = prev.find((c) => c.id === activeChatId);
-        if (active) {
-          setMessages(active.messages as any);
-        } else {
-          setMessages([]);
+      // Map initial/database conversations
+      const dbMap = new Map(initialConversations.map(c => [c.id, c]));
+      
+      // Update existing conversations with latest DB data, or keep client-only ones
+      let updated = prev.map(c => {
+        const dbConv = dbMap.get(c.id);
+        if (dbConv) return dbConv;
+        return c;
+      });
+
+      // Add any new database conversations
+      const prevIds = new Set(prev.map(c => c.id));
+      for (const dbConv of initialConversations) {
+        if (!prevIds.has(dbConv.id)) {
+          updated.push(dbConv);
         }
-        return prev;
       }
+
+      // Ensure the active chat exists in the list
+      const hasChat = updated.some((c) => c.id === activeChatId);
+      if (activeChatId && !hasChat) {
+        updated = [
+          { id: activeChatId, title: "New Conversation", messages: [] },
+          ...updated
+        ];
+      }
+
+      // Sync the messages of the active chat into useChat
+      const active = updated.find((c) => c.id === activeChatId);
+      if (active) {
+        setMessages(active.messages as any);
+      } else {
+        setMessages([]);
+      }
+
+      return updated;
     });
-  }, [activeChatId]);
+  }, [activeChatId, initialConversations]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
