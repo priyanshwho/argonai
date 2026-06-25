@@ -24,7 +24,24 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
 
   for (const m of messages || []) {
     if (m.role === 'user') {
-      modelMessages.push({ role: 'user', content: getMessageText(m) });
+      if (Array.isArray(m.parts) && m.parts.length > 0) {
+        const parts = m.parts.map((p: any) => {
+          if (p.type === 'text') {
+            return { type: 'text', text: p.text };
+          } else if (p.type === 'file') {
+            const dataBase64 = p.url.includes(',') ? p.url.split(',')[1] : p.url;
+            return {
+              type: 'file',
+              data: dataBase64,
+              mimeType: p.mediaType || 'application/octet-stream'
+            };
+          }
+          return p;
+        });
+        modelMessages.push({ role: 'user', content: parts });
+      } else {
+        modelMessages.push({ role: 'user', content: getMessageText(m) });
+      }
     } else if (m.role === 'system') {
       modelMessages.push({ role: 'system', content: getMessageText(m) });
     } else if (m.role === 'assistant') {

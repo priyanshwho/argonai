@@ -8,6 +8,7 @@ export function EmailDraftCard({
   to: initialTo,
   subject: initialSubject,
   body: initialBody,
+  attachments: initialAttachments = [],
   threadId,
   toolCallId,
   addToolResult
@@ -15,6 +16,7 @@ export function EmailDraftCard({
   to: string;
   subject: string;
   body: string;
+  attachments?: EmailAttachment[];
   threadId?: string | null;
   toolCallId: string;
   addToolResult: (args: any) => void;
@@ -22,7 +24,7 @@ export function EmailDraftCard({
   const [to, setTo] = useState(initialTo);
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState(initialBody);
-  const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
+  const [attachments, setAttachments] = useState<EmailAttachment[]>(initialAttachments);
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState<'draft' | 'refining' | 'sending' | 'sent' | 'error'>('draft');
   const [errorMessage, setErrorMessage] = useState('');

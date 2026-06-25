@@ -149,6 +149,33 @@ export function WorkspaceClient({
   );
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  const handleChatFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+    }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFilesWithDataUrls = async (files: File[]) => {
+    return Promise.all(files.map(file => {
+      return new Promise<{ filename: string; mediaType: string; url: string }>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            filename: file.name,
+            mediaType: file.type,
+            url: reader.result as string
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }));
+  };
 
   const toggleListening = () => {
     if (isListening) {
@@ -451,11 +478,27 @@ export function WorkspaceClient({
   };
 
   // Handle message submission
-  const handleChatSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChatSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && selectedFiles.length === 0) || isLoading) return;
 
-    const userMsg = { id: `user-${Date.now()}`, role: "user" as const, content: input };
+    const fileParts = selectedFiles.length > 0 ? await getFilesWithDataUrls(selectedFiles) : [];
+    const textPart = input.trim() ? [{ type: "text" as const, text: input }] : [];
+    
+    const userMsg = {
+      id: `user-${Date.now()}`,
+      role: "user" as const,
+      content: input,
+      parts: [
+        ...textPart,
+        ...fileParts.map(f => ({
+          type: "file" as const,
+          filename: f.filename,
+          mediaType: f.mediaType,
+          url: f.url
+        }))
+      ]
+    };
     const updatedMessages = [...messages, userMsg];
     
     setConversations((prev) => 
@@ -466,8 +509,12 @@ export function WorkspaceClient({
       )
     );
     
-    sendMessage({ text: input }, { body: { conversationId: activeChatId } });
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    
+    sendMessage({ text: input, files: dt.files }, { body: { conversationId: activeChatId } });
     setInput("");
+    setSelectedFiles([]);
   };
 
   const submitMessageDirectly = (promptText: string) => {
@@ -475,7 +522,12 @@ export function WorkspaceClient({
     setActiveTab("chat");
     setShowSearchResults(false);
     
-    const userMsg = { id: `user-${Date.now()}`, role: "user" as const, content: promptText };
+    const userMsg = {
+      id: `user-${Date.now()}`,
+      role: "user" as const,
+      content: promptText,
+      parts: [{ type: "text" as const, text: promptText }]
+    };
     const updatedMessages = [...messages, userMsg];
     
     setConversations((prev) => 
@@ -583,7 +635,19 @@ export function WorkspaceClient({
                       : "bg-card border border-border/50 text-foreground animate-in fade-in slide-in-from-bottom-2 duration-300"
                   }`}>
                     {m.role === "user" ? (
-                      <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
+                      <div className="space-y-1">
+                        <div className="whitespace-pre-wrap">{getMessageText(m)}</div>
+                        {Array.isArray((m as any).parts) && (m as any).parts.some((p: any) => p.type === 'file') && (
+                          <div className="flex flex-wrap gap-1.5 pt-1.5">
+                            {(m as any).parts.filter((p: any) => p.type === 'file').map((p: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-1 bg-primary-foreground/15 border border-primary-foreground/20 rounded px-1.5 py-0.5 text-[9px] text-primary-foreground/90">
+                                <Paperclip className="h-2.5 w-2.5" />
+                                <span>{p.filename}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <>
                         <MarkdownMessage content={getMessageText(m)} />
@@ -593,12 +657,28 @@ export function WorkspaceClient({
                           const { toolCallId, toolName, result, args } = toolInvocation;
                           
                           if (toolName === 'draft_email') {
+                            // Find files from the user message immediately preceding this tool call if not passed in tool args
+                            let messageAttachments: EmailAttachment[] = [];
+                            const msgIndex = messages.findIndex(msg => msg.id === m.id);
+                            if (msgIndex > 0) {
+                              const prevMsg = messages[msgIndex - 1];
+                              if (prevMsg && prevMsg.role === 'user' && Array.isArray((prevMsg as any).parts)) {
+                                messageAttachments = (prevMsg as any).parts
+                                  .filter((p: any) => p.type === 'file')
+                                  .map((p: any) => ({
+                                    filename: p.filename,
+                                    content: p.url // Data URL containing base64
+                                  }));
+                              }
+                            }
+
                             return (
                               <EmailDraftCard
                                 key={toolCallId}
                                 to={args.to}
                                 subject={args.subject}
                                 body={args.body}
+                                attachments={args.attachments || messageAttachments}
                                 threadId={args.threadId}
                                 toolCallId={toolCallId}
                                 addToolResult={addToolResult}
@@ -696,6 +776,23 @@ export function WorkspaceClient({
 
         {/* Chat Input form */}
         <div className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-3" : "p-4"}`}>
+          {selectedFiles.length > 0 && (
+            <div className="w-full max-w-2xl mx-auto flex flex-wrap gap-1.5 mb-2 px-1 animate-in fade-in duration-200">
+              {selectedFiles.map((file, idx) => (
+                <div key={idx} className="flex items-center gap-1.5 bg-secondary border border-border rounded-lg px-2 py-1 text-[10px]">
+                  <Paperclip className="h-2.5 w-2.5 text-muted-foreground" />
+                  <span className="max-w-[150px] truncate text-foreground">{file.name}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => removeSelectedFile(idx)} 
+                    className="text-muted-foreground hover:text-destructive cursor-pointer ml-1 font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <form 
             onSubmit={handleChatSubmit}
             className="w-full max-w-2xl mx-auto relative flex items-center bg-card border border-border rounded-xl px-2.5 py-1 hover:border-border/80 focus-within:border-border transition-all shadow-inner"
@@ -705,9 +802,21 @@ export function WorkspaceClient({
               placeholder={compact ? "Ask Argon assistant..." : "Ask AI assistant to search mail or book meetings..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="w-full bg-transparent text-xs text-foreground placeholder-muted-foreground py-2 pl-3 pr-20 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent text-xs text-foreground placeholder-muted-foreground py-2 pl-3 pr-28 focus:outline-none focus:ring-0"
             />
             <div className="absolute right-2 flex items-center gap-1.5 z-10">
+              <label 
+                title="Attach files"
+                className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground transition-all cursor-pointer shadow-sm flex items-center justify-center"
+              >
+                <Paperclip className="h-3.5 w-3.5" />
+                <input 
+                  type="file" 
+                  multiple 
+                  onChange={handleChatFileChange} 
+                  className="hidden" 
+                />
+              </label>
               <button
                 type="button"
                 onClick={toggleListening}
@@ -720,7 +829,7 @@ export function WorkspaceClient({
               </button>
               <button
                 type="submit"
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || (!input.trim() && selectedFiles.length === 0)}
                 className="p-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 disabled:hover:bg-primary transition-all cursor-pointer shadow-sm animate-in fade-in"
               >
                 <Send className="h-3.5 w-3.5" />
