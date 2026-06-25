@@ -78,13 +78,15 @@ export async function POST(req: Request) {
       parameters: z.object({
         to: z.string().describe('The email address of the recipient.'),
         subject: z.string().describe('The subject line of the email.'),
-        body: z.string().describe('The body text of the email.')
+        body: z.string().describe('The body text of the email.'),
+        threadId: z.string().optional().describe('The threadId if this email is a reply to an existing conversation thread.')
       }),
       execute: async (args) => {
         return {
           to: args.to,
           subject: args.subject,
           body: args.body,
+          threadId: args.threadId || null,
           status: 'draft'
         };
       }

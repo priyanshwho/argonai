@@ -6,7 +6,8 @@ import {
   Star, Bot, User, Send, Plus, Settings, LogOut, Mail, 
   Calendar, CheckCircle2, MessageSquare, AlertCircle, RefreshCw, 
   Sparkles, Search, ArrowRight, UserCheck, Inbox, ShieldAlert, 
-  ChevronRight, CalendarDays, Edit3, Clipboard, FileText, Mic, MicOff
+  ChevronRight, CalendarDays, Edit3, Clipboard, FileText, Mic, MicOff,
+  Paperclip, ChevronDown, ChevronUp, Trash2, Check, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
