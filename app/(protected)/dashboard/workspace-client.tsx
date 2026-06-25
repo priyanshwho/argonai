@@ -139,11 +139,7 @@ export function WorkspaceClient({
   }, [activeTab]);
 
 
-  // Clear search query and results when tab or conversation changes
-  useEffect(() => {
-    setSearchQuery("");
-    setShowSearchResults(false);
-  }, [activeTab, activeChatId]);
+
 
   // ── Search state ─────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("");
@@ -308,6 +304,12 @@ export function WorkspaceClient({
       : [{ id: activeChatIdParam || `chat-${Date.now()}`, title: "New Conversation", messages: [] }]
   );
   const activeChatId = activeChatIdParam || (initialConversations.length > 0 ? initialConversations[0].id : conversations[0]?.id || "default-chat");
+
+  // Clear search query and results when tab or conversation changes
+  useEffect(() => {
+    setSearchQuery("");
+    setShowSearchResults(false);
+  }, [activeTab, activeChatId]);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
