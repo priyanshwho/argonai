@@ -81,8 +81,9 @@ export function EmailDraftCard({
       if (data.success) {
         setStatus('sent');
         addToolResult({
+          tool: 'draft_email' as any,
           toolCallId,
-          result: { success: true, message: 'Email sent successfully' }
+          output: { success: true, message: 'Email sent successfully' }
         });
       } else {
         throw new Error(data.error || 'Failed to send email');
