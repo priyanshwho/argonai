@@ -54,8 +54,9 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
           !e.metaKey &&
           !e.ctrlKey
         ) {
-          const currentUrl = window.location.pathname + window.location.search;
-          if (href !== currentUrl) {
+          const targetPathname = href.split("?")[0].split("#")[0];
+          const currentPathname = window.location.pathname;
+          if (targetPathname !== currentPathname) {
             startLoading();
           }
         }
@@ -112,16 +113,22 @@ export function useRouter() {
   return {
     ...router,
     push: (href: string, options?: any) => {
-      const currentUrl = window.location.pathname + window.location.search;
-      if (href !== currentUrl && href.startsWith("/")) {
-        startLoading();
+      if (href.startsWith("/")) {
+        const targetPathname = href.split("?")[0].split("#")[0];
+        const currentPathname = window.location.pathname;
+        if (targetPathname !== currentPathname) {
+          startLoading();
+        }
       }
       return router.push(href, options);
     },
     replace: (href: string, options?: any) => {
-      const currentUrl = window.location.pathname + window.location.search;
-      if (href !== currentUrl && href.startsWith("/")) {
-        startLoading();
+      if (href.startsWith("/")) {
+        const targetPathname = href.split("?")[0].split("#")[0];
+        const currentPathname = window.location.pathname;
+        if (targetPathname !== currentPathname) {
+          startLoading();
+        }
       }
       return router.replace(href, options);
     },

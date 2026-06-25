@@ -77,7 +77,7 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
             type: 'tool-call',
             toolCallId: part.toolCallId,
             toolName,
-            args: part.input ?? {}
+            input: part.input ?? {}
           });
         }
 
@@ -87,7 +87,7 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
             type: 'tool-call',
             toolCallId: call.toolCallId,
             toolName: call.toolName,
-            args: call.args ?? {}
+            input: call.args ?? {}
           });
         }
 
@@ -98,19 +98,38 @@ function convertClientMessagesToModelMessages(messages: any[]): any[] {
 
         for (const part of resolvedParts) {
           const toolName = part.type.replace(/^tool-/, '');
+          const rawResult = part.output ?? part.errorText ?? {};
+          const isError = part.state === 'output-error';
+
+          let outputVal: any;
+          if (typeof rawResult === 'string') {
+            outputVal = { type: isError ? 'error-text' : 'text', value: rawResult };
+          } else {
+            outputVal = { type: isError ? 'error-json' : 'json', value: rawResult };
+          }
+
           toolResultContent.push({
             type: 'tool-result',
             toolCallId: part.toolCallId,
             toolName,
-            result: part.output ?? part.errorText ?? {}
+            output: outputVal
           });
         }
         for (const t of legacyInvocations) {
+          const rawResult = t.result ?? {};
+
+          let outputVal: any;
+          if (typeof rawResult === 'string') {
+            outputVal = { type: 'text', value: rawResult };
+          } else {
+            outputVal = { type: 'json', value: rawResult };
+          }
+
           toolResultContent.push({
             type: 'tool-result',
             toolCallId: t.toolCallId,
             toolName: t.toolName,
-            result: t.result ?? {}
+            output: outputVal
           });
         }
 
