@@ -301,8 +301,9 @@ export function WorkspaceClient({
 
   // Sync messages into conversation store
   useEffect(() => {
-    setConversations((prev) =>
-      prev.map((c) => {
+    setConversations((prev) => {
+      let changed = false;
+      const next = prev.map((c) => {
         if (c.id !== activeChatId) return c;
         if (
           c.messages.length === messages.length &&
@@ -315,45 +316,40 @@ export function WorkspaceClient({
         ) {
           return c;
         }
+        changed = true;
         let title = c.title;
         if (c.title.startsWith("New Conversation") || c.title.startsWith("Conversation ")) {
           const first = messages.find((m) => m.role === "user");
           if (first) title = getMessageText(first).slice(0, 30) || c.title;
         }
         return { ...c, title, messages: messages as any };
-      })
-    );
+      });
+      return changed ? next : prev;
+    });
   }, [messages, activeChatId]);
 
   // Sync URL active chat ID with conversations state and restore messages
+  // This ONLY depends on activeChatId to prevent rendering loops when conversations list updates
   useEffect(() => {
-    const hasChat = conversations.some((c) => c.id === activeChatId);
-    if (activeChatId && !hasChat) {
-      setConversations((prev) => {
-        if (prev.some((c) => c.id === activeChatId)) return prev;
+    setConversations((prev) => {
+      const hasChat = prev.some((c) => c.id === activeChatId);
+      if (activeChatId && !hasChat) {
+        setMessages([]);
         return [
           { id: activeChatId, title: "New Conversation", messages: [] },
           ...prev,
         ];
-      });
-      setMessages([]);
-    } else {
-      const active = conversations.find((c) => c.id === activeChatId);
-      if (active) {
-        setMessages((prev) => {
-          if (
-            prev.length === active.messages.length &&
-            prev.every((m, idx) => m.id === active.messages[idx].id)
-          ) {
-            return prev;
-          }
-          return active.messages as any;
-        });
       } else {
-        setMessages([]);
+        const active = prev.find((c) => c.id === activeChatId);
+        if (active) {
+          setMessages(active.messages as any);
+        } else {
+          setMessages([]);
+        }
+        return prev;
       }
-    }
-  }, [activeChatId, conversations]);
+    });
+  }, [activeChatId]);
 
   const isLoading = status === "submitted" || status === "streaming";
 
