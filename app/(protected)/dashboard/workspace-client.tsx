@@ -131,6 +131,588 @@ function formatDateTimeLocal(date: Date): string {
   return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
 }
 
+interface EmailAttachment {
+  filename: string;
+  content: string; // Base64 data
+}
+
+function EmailThreadAccordion({ threadId }: { threadId: string | null | undefined }) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!threadId || !isOpen || messages.length > 0) return;
+
+    const fetchThread = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/emails/thread?threadId=${threadId}`);
+        const data = await res.json();
+        if (data.messages) {
+          setMessages(data.messages);
+        }
+      } catch (err) {
+        console.error("Failed to load thread history:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchThread();
+  }, [threadId, isOpen]);
+
+  if (!threadId) return null;
+
+  return (
+    <div className="border border-border/40 rounded-xl bg-muted/20 overflow-hidden my-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-2 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition cursor-pointer"
+      >
+        <span className="flex items-center gap-1.5">
+          <Mail className="h-3.5 w-3.5" />
+          <span>View Previous Conversation History</span>
+        </span>
+        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-border/40 p-3.5 space-y-3 max-h-60 overflow-y-auto bg-card/20">
+          {loading ? (
+            <div className="flex items-center justify-center py-4 gap-2 text-xs text-muted-foreground">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              <span>Loading thread history...</span>
+            </div>
+          ) : messages.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-2">No previous thread messages found.</p>
+          ) : (
+            messages.map((msg, i) => (
+              <div key={i} className="text-xs space-y-1 pb-2 border-b border-border/30 last:border-0 last:pb-0">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold">
+                  <span className="truncate max-w-[150px]">{msg.sender}</span>
+                  <span>{new Date(msg.date).toLocaleString()}</span>
+                </div>
+                <p className="text-foreground/80 leading-relaxed whitespace-pre-wrap select-text">{msg.body}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmailDraftCard({
+  to: initialTo,
+  subject: initialSubject,
+  body: initialBody,
+  threadId,
+  toolCallId,
+  addToolResult
+}: {
+  to: string;
+  subject: string;
+  body: string;
+  threadId?: string | null;
+  toolCallId: string;
+  addToolResult: (args: { toolCallId: string; result: any }) => void;
+}) {
+  const [to, setTo] = useState(initialTo);
+  const [subject, setSubject] = useState(initialSubject);
+  const [body, setBody] = useState(initialBody);
+  const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [status, setStatus] = useState<'draft' | 'refining' | 'sending' | 'sent' | 'error'>('draft');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleRefine = async (tone: string) => {
+    setStatus('refining');
+    try {
+      const res = await fetch('/api/emails/refine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body, tone })
+      });
+      const data = await res.json();
+      if (data.refinedBody) {
+        setBody(data.refinedBody);
+        setStatus('draft');
+      } else {
+        throw new Error(data.error || 'Failed to refine email');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to refine email');
+      setStatus('error');
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        setAttachments(prev => [...prev, { filename: file.name, content: base64 }]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSend = async () => {
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/emails/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, body, attachments })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus('sent');
+        addToolResult({
+          toolCallId,
+          result: { success: true, message: 'Email sent successfully' }
+        });
+      } else {
+        throw new Error(data.error || 'Failed to send email');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to send email');
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4 shadow-lg w-full max-w-xl animate-in fade-in zoom-in-95 duration-200 my-3">
+      <div className="flex items-center justify-between pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Draft Email (Google Mail)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {status === 'sent' && <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1"><Check className="h-3.5 w-3.5" /> Sent</span>}
+          {status === 'sending' && <span className="text-xs text-muted-foreground flex items-center gap-1"><RefreshCw className="h-3 w-3 animate-spin" /> Sending...</span>}
+          {status === 'refining' && <span className="text-xs text-muted-foreground flex items-center gap-1"><RefreshCw className="h-3 w-3 animate-spin" /> Refining...</span>}
+        </div>
+      </div>
+
+      {threadId && <EmailThreadAccordion threadId={threadId} />}
+
+      <div className="space-y-3">
+        <div className="flex gap-2 items-center">
+          <span className="text-xs font-bold text-muted-foreground/60 w-16 uppercase">To:</span>
+          {isEditing ? (
+            <input
+              type="text"
+              value={to}
+              onChange={e => setTo(e.target.value)}
+              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            />
+          ) : (
+            <span className="text-sm font-semibold text-foreground">{to}</span>
+          )}
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <span className="text-xs font-bold text-muted-foreground/60 w-16 uppercase">Subject:</span>
+          {isEditing ? (
+            <input
+              type="text"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
+              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            />
+          ) : (
+            <span className="text-sm font-bold text-foreground">{subject}</span>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <span className="text-xs font-bold text-muted-foreground/60 uppercase block">Message Body:</span>
+          {isEditing ? (
+            <textarea
+              value={body}
+              onChange={e => setBody(e.target.value)}
+              rows={6}
+              className="w-full bg-background border border-border rounded-lg p-3 text-sm focus:outline-none"
+            />
+          ) : (
+            <div className="p-3 bg-muted/40 border border-border/40 rounded-xl text-sm whitespace-pre-wrap text-foreground/90 max-h-60 overflow-y-auto leading-relaxed select-text">
+              {body}
+            </div>
+          )}
+        </div>
+
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {attachments.map((att, i) => (
+              <div key={i} className="flex items-center gap-1.5 bg-muted border border-border/80 rounded-lg px-2.5 py-1 text-xs">
+                <Paperclip className="h-3 w-3 text-muted-foreground" />
+                <span className="max-w-[120px] truncate text-foreground/80">{att.filename}</span>
+                {status === 'draft' && (
+                  <button onClick={() => removeAttachment(i)} className="text-muted-foreground hover:text-destructive cursor-pointer ml-1">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {status === 'error' && (
+        <div className="p-3 bg-destructive/15 border border-destructive/20 rounded-xl text-xs text-destructive flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {status === 'draft' && (
+        <div className="pt-2 flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-muted/40 border border-border/40 rounded-xl">
+            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase px-2">Refine Tone:</span>
+            <button onClick={() => handleRefine('professional')} className="text-[11px] px-2 py-1 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition cursor-pointer flex items-center gap-1">👔 Prof</button>
+            <button onClick={() => handleRefine('friendly')} className="text-[11px] px-2 py-1 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition cursor-pointer flex items-center gap-1">😊 Friendly</button>
+            <button onClick={() => handleRefine('casual')} className="text-[11px] px-2 py-1 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition cursor-pointer flex items-center gap-1">⚡ Casual</button>
+            <button onClick={() => handleRefine('short')} className="text-[11px] px-2 py-1 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition cursor-pointer flex items-center gap-1">🤏 Short</button>
+            <button onClick={() => handleRefine('long')} className="text-[11px] px-2 py-1 rounded-lg border border-border bg-background hover:bg-muted text-foreground transition cursor-pointer flex items-center gap-1">📖 Long</button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer px-2 py-1 rounded-lg hover:bg-muted/50 transition">
+              <Paperclip className="h-3.5 w-3.5" />
+              <span>Attach File</span>
+              <input type="file" multiple onChange={handleFileChange} className="hidden" />
+            </label>
+
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setIsEditing(!isEditing)}
+                variant="outline"
+                className="text-xs py-1.5 h-8 border border-border rounded-xl cursor-pointer"
+              >
+                {isEditing ? 'Save Edit' : 'Edit Draft'}
+              </Button>
+              <Button
+                onClick={handleSend}
+                className="text-xs py-1.5 h-8 bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl cursor-pointer flex items-center gap-1.5 font-bold shadow-md"
+              >
+                <Send className="h-3.5 w-3.5" />
+                <span>Send Email</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CalendarDraftCard({
+  title: initialTitle,
+  startTime: initialStartTime,
+  endTime: initialEndTime,
+  attendees: initialAttendees,
+  toolCallId,
+  addToolResult
+}: {
+  title: string;
+  startTime: string;
+  endTime: string;
+  attendees: string[];
+  toolCallId: string;
+  addToolResult: (args: { toolCallId: string; result: any }) => void;
+}) {
+  const [title, setTitle] = useState(initialTitle);
+  const [startTime, setStartTime] = useState(initialStartTime);
+  const [endTime, setEndTime] = useState(initialEndTime);
+  const [attendees, setAttendees] = useState<string[]>(initialAttendees || []);
+  const [isEditing, setIsEditing] = useState(false);
+  const [status, setStatus] = useState<'checking' | 'ready' | 'creating' | 'created' | 'conflict' | 'error'>('checking');
+  const [currentStep, setCurrentStep] = useState(0); 
+  const [conflicts, setConflicts] = useState<any[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [refiningAlternative, setRefiningAlternative] = useState(false);
+
+  const steps = [
+    { text: "Parsing date and time range...", icon: Search },
+    { text: "Checking calendar availability...", icon: Calendar },
+    { text: "Analyzing conflicts...", icon: ShieldAlert }
+  ];
+
+  const runConflictValidation = async (start: string, end: string) => {
+    setStatus('checking');
+    setCurrentStep(0);
+    
+    for (let step = 0; step < 3; step++) {
+      setCurrentStep(step);
+      await new Promise(resolve => setTimeout(resolve, 600));
+    }
+    
+    setCurrentStep(3);
+
+    try {
+      const res = await fetch('/api/events/check-conflicts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startTime: start, endTime: end })
+      });
+      const data = await res.json();
+      if (data.hasConflict) {
+        setConflicts(data.conflicts);
+        setStatus('conflict');
+      } else {
+        setConflicts([]);
+        setStatus('ready');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Conflict check failed');
+      setStatus('error');
+    }
+  };
+
+  useEffect(() => {
+    runConflictValidation(startTime, endTime);
+  }, []);
+
+  const handleSuggestAlternative = async () => {
+    setRefiningAlternative(true);
+    try {
+      const res = await fetch('/api/events/alternative-slot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startTime, endTime })
+      });
+      const data = await res.json();
+      if (data.alternativeSlot) {
+        setStartTime(data.alternativeSlot.startTime);
+        setEndTime(data.alternativeSlot.endTime);
+        setRefiningAlternative(false);
+        runConflictValidation(data.alternativeSlot.startTime, data.alternativeSlot.endTime);
+      } else {
+        throw new Error(data.error || 'No alternative slots found');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to find alternative slot');
+      setStatus('error');
+      setRefiningAlternative(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    setStatus('creating');
+    try {
+      const res = await fetch('/api/events/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, startTime, endTime, attendees })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus('created');
+        addToolResult({
+          toolCallId,
+          result: { success: true, message: 'Event scheduled successfully' }
+        });
+      } else {
+        throw new Error(data.error || 'Failed to schedule event');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to schedule event');
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4 shadow-lg w-full max-w-xl animate-in fade-in zoom-in-95 duration-200 my-3 select-text">
+      <div className="flex items-center justify-between pb-2 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Draft Calendar Event (Google Calendar)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {status === 'created' && <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1"><Check className="h-3.5 w-3.5" /> Scheduled</span>}
+          {status === 'creating' && <span className="text-xs text-muted-foreground flex items-center gap-1"><RefreshCw className="h-3 w-3 animate-spin" /> Scheduling...</span>}
+        </div>
+      </div>
+
+      {status === 'checking' && (
+        <div className="p-6 border border-border/40 bg-muted/20 rounded-xl space-y-4">
+          <div className="space-y-3">
+            {steps.map((step, idx) => {
+              const Icon = step.icon;
+              const isPending = idx > currentStep;
+              const isActive = idx === currentStep;
+              const isCompleted = idx < currentStep;
+              return (
+                <div key={idx} className="flex items-center gap-3 transition-opacity duration-300">
+                  <div className={`h-5 w-5 rounded-full flex items-center justify-center border text-xs font-bold transition-all ${
+                    isCompleted ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" :
+                    isActive ? "bg-primary/10 border-primary/30 text-primary animate-pulse" :
+                    "bg-muted border-border text-muted-foreground/60"
+                  }`}>
+                    {isCompleted ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
+                  </div>
+                  <span className={`text-xs ${
+                    isCompleted ? "text-foreground/70 line-through decoration-muted-foreground/30" :
+                    isActive ? "text-foreground font-semibold" :
+                    "text-muted-foreground/60"
+                  }`}>{step.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {status !== 'checking' && (
+        <div className="space-y-3">
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold text-muted-foreground/60 w-20 uppercase">Title:</span>
+            {isEditing ? (
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+              />
+            ) : (
+              <span className="text-sm font-semibold text-foreground">{title}</span>
+            )}
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold text-muted-foreground/60 w-20 uppercase">Start:</span>
+            {isEditing ? (
+              <input
+                type="datetime-local"
+                value={startTime.slice(0, 16)}
+                onChange={e => setStartTime(new Date(e.target.value).toISOString())}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+              />
+            ) : (
+              <span className="text-sm text-foreground">{new Date(startTime).toLocaleString()}</span>
+            )}
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <span className="text-xs font-bold text-muted-foreground/60 w-20 uppercase">End:</span>
+            {isEditing ? (
+              <input
+                type="datetime-local"
+                value={endTime.slice(0, 16)}
+                onChange={e => setEndTime(new Date(e.target.value).toISOString())}
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+              />
+            ) : (
+              <span className="text-sm text-foreground">{new Date(endTime).toLocaleString()}</span>
+            )}
+          </div>
+
+          {attendees && attendees.length > 0 && (
+            <div className="flex gap-2 items-start">
+              <span className="text-xs font-bold text-muted-foreground/60 w-20 uppercase mt-0.5">Attendees:</span>
+              <div className="flex flex-wrap gap-1.5 flex-1">
+                {attendees.map((email, idx) => (
+                  <span key={idx} className="bg-muted border border-border/80 rounded-lg px-2 py-0.5 text-xs text-foreground/80">{email}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {status === 'conflict' && (
+        <div className="p-4 border border-destructive/20 bg-destructive/10 rounded-xl space-y-3 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex gap-2 text-destructive">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-xs font-bold">⚠️ Calendar Conflict Detected</p>
+              <p className="text-xs text-destructive/80">The proposed slot overlaps with these events in your schedule:</p>
+            </div>
+          </div>
+          <div className="space-y-1.5 pl-6">
+            {conflicts.map((conf, idx) => (
+              <div key={idx} className="text-xs text-foreground/80 leading-relaxed border-l-2 border-destructive/50 pl-2">
+                <strong>{conf.title}</strong>
+                <span className="text-muted-foreground text-[10px] block">
+                  {new Date(conf.startTime).toLocaleTimeString()} - {new Date(conf.endTime).toLocaleTimeString()}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-2 flex items-center justify-between">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-xs text-muted-foreground hover:text-foreground font-semibold underline cursor-pointer"
+            >
+              Edit proposed time manually
+            </button>
+            <Button
+              onClick={handleSuggestAlternative}
+              disabled={refiningAlternative}
+              className="text-xs py-1.5 h-8 border border-border bg-background hover:bg-muted text-foreground rounded-xl flex items-center gap-1 cursor-pointer"
+            >
+              {refiningAlternative ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-primary" />}
+              <span>Find Alternative Slot</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {status === 'ready' && (
+        <div className="p-3 border border-emerald-500/20 bg-emerald-500/10 rounded-xl flex items-center gap-2 text-emerald-500 text-xs font-bold animate-in slide-in-from-top-2 duration-300">
+          <Check className="h-4 w-4 shrink-0" />
+          <span>✓ Time Slot is Available! No conflicts found.</span>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="p-3 bg-destructive/15 border border-destructive/20 rounded-xl text-xs text-destructive flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {(status === 'ready' || isEditing || status === 'conflict') && (
+        <div className="pt-2 flex items-center justify-end gap-2">
+          <Button
+            onClick={() => {
+              if (isEditing) {
+                setIsEditing(false);
+                runConflictValidation(startTime, endTime);
+              } else {
+                setIsEditing(true);
+              }
+            }}
+            variant="outline"
+            className="text-xs py-1.5 h-8 border border-border rounded-xl cursor-pointer"
+          >
+            {isEditing ? 'Save & Recheck' : 'Edit Event'}
+          </Button>
+          {!isEditing && status !== 'conflict' && status !== 'created' && (
+            <Button
+              onClick={handleCreate}
+              className="text-xs py-1.5 h-8 bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl cursor-pointer flex items-center gap-1 font-bold shadow-md"
+            >
+              <span>Confirm & Schedule</span>
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function WorkspaceClient({
   userId,
   userEmail,
