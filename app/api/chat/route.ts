@@ -285,7 +285,6 @@ Example fallback pattern:
 Always write return statements inside your "run_script" code.`,
     messages: convertClientMessagesToModelMessages(messages),
     tools: aiTools,
-    maxSteps: 5,
     // Stop immediately after a draft card tool completes so the model
     // doesn't emit a follow-up text step that hides the interactive card.
     stopWhen: ({ steps }) => {
