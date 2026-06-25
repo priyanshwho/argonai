@@ -163,10 +163,10 @@ export function EmailDraftCard({
               type="text"
               value={to}
               onChange={e => setTo(e.target.value)}
-              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
             />
           ) : (
-            <span className="text-sm font-semibold text-foreground">{to}</span>
+            <span className="text-base font-semibold text-foreground">{to}</span>
           )}
         </div>
 
@@ -177,10 +177,10 @@ export function EmailDraftCard({
               type="text"
               value={subject}
               onChange={e => setSubject(e.target.value)}
-              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+              className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
             />
           ) : (
-            <span className="text-sm font-bold text-foreground">{subject}</span>
+            <span className="text-base font-bold text-foreground">{subject}</span>
           )}
         </div>
 
@@ -191,10 +191,10 @@ export function EmailDraftCard({
               value={body}
               onChange={e => setBody(e.target.value)}
               rows={6}
-              className="w-full bg-background border border-border rounded-lg p-3 text-sm focus:outline-none"
+              className="w-full bg-background border border-border rounded-lg p-3 text-base focus:outline-none"
             />
           ) : (
-            <div className="p-3 bg-muted/40 border border-border/40 rounded-xl text-sm whitespace-pre-wrap text-foreground/90 max-h-60 overflow-y-auto leading-relaxed select-text">
+            <div className="p-3 bg-muted/40 border border-border/40 rounded-xl text-base whitespace-pre-wrap text-foreground/90 max-h-60 overflow-y-auto leading-relaxed select-text">
               {body}
             </div>
           )}

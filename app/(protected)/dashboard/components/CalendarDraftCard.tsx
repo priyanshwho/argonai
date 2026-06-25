@@ -224,10 +224,10 @@ export function CalendarDraftCard({
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
               />
             ) : (
-              <span className="text-sm font-semibold text-foreground">{title}</span>
+              <span className="text-base font-semibold text-foreground">{title}</span>
             )}
           </div>
 
@@ -238,10 +238,10 @@ export function CalendarDraftCard({
                 type="datetime-local"
                 value={startTime.slice(0, 16)}
                 onChange={e => setStartTime(new Date(e.target.value).toISOString())}
-                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+                className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
               />
             ) : (
-              <span className="text-sm text-foreground">{new Date(startTime).toLocaleString()}</span>
+              <span className="text-base text-foreground">{new Date(startTime).toLocaleString()}</span>
             )}
           </div>
 
