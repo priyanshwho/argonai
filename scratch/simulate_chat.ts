@@ -10,19 +10,19 @@ import { getGoogleModel } from '../lib/ai';
 import { getCorsairAiTools } from '../lib/ai-tools';
 import { z } from 'zod';
 
-function convertClientMessagesToCoreMessages(messages: any[]): any[] {
-  const coreMessages: any[] = [];
+function convertClientMessagesToModelMessages(messages: any[]): any[] {
+  const modelMessages: any[] = [];
 
   for (const m of messages) {
     if (m.role === 'user') {
-      coreMessages.push({ role: 'user', content: m.content });
+      modelMessages.push({ role: 'user', content: m.content });
     } else if (m.role === 'system') {
-      coreMessages.push({ role: 'system', content: m.content });
+      modelMessages.push({ role: 'system', content: m.content });
     } else if (m.role === 'assistant') {
       const hasToolCalls = m.toolInvocations && m.toolInvocations.length > 0;
       
       if (!hasToolCalls) {
-        coreMessages.push({ role: 'assistant', content: m.content || '' });
+        modelMessages.push({ role: 'assistant', content: m.content || '' });
       } else {
         const assistantContent: any[] = [];
         if (m.content) {
@@ -34,11 +34,11 @@ function convertClientMessagesToCoreMessages(messages: any[]): any[] {
             type: 'tool-call',
             toolCallId: call.toolCallId,
             toolName: call.toolName,
-            args: call.args
+            input: call.args // Mapped to 'input' in model messages
           });
         }
         
-        coreMessages.push({ role: 'assistant', content: assistantContent });
+        modelMessages.push({ role: 'assistant', content: assistantContent });
         
         const toolResults = m.toolInvocations
           .filter((t: any) => t.state === 'result' || t.result !== undefined)
@@ -46,37 +46,27 @@ function convertClientMessagesToCoreMessages(messages: any[]): any[] {
             type: 'tool-result',
             toolCallId: t.toolCallId,
             toolName: t.toolName,
-            result: t.result
+            input: t.args,
+            output: {
+              type: 'json',
+              value: t.result
+            }
           }));
           
         if (toolResults.length > 0) {
-          coreMessages.push({ role: 'tool', content: toolResults });
+          modelMessages.push({ role: 'tool', content: toolResults });
         }
       }
     }
   }
 
-  return coreMessages;
+  return modelMessages;
 }
 
 async function main() {
-  // Dynamically import prisma to ensure the adapter pool connects correctly with env variables loaded
-  const { prisma } = await import('../lib/db');
-
-  const convId = 'chat-1782369935129';
   const userId = 'JYAmUlIotAqAFMpxxZNXkduxnh4EhmQA'; // Edu Sphere
 
   try {
-    const dbMessages = await prisma.message.findMany({
-      where: { conversationId: convId },
-      orderBy: { timestamp: 'asc' }
-    });
-
-    console.log(`Found ${dbMessages.length} messages in database.`);
-    
-    // Map database messages to client-side format
-    // Note: Since DB doesn't store toolInvocations directly, we simulate the client-side messages.
-    // Wait! Let's mock a message history that actually has some toolCalls to test.
     const clientMessages = [
       { role: 'user', content: 'check if something is importnt' },
       { role: 'assistant', content: 'Looking at your recent emails, the most important one appears to be from Priyanshu Anand regarding a "Meeting tomorrow" at 1:00 PM. Would you like me to look into your calendar to see your schedule for tomorrow, or draft a reply to that email for you?' },
@@ -111,11 +101,11 @@ async function main() {
       { role: 'user', content: 'mail priyanshu that to shift the meeting to 26th at 6' }
     ];
 
-    const coreMessages = convertClientMessagesToCoreMessages(clientMessages);
-    console.log('\nConverted Core Messages:');
-    console.log(JSON.stringify(coreMessages, null, 2));
+    const modelMessages = convertClientMessagesToModelMessages(clientMessages);
+    console.log('\nConverted Model Messages:');
+    console.log(JSON.stringify(modelMessages, null, 2));
 
-    console.log('\nRunning streamText simulation...');
+    console.log('\nRunning streamText simulation with ModelMessages...');
     const model = await getGoogleModel();
     const rawAiTools = getCorsairAiTools(userId);
     const aiTools = {
@@ -145,7 +135,7 @@ async function main() {
     const result = await streamText({
       model,
       system: 'You are ArgonAI, an AI-powered workspace assistant. CRITICAL: When the user wants to draft or send an email, you MUST call the "draft_email" tool to present a draft card. When the user wants to schedule, create, or book a calendar event, you MUST call the "draft_calendar_event" tool to present the event details.',
-      messages: coreMessages,
+      messages: modelMessages,
       tools: aiTools,
       stopWhen: stepCountIs(10)
     });
@@ -158,8 +148,6 @@ async function main() {
 
   } catch (err: any) {
     console.error('Error during simulation:', err.stack || err.message);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, tool, convertToModelMessages } from 'ai';
+import { streamText, stepCountIs, tool } from 'ai';
 import { z } from 'zod';
 import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
@@ -17,6 +17,59 @@ function getMessageText(message: any): string {
       .join('');
   }
   return message.content || '';
+}
+
+function convertClientMessagesToModelMessages(messages: any[]): any[] {
+  const modelMessages: any[] = [];
+
+  for (const m of messages) {
+    if (m.role === 'user') {
+      modelMessages.push({ role: 'user', content: m.content });
+    } else if (m.role === 'system') {
+      modelMessages.push({ role: 'system', content: m.content });
+    } else if (m.role === 'assistant') {
+      const hasToolCalls = m.toolInvocations && m.toolInvocations.length > 0;
+      
+      if (!hasToolCalls) {
+        modelMessages.push({ role: 'assistant', content: m.content || '' });
+      } else {
+        const assistantContent: any[] = [];
+        if (m.content) {
+          assistantContent.push({ type: 'text', text: m.content });
+        }
+        
+        for (const call of m.toolInvocations) {
+          assistantContent.push({
+            type: 'tool-call',
+            toolCallId: call.toolCallId,
+            toolName: call.toolName,
+            input: call.args
+          });
+        }
+        
+        modelMessages.push({ role: 'assistant', content: assistantContent });
+        
+        const toolResults = m.toolInvocations
+          .filter((t: any) => t.state === 'result' || t.result !== undefined)
+          .map((t: any) => ({
+            type: 'tool-result',
+            toolCallId: t.toolCallId,
+            toolName: t.toolName,
+            input: t.args,
+            output: {
+              type: 'json',
+              value: t.result
+            }
+          }));
+          
+        if (toolResults.length > 0) {
+          modelMessages.push({ role: 'tool', content: toolResults });
+        }
+      }
+    }
+  }
+
+  return modelMessages;
 }
 
 export async function POST(req: Request) {
@@ -210,7 +263,7 @@ Example fallback pattern:
    return result;
 
 Always write return statements inside your "run_script" code.`,
-    messages: await convertToModelMessages(messages),
+    messages: convertClientMessagesToModelMessages(messages),
     tools: aiTools,
     stopWhen: stepCountIs(10),
     async onFinish({ text }) {
