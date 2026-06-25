@@ -1242,7 +1242,7 @@ export function WorkspaceClient({
           ) : (
             <div className={`${compact ? "w-full" : "max-w-2xl mx-auto"} space-y-4`}>
               {messages
-                .filter(m => getMessageText(m).trim() !== "" || m.role === "user")
+                .filter(m => getMessageText(m).trim() !== "" || m.role === "user" || (m as any).toolInvocations?.length > 0)
                 .map((m) => (
                 <div
                   key={m.id}
@@ -1350,7 +1350,7 @@ export function WorkspaceClient({
               ))}
               {isLoading && (
                 (() => {
-                  const visibleMessages = messages.filter(m => getMessageText(m).trim() !== "" || m.role === "user");
+                  const visibleMessages = messages.filter(m => getMessageText(m).trim() !== "" || m.role === "user" || (m as any).toolInvocations?.length > 0);
                   const lastVisible = visibleMessages[visibleMessages.length - 1];
                   return !lastVisible || lastVisible.role !== "assistant";
                 })()

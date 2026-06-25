@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, tool } from 'ai';
+import { streamText, stepCountIs, tool, convertToModelMessages } from 'ai';
 import { z } from 'zod';
 import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
@@ -110,10 +110,6 @@ export async function POST(req: Request) {
       }
     })
   };
-  const coreMessages = (messages || []).map((m: any) => ({
-    role: m.role,
-    content: getMessageText(m),
-  }));
 
   const model = await getGoogleModel();
 
@@ -214,7 +210,7 @@ Example fallback pattern:
    return result;
 
 Always write return statements inside your "run_script" code.`,
-    messages: coreMessages,
+    messages: await convertToModelMessages(messages),
     tools: aiTools,
     stopWhen: stepCountIs(10),
     async onFinish({ text }) {
