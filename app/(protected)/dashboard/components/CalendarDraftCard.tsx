@@ -112,9 +112,7 @@ export function CalendarDraftCard({
         setStatus('created');
         addToolResult({
           toolCallId,
-          tool: 'draft_calendar_event',
-          state: 'output-available',
-          output: { success: true, message: 'Event scheduled successfully' }
+          result: { success: true, message: 'Event scheduled successfully' }
         });
       } else {
         throw new Error(data.error || 'Failed to schedule event');

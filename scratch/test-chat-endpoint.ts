@@ -73,10 +73,22 @@ async function main() {
 
   console.log('Successfully loaded model and tools. Testing streamText call with empty/simple messages...');
   
+  const systemPrompt = `You are ArgonAI, an AI-powered workspace assistant.
+You manage the user's Gmail and Google Calendar.
+You can read their emails, draft responses, find calendar availability, and schedule meetings.
+Be concise, helpful, and professional.
+
+CRITICAL: When the user wants to write an email, draft an email, reply to an email, or send an email, you MUST call the "draft_email" tool to present a draft card to the user. Do NOT write the email subject, recipient, or body as plain text in your chat response. You must always invoke the "draft_email" tool so that the user receives an interactive card.
+When the user wants to schedule, create, or book a calendar event, you MUST call the "draft_calendar_event" tool to present the event details to the user for approval. Do NOT write the event details as plain text in your chat response. You must always invoke the "draft_calendar_event" tool to render the animated visual conflict checker card.
+Do NOT execute send or event creation via "run_script". All writes must go through the user-approved "draft_email" and "draft_calendar_event" cards.`;
+
   const result = await streamText({
     model,
-    system: 'You are ArgonAI, an AI-powered workspace assistant.',
-    messages: [{ role: 'user', content: 'hello' }],
+    system: systemPrompt,
+    messages: [{ 
+      role: 'user', 
+      content: 'i want to send a mail to priyanshu82711@gmail.com that i dont want to come to your stupic meeting tommoroow i m setting schdule to 26june' 
+    }],
     tools: aiTools,
     stopWhen: stepCountIs(10)
   });
@@ -84,6 +96,12 @@ async function main() {
   console.log('Stream response:');
   for await (const chunk of result.textStream) {
     process.stdout.write(chunk);
+  }
+  
+  const steps = await result.steps;
+  console.log('\nSteps run:', steps.length);
+  for (const step of steps) {
+    console.log('  Tool calls:', JSON.stringify(step.toolCalls));
   }
   console.log('\nDone!');
 }

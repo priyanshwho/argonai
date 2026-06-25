@@ -82,9 +82,7 @@ export function EmailDraftCard({
         setStatus('sent');
         addToolResult({
           toolCallId,
-          tool: 'draft_email',
-          state: 'output-available',
-          output: { success: true, message: 'Email sent successfully' }
+          result: { success: true, message: 'Email sent successfully' }
         });
       } else {
         throw new Error(data.error || 'Failed to send email');
@@ -94,6 +92,7 @@ export function EmailDraftCard({
       setStatus('error');
     }
   };
+
 
   return (
     <div className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-md space-y-4 shadow-lg w-full max-w-xl animate-in fade-in zoom-in-95 duration-200 my-3">

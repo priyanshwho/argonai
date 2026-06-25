@@ -1,4 +1,4 @@
-import { streamText, stepCountIs, tool } from 'ai';
+import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { getGoogleModel } from '@/lib/ai';
 import { getCorsairAiTools } from '@/lib/ai-tools';
@@ -285,7 +285,18 @@ Example fallback pattern:
 Always write return statements inside your "run_script" code.`,
     messages: convertClientMessagesToModelMessages(messages),
     tools: aiTools,
-    stopWhen: stepCountIs(10),
+    maxSteps: 5,
+    // Stop immediately after a draft card tool completes so the model
+    // doesn't emit a follow-up text step that hides the interactive card.
+    stopWhen: ({ steps }) => {
+      const lastStep = steps[steps.length - 1];
+      return (
+        lastStep?.toolResults?.some(
+          (r: any) =>
+            r.toolName === 'draft_email' || r.toolName === 'draft_calendar_event'
+        ) ?? false
+      );
+    },
     async onFinish({ text, toolCalls, toolResults }) {
       if (conversationId) {
         let contentToSave = text;
