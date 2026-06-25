@@ -309,7 +309,7 @@ export function ChatPanel({
                   </div>
 
                   {/* Bubble */}
-                  <div className={`rounded-xl px-3 py-2 max-w-[90%] text-xs leading-relaxed ${
+                  <div className={`rounded-xl px-4 py-2.5 max-w-[90%] text-base leading-relaxed ${
                     m.role === "user"
                       ? "bg-primary/90 text-primary-foreground font-medium animate-in fade-in slide-in-from-bottom-2 duration-300"
                       : "bg-card border border-border/50 text-foreground animate-in fade-in slide-in-from-bottom-2 duration-300"
@@ -400,7 +400,7 @@ export function ChatPanel({
                             ) {
                               return (
                                 <div key={toolCallId} className="mt-3 space-y-2 w-full text-left">
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                  <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1">
                                     Found Emails:
                                   </p>
                                   {list.map((email: any, idx: number) => {
@@ -411,17 +411,17 @@ export function ChatPanel({
                                     return (
                                       <div key={idx} className="p-3 rounded-xl border border-border/85 bg-card/45 hover:bg-card/90 transition flex flex-col gap-2 shadow-sm select-text">
                                         <div>
-                                          <span className="text-[9px] font-bold text-muted-foreground/60 uppercase block">Sender</span>
-                                          <span className="text-xs font-bold text-foreground">{sender}</span>
+                                          <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Sender</span>
+                                          <span className="text-sm font-bold text-foreground">{sender}</span>
                                         </div>
                                         <div>
-                                          <span className="text-[9px] font-bold text-muted-foreground/60 uppercase block">Subject</span>
-                                          <span className="text-xs font-extrabold text-foreground">{subject}</span>
+                                          <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Subject</span>
+                                          <span className="text-sm font-extrabold text-foreground">{subject}</span>
                                         </div>
                                         {snippet && (
                                           <div>
-                                            <span className="text-[9px] font-bold text-muted-foreground/60 uppercase block">Snippet</span>
-                                            <span className="text-xs text-muted-foreground leading-relaxed">{snippet}</span>
+                                            <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Snippet</span>
+                                            <span className="text-sm text-muted-foreground leading-relaxed">{snippet}</span>
                                           </div>
                                         )}
                                         <div className="flex justify-end pt-1">
@@ -463,7 +463,7 @@ export function ChatPanel({
         {selectedFiles.length > 0 && (
           <div className="w-full max-w-2xl mx-auto flex flex-wrap gap-1.5 mb-2 px-1 animate-in fade-in duration-200">
             {selectedFiles.map((file, idx) => (
-              <div key={idx} className="flex items-center gap-1.5 bg-secondary border border-border rounded-lg px-2 py-1 text-[10px]">
+              <div key={idx} className="flex items-center gap-1.5 bg-secondary border border-border rounded-lg px-2 py-1 text-xs">
                 <Paperclip className="h-2.5 w-2.5 text-muted-foreground" />
                 <span className="max-w-[150px] truncate text-foreground">{file.name}</span>
                 <button type="button" onClick={() => removeFile(idx)} className="text-muted-foreground hover:text-destructive cursor-pointer ml-1 font-bold">×</button>
@@ -481,7 +481,7 @@ export function ChatPanel({
             placeholder={compact ? "Ask Argon assistant..." : "Ask AI assistant to search mail or book meetings..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="w-full bg-transparent text-xs text-foreground placeholder-muted-foreground py-2 pl-3 pr-28 focus:outline-none focus:ring-0"
+            className="w-full bg-transparent text-base text-foreground placeholder-muted-foreground py-2 pl-3 pr-28 focus:outline-none focus:ring-0"
           />
           <div className="absolute right-2 flex items-center gap-1.5 z-10">
             {/* Attach */}
