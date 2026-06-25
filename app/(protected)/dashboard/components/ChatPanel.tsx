@@ -88,7 +88,7 @@ function ThinkingSteps({ messages }: { messages: any[] }) {
       <div className="p-4 rounded-2xl border border-border/50 bg-card/45 backdrop-blur-md space-y-3.5 shadow-lg w-full max-w-sm">
         <div className="flex items-center gap-1.5 pb-1.5 border-b border-border/40">
           <RefreshCw className="h-3 w-3 animate-spin text-primary" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/90">
+          <span className="text-xs font-bold uppercase tracking-wider text-foreground/90">
             Argon AI is working...
           </span>
         </div>
@@ -107,7 +107,7 @@ function ThinkingSteps({ messages }: { messages: any[] }) {
                   {step.status === "completed" ? <Check className="h-2.5 w-2.5" /> :
                    step.status === "active" ? <RefreshCw className="h-2 w-2 animate-spin" /> : null}
                 </div>
-                <span className={`text-[11px] ${
+                <span className={`text-xs ${
                   step.status === "completed"
                     ? "text-muted-foreground line-through decoration-muted-foreground/30"
                     : step.status === "active"
@@ -243,8 +243,8 @@ export function ChatPanel({
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-foreground">Argon AI Assistant</h2>
-                <p className="text-xs text-muted-foreground mt-1">
+                <h2 className="text-xl font-bold text-foreground">Argon AI Assistant</h2>
+                <p className="text-base text-muted-foreground mt-1">
                   Your AI-powered Gmail & Calendar command center
                 </p>
               </div>
@@ -267,18 +267,18 @@ export function ChatPanel({
                       <span className="text-lg">{item.icon}</span>
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <p className="text-xs font-semibold text-foreground">{item.title}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
+                    <p className="text-base font-bold text-foreground">{item.title}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
                   </button>
                 ))}
               </div>
             )}
 
             <div className="text-center space-y-1.5 max-w-xs">
-              <p className="text-[10px] text-muted-foreground/70 font-bold uppercase tracking-wider">
+              <p className="text-sm text-muted-foreground/70 font-semibold uppercase tracking-wider">
                 Operations Guide
               </p>
-              <p className="text-[10px] text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Query your cached correspondence, draft response text, check calendar conflicts,
                 or trigger direct event creation via command parameters.
               </p>
@@ -321,7 +321,7 @@ export function ChatPanel({
                         {Array.isArray(m.parts) && m.parts.some((p: any) => p.type === "file") && (
                           <div className="flex flex-wrap gap-1.5 pt-1.5">
                             {m.parts.filter((p: any) => p.type === "file").map((p: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-1 bg-primary-foreground/15 border border-primary-foreground/20 rounded px-1.5 py-0.5 text-[9px] text-primary-foreground/90">
+                              <div key={idx} className="flex items-center gap-1 bg-primary-foreground/15 border border-primary-foreground/20 rounded px-1.5 py-0.5 text-xs text-primary-foreground/90">
                                 <Paperclip className="h-2.5 w-2.5" />
                                 <span>{p.filename}</span>
                               </div>
@@ -400,7 +400,7 @@ export function ChatPanel({
                             ) {
                               return (
                                 <div key={toolCallId} className="mt-3 space-y-2 w-full text-left">
-                                  <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                                  <p className="text-base font-bold uppercase tracking-wider text-muted-foreground mb-1">
                                     Found Emails:
                                   </p>
                                   {list.map((email: any, idx: number) => {
@@ -411,24 +411,24 @@ export function ChatPanel({
                                     return (
                                       <div key={idx} className="p-3 rounded-xl border border-border/85 bg-card/45 hover:bg-card/90 transition flex flex-col gap-2 shadow-sm select-text">
                                         <div>
-                                          <span className="text-xs font-bold text-muted-foreground/60 uppercase block">Sender</span>
-                                          <span className="text-sm font-bold text-foreground">{sender}</span>
+                                          <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Sender</span>
+                                          <span className="text-base font-bold text-foreground">{sender}</span>
                                         </div>
                                         <div>
-                                          <span className="text-xs font-bold text-muted-foreground/60 uppercase block">Subject</span>
-                                          <span className="text-sm font-extrabold text-foreground">{subject}</span>
+                                          <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Subject</span>
+                                          <span className="text-base font-extrabold text-foreground">{subject}</span>
                                         </div>
                                         {snippet && (
                                           <div>
-                                            <span className="text-xs font-bold text-muted-foreground/60 uppercase block">Snippet</span>
-                                            <span className="text-sm text-muted-foreground leading-relaxed">{snippet}</span>
+                                            <span className="text-sm font-bold text-muted-foreground/60 uppercase block">Snippet</span>
+                                            <span className="text-base text-muted-foreground leading-relaxed">{snippet}</span>
                                           </div>
                                         )}
                                         <div className="flex justify-end pt-1">
                                           <Button
                                             size="sm"
                                             onClick={() => setInput(`Reply to email: "${subject}" from "${sender}" (threadId: ${threadId})`)}
-                                            className="text-xs h-6 px-2 bg-secondary hover:bg-muted text-secondary-foreground border border-border rounded-lg flex items-center gap-1 cursor-pointer"
+                                            className="text-sm h-7 px-2.5 bg-secondary hover:bg-muted text-secondary-foreground border border-border rounded-lg flex items-center gap-1 cursor-pointer"
                                           >
                                             <span>Reply via AI</span>
                                           </Button>

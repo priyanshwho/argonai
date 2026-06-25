@@ -24,7 +24,7 @@ export function SearchResultsPanel({
       </h2>
 
       {searchLoading ? (
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-12">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-12">
           <RefreshCw className="h-4 w-4 animate-spin" />
           <span>Parsing search criteria...</span>
         </div>
@@ -32,7 +32,7 @@ export function SearchResultsPanel({
         (searchResults.emails.length === 0 && searchResults.events.length === 0) ? (
         <div className="text-center py-12 space-y-2">
           <ShieldAlert className="h-9 w-9 text-muted-foreground/70 mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">
+          <p className="text-sm text-muted-foreground font-medium">
             No matching emails or meetings registered in cache database.
           </p>
         </div>
@@ -40,7 +40,7 @@ export function SearchResultsPanel({
         <div className="space-y-6">
           {searchResults.emails.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 Emails
               </h3>
               <div className="divide-y divide-border border border-border rounded-xl overflow-hidden bg-muted/15">
@@ -51,15 +51,15 @@ export function SearchResultsPanel({
                     className="w-full p-4 flex flex-col gap-1 items-start text-left hover:bg-muted/60 transition-colors"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="text-sm font-bold text-foreground/90">{email.sender}</span>
-                      <span className="text-xs text-muted-foreground/60">
+                      <span className="text-base font-bold text-foreground/90">{email.sender}</span>
+                      <span className="text-sm text-muted-foreground/60">
                         {new Date(email.receivedAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <span className="text-sm text-foreground font-semibold line-clamp-1">
+                    <span className="text-base text-foreground font-semibold line-clamp-1">
                       {email.subject}
                     </span>
-                    <span className="text-xs text-muted-foreground/85 line-clamp-1">
+                    <span className="text-sm text-muted-foreground/85 line-clamp-1">
                       {email.snippet}
                     </span>
                   </button>
@@ -70,7 +70,7 @@ export function SearchResultsPanel({
 
           {searchResults.events.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 Meetings
               </h3>
               <div className="divide-y divide-border border border-border rounded-xl overflow-hidden bg-muted/15">
@@ -81,12 +81,12 @@ export function SearchResultsPanel({
                     className="w-full p-4 flex flex-col gap-1 items-start text-left hover:bg-muted/60 transition-colors"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="text-sm font-bold text-foreground/90">{event.title}</span>
-                      <span className="text-xs text-muted-foreground/60">
+                      <span className="text-base font-bold text-foreground/90">{event.title}</span>
+                      <span className="text-sm text-muted-foreground/60">
                         {new Date(event.startTime).toLocaleDateString()}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground/80">
+                    <span className="text-sm text-muted-foreground/80">
                       Time: {new Date(event.startTime).toLocaleTimeString()} -{" "}
                       {new Date(event.endTime).toLocaleTimeString()}
                     </span>

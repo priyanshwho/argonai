@@ -73,15 +73,15 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
       {/* Calendar Header with Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div className="space-y-1">
-          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Calendar className="h-4.5 w-4.5 text-primary" />
             Calendar Board
           </h2>
-          <p className="text-xs text-muted-foreground/75">
+          <p className="text-sm text-muted-foreground/75">
             Scroll dates horizontally to check availability and conflict dots.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-muted/40 border border-border/60 rounded-xl p-1 shrink-0 self-start sm:self-auto shadow-sm">
+        <div className="flex items-center gap-2 bg-muted/40 border border-border/60 rounded-xl p-1.5 shrink-0 self-start sm:self-auto shadow-sm">
           <Button
             variant="ghost"
             size="icon"
@@ -93,7 +93,7 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
           </Button>
           <button
             onClick={handleGoToday}
-            className="px-2 py-0.5 text-[11px] font-bold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
+            className="px-2.5 py-1 text-xs font-bold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
           >
             Today
           </button>
@@ -111,7 +111,7 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
 
       {/* Horizontally Scrollable Date Picker Strip */}
       <div className="shrink-0 flex flex-col gap-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-1">
+        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-1">
           Selected Range: <span className="text-foreground/90 normal-case">{formattedWeekRange}</span>
         </div>
         <div className="flex items-center gap-3 overflow-x-auto py-2.5 px-1 scrollbar-none select-none border-b border-border/40">
@@ -134,10 +134,10 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
                     : "bg-card border-border/50 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                 }`}
               >
-                <span className={`text-[9px] uppercase tracking-wider ${isSelected ? "opacity-90" : "opacity-60"}`}>
+                <span className={`text-xs uppercase tracking-wider ${isSelected ? "opacity-90" : "opacity-60"}`}>
                   {dayName}
                 </span>
-                <span className="text-base font-extrabold leading-none mt-1">{dayNum}</span>
+                <span className="text-lg font-extrabold leading-none mt-1">{dayNum}</span>
 
                 {/* Event Dot Indicator */}
                 {hasEvents && (
@@ -156,7 +156,7 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
       {/* Daily Agenda Events Section */}
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
         {eventsLoading ? (
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-24">
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-24">
             <RefreshCw className="h-4 w-4 animate-spin" />
             <span>Loading calendar events...</span>
           </div>
@@ -166,15 +166,15 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
               <CalendarDays className="h-6 w-6 text-muted-foreground/60" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-bold text-foreground">No events scheduled</p>
-              <p className="text-xs text-muted-foreground/80 leading-relaxed">
+              <p className="text-base font-bold text-foreground">No events scheduled</p>
+              <p className="text-sm text-muted-foreground/80 leading-relaxed">
                 You have a clear schedule for {selectedDate.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}.
               </p>
             </div>
           </div>
         ) : (
           <div className="space-y-3.5 max-w-xl mx-auto">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-1.5">
               Schedule for {selectedDate.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}
             </div>
             <div className="space-y-2.5">
@@ -196,30 +196,30 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
                           : "bg-muted/60 border-border text-foreground"
                       }`}
                     >
-                      <span className="text-[10px] font-bold uppercase opacity-70">
+                      <span className="text-xs font-bold uppercase opacity-70">
                         {start.toLocaleDateString([], { month: "short" })}
                       </span>
-                      <span className="text-lg font-extrabold leading-none">{start.getDate()}</span>
+                      <span className="text-xl font-extrabold leading-none">{start.getDate()}</span>
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
-                      <h4 className="text-sm font-bold text-foreground leading-tight truncate">
+                      <h4 className="text-base font-bold text-foreground leading-tight truncate">
                         {event.title}
                       </h4>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} –{" "}
                         {end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </p>
                       {guests.length > 0 && (
                         <div className="flex items-center gap-1.5 pt-0.5">
-                          <UserCheck className="h-3 w-3 text-muted-foreground/60" />
-                          <span className="text-[10px] text-muted-foreground/60 truncate">
+                          <UserCheck className="h-3.5 w-3.5 text-muted-foreground/60" />
+                          <span className="text-xs text-muted-foreground/60 truncate">
                             {guests.join(", ")}
                           </span>
                         </div>
                       )}
                     </div>
                     <div
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 border ${
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 border ${
                         isToday
                           ? "bg-primary/10 text-primary border-primary/30"
                           : "bg-muted text-muted-foreground border-border/40"

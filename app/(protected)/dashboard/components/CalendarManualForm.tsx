@@ -37,8 +37,8 @@ export function CalendarManualForm({
     <div className="flex-1 overflow-y-auto p-5 space-y-6 select-text">
       <div className="flex items-center justify-between pb-3 border-b border-border/50">
         <div className="space-y-0.5">
-          <h3 className="text-xs font-bold text-foreground font-serif">Manual Scheduler</h3>
-          <p className="text-[10px] text-muted-foreground/60">
+          <h3 className="text-sm font-bold text-foreground font-serif">Manual Scheduler</h3>
+          <p className="text-xs text-muted-foreground/60">
             Schedule Google calendar events manually.
           </p>
         </div>
@@ -47,16 +47,16 @@ export function CalendarManualForm({
           variant="ghost"
           size="sm"
           onClick={onSwitchToAssistant}
-          className="text-[10px] h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer flex items-center gap-1"
+          className="text-xs h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer flex items-center gap-1"
         >
           <Bot className="h-3.5 w-3.5 text-primary animate-pulse" />
           <span>Use Assistant</span>
         </Button>
       </div>
 
-      <form onSubmit={onSubmit} className="p-4 rounded-xl border border-border bg-card/25 space-y-4 text-xs">
+      <form onSubmit={onSubmit} className="p-4 rounded-xl border border-border bg-card/25 space-y-4 text-sm">
         <div className="space-y-1">
-          <label className="text-[10px] text-muted-foreground/85 font-bold uppercase block">
+          <label className="text-xs text-muted-foreground/85 font-bold uppercase block">
             Meeting Title *
           </label>
           <input
@@ -65,12 +65,12 @@ export function CalendarManualForm({
             placeholder="e.g. Sync with HR, Review roadmap..."
             value={eventTitle}
             onChange={(e) => setEventTitle(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg p-2 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80"
+            className="w-full bg-background border border-border rounded-lg p-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] text-muted-foreground/85 font-bold uppercase block">
+          <label className="text-xs text-muted-foreground/85 font-bold uppercase block">
             Start Time *
           </label>
           <input
@@ -78,12 +78,12 @@ export function CalendarManualForm({
             required
             value={eventStart}
             onChange={(e) => setEventStart(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg p-2 text-xs text-foreground focus:outline-none focus:border-border/80"
+            className="w-full bg-background border border-border rounded-lg p-2.5 text-sm text-foreground focus:outline-none focus:border-border/80"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] text-muted-foreground/85 font-bold uppercase block">
+          <label className="text-xs text-muted-foreground/85 font-bold uppercase block">
             End Time *
           </label>
           <input
@@ -91,12 +91,12 @@ export function CalendarManualForm({
             required
             value={eventEnd}
             onChange={(e) => setEventEnd(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg p-2 text-xs text-foreground focus:outline-none focus:border-border/80"
+            className="w-full bg-background border border-border rounded-lg p-2.5 text-sm text-foreground focus:outline-none focus:border-border/80"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] text-muted-foreground/85 font-bold uppercase block">
+          <label className="text-xs text-muted-foreground/85 font-bold uppercase block">
             Guests (comma-separated)
           </label>
           <input
@@ -104,13 +104,13 @@ export function CalendarManualForm({
             placeholder="e.g. john@domain.com, team@locus.co"
             value={eventGuests}
             onChange={(e) => setEventGuests(e.target.value)}
-            className="w-full bg-background border border-border rounded-lg p-2 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80"
+            className="w-full bg-background border border-border rounded-lg p-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80"
           />
         </div>
 
         {eventStatus && (
           <div
-            className={`p-2.5 rounded-lg border text-[11px] leading-relaxed ${
+            className={`p-2.5 rounded-lg border text-xs leading-relaxed ${
               eventStatus.type === "success"
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                 : "bg-destructive/10 border-destructive/20 text-destructive"
@@ -123,16 +123,16 @@ export function CalendarManualForm({
         <Button
           type="submit"
           disabled={eventCreating}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs py-1.5 font-bold rounded-lg flex items-center justify-center gap-1 cursor-pointer"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm py-2 font-bold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer"
         >
           {eventCreating ? (
             <>
-              <RefreshCw className="h-3 w-3 animate-spin" />
+              <RefreshCw className="h-4 w-4 animate-spin" />
               <span>Booking...</span>
             </>
           ) : (
             <>
-              <Calendar className="h-3.5 w-3.5 text-primary-foreground" />
+              <Calendar className="h-4 w-4 text-primary-foreground" />
               <span>Post Event</span>
             </>
           )}

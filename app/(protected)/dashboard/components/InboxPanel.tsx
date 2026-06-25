@@ -82,7 +82,7 @@ export function InboxPanel({
               <button
                 key={f.id}
                 onClick={() => onFilterChange(f.id)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm font-bold scale-[1.02]"
                     : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
@@ -97,7 +97,7 @@ export function InboxPanel({
         {/* Scrollable Email List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {emailsLoading ? (
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-24">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-24">
               <RefreshCw className="h-4 w-4 animate-spin" />
               <span>Loading Gmail cache...</span>
             </div>
@@ -106,8 +106,8 @@ export function InboxPanel({
               <div className="h-14 w-14 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto">
                 <Inbox className="h-7 w-7 text-muted-foreground/50" />
               </div>
-              <p className="text-sm font-semibold text-foreground/60">No emails found</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-base font-semibold text-foreground/60">No emails found</p>
+              <p className="text-sm text-muted-foreground">
                 No emails synced for this label.
               </p>
             </div>
@@ -150,20 +150,20 @@ export function InboxPanel({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1.5 mb-0.5">
-                      <span className="text-xs font-bold text-foreground truncate">
+                      <span className="text-sm font-bold text-foreground truncate">
                         {email.sender}
                       </span>
-                      <span className="text-[9px] text-muted-foreground shrink-0">
+                      <span className="text-xs text-muted-foreground shrink-0">
                         {new Date(email.receivedAt).toLocaleDateString([], {
                           month: "short",
                           day: "numeric",
                         })}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-foreground/80 block truncate">
+                    <span className="text-sm font-semibold text-foreground/80 block truncate">
                       {email.subject}
                     </span>
-                    <span className="text-[10px] text-muted-foreground/70 line-clamp-1 leading-relaxed">
+                    <span className="text-xs text-muted-foreground/70 line-clamp-1 leading-relaxed">
                       {email.snippet}
                     </span>
                   </div>
@@ -179,14 +179,14 @@ export function InboxPanel({
       {selectedEmail && (
         <div className="flex-1 overflow-y-auto p-6 bg-card/10 select-text flex flex-col gap-6">
           <div className="flex justify-between items-center pb-3 border-b border-border/60">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
               Email Details
             </h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedEmail(null)}
-              className="text-xs hover:bg-muted text-muted-foreground shrink-0 cursor-pointer h-8"
+              className="text-sm hover:bg-muted text-muted-foreground shrink-0 cursor-pointer h-8"
             >
               Close Details
             </Button>
@@ -196,31 +196,31 @@ export function InboxPanel({
             {/* Email metadata */}
             <div className="p-5 rounded-2xl border border-border bg-card/50 space-y-4 shadow-xl select-text">
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
+                <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
                   Sender
                 </span>
-                <p className="text-sm font-bold text-foreground break-words leading-snug">
+                <p className="text-base font-bold text-foreground break-words leading-snug">
                   {selectedEmail.sender}
                 </p>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
+                <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
                   Subject
                 </span>
-                <p className="text-base font-extrabold text-foreground leading-snug break-words">
+                <p className="text-lg font-extrabold text-foreground leading-snug break-words">
                   {selectedEmail.subject}
                 </p>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
+                <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block mb-1">
                   Received
                 </span>
-                <p className="text-xs text-muted-foreground font-medium">
+                <p className="text-sm text-muted-foreground font-medium">
                   {new Date(selectedEmail.receivedAt).toLocaleString()}
                 </p>
               </div>
               <div className="pt-4 border-t border-border/60">
-                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider block mb-2">
+                <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block mb-2">
                   {selectedEmail.htmlBody || selectedEmail.body ? "Message Content" : "Snippet"}
                 </span>
                 <div className="border border-border/80 rounded-xl overflow-hidden bg-white shadow-inner">
@@ -233,7 +233,7 @@ export function InboxPanel({
                       style={{ colorScheme: "light" }}
                     />
                   ) : (
-                    <div className="text-sm text-foreground/90 p-4 leading-relaxed break-words whitespace-pre-wrap select-text max-h-[300px] overflow-y-auto pr-1 bg-card/10">
+                    <div className="text-base text-foreground/90 p-4 leading-relaxed break-words whitespace-pre-wrap select-text max-h-[300px] overflow-y-auto pr-1 bg-card/10">
                       {selectedEmail.body || selectedEmail.snippet}
                     </div>
                   )}
@@ -250,7 +250,7 @@ export function InboxPanel({
             >
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-xs font-semibold text-foreground/80">
+                <span className="text-sm font-semibold text-foreground/80">
                   Ask AI to reply to this email
                 </span>
               </div>
@@ -259,7 +259,7 @@ export function InboxPanel({
 
             {/* AI Actions */}
             <div className="space-y-5 pt-4 border-t border-border/60">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
                 AI Assistant Actions
               </h4>
 
@@ -268,7 +268,7 @@ export function InboxPanel({
                 <Button
                   onClick={() => onSummarize(selectedEmail.gmailId)}
                   disabled={aiSummaryLoading}
-                  className="w-full bg-secondary hover:bg-muted text-secondary-foreground text-xs py-2 h-10 flex items-center justify-center gap-1.5 border border-border rounded-xl cursor-pointer"
+                  className="w-full bg-secondary hover:bg-muted text-secondary-foreground text-sm py-2 h-10 flex items-center justify-center gap-1.5 border border-border rounded-xl cursor-pointer"
                 >
                   {aiSummaryLoading ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
@@ -279,7 +279,7 @@ export function InboxPanel({
                 </Button>
 
                 {aiSummary && (
-                  <div className="p-4 rounded-2xl border border-border bg-card/35 text-sm text-foreground/90 leading-relaxed relative whitespace-pre-wrap select-text shadow-inner animate-in fade-in duration-200">
+                  <div className="p-4 rounded-2xl border border-border bg-card/35 text-base text-foreground/90 leading-relaxed relative whitespace-pre-wrap select-text shadow-inner animate-in fade-in duration-200">
                     <button
                       onClick={() => copyToClipboard(aiSummary)}
                       className="absolute right-3 top-3 p-1.5 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors cursor-pointer"
@@ -298,7 +298,7 @@ export function InboxPanel({
               {/* Draft Reply */}
               <div className="space-y-3.5 pt-4 border-t border-border">
                 <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-muted-foreground block">
+                  <span className="text-sm font-semibold text-muted-foreground block">
                     Drafting instructions (optional)
                   </span>
                   <input
@@ -306,14 +306,14 @@ export function InboxPanel({
                     placeholder="e.g., politely decline, ask to reschedule..."
                     value={draftInstructions}
                     onChange={(e) => setDraftInstructions(e.target.value)}
-                    className="w-full bg-background border border-border rounded-xl p-3 h-10 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80 focus:ring-1 focus:ring-ring"
+                    className="w-full bg-background border border-border rounded-xl p-3 h-10 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80 focus:ring-1 focus:ring-ring"
                   />
                 </div>
 
                 <Button
                   onClick={() => onDraftReply(selectedEmail.gmailId)}
                   disabled={aiDraftLoading}
-                  className="w-full bg-secondary hover:bg-muted text-secondary-foreground text-xs py-2 h-10 flex items-center justify-center gap-1.5 border border-border rounded-xl cursor-pointer"
+                  className="w-full bg-secondary hover:bg-muted text-secondary-foreground text-sm py-2 h-10 flex items-center justify-center gap-1.5 border border-border rounded-xl cursor-pointer"
                 >
                   {aiDraftLoading ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
@@ -330,7 +330,7 @@ export function InboxPanel({
                         value={aiDraft}
                         onChange={(e) => setAiDraftValue(e.target.value)}
                         rows={8}
-                        className="w-full bg-background border border-border rounded-xl p-3.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80 focus:ring-1 focus:ring-ring select-text leading-relaxed resize-y shadow-inner"
+                        className="w-full bg-background border border-border rounded-xl p-3.5 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:border-border/80 focus:ring-1 focus:ring-ring select-text leading-relaxed resize-y shadow-inner"
                         placeholder="Edit the reply draft here..."
                       />
                       <button
@@ -344,7 +344,7 @@ export function InboxPanel({
 
                     {inboxReplyStatus && (
                       <div
-                        className={`p-3 rounded-xl border text-xs flex items-center gap-2 animate-in fade-in duration-150 ${
+                        className={`p-3 rounded-xl border text-sm flex items-center gap-2 animate-in fade-in duration-150 ${
                           inboxReplyStatus.type === "success"
                             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                             : "bg-destructive/10 border-destructive/20 text-destructive"
@@ -362,7 +362,7 @@ export function InboxPanel({
                     <Button
                       onClick={onSendReply}
                       disabled={sendingInboxReply}
-                      className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs py-2 h-10 flex items-center justify-center gap-1.5 rounded-xl font-bold shadow-md cursor-pointer transition-all duration-200 active:scale-[0.98]"
+                      className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-sm py-2 h-10 flex items-center justify-center gap-1.5 rounded-xl font-bold shadow-md cursor-pointer transition-all duration-200 active:scale-[0.98]"
                     >
                       {sendingInboxReply ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
