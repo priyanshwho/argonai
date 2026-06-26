@@ -433,8 +433,8 @@ export default function LandingClient() {
       <nav className="font-serif flex items-center justify-between z-50 text-black dark:text-foreground transition-all duration-300">
         <div className="nav-logo flex items-center select-none">
           <Link href="/" className="flex items-center">
-            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden w-auto transition-all duration-300 h-20 md:h-24" />
-            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block w-auto transition-all duration-300 h-20 md:h-24" />
+            <img src="/BL-ARGON.png" alt="ArgonAI" className="dark:hidden w-auto transition-all duration-300 h-20 md:h-24" />
+            <img src="/WL-ARGON.png" alt="ArgonAI" className="hidden dark:block w-auto transition-all duration-300 h-20 md:h-24" />
           </Link>
         </div>
 
