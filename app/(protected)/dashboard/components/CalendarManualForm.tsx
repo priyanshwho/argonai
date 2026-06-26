@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Bot, RefreshCw, Calendar } from "lucide-react";
+import { Bot, RefreshCw, Calendar, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CalendarManualFormProps {
@@ -17,6 +17,7 @@ interface CalendarManualFormProps {
   eventStatus: { type: "success" | "error"; message: string } | null;
   onSubmit: (e: React.FormEvent) => void;
   onSwitchToAssistant: () => void;
+  onCollapse?: () => void;
 }
 
 export function CalendarManualForm({
@@ -32,6 +33,7 @@ export function CalendarManualForm({
   eventStatus,
   onSubmit,
   onSwitchToAssistant,
+  onCollapse,
 }: CalendarManualFormProps) {
   return (
     <div className="flex-1 overflow-y-auto p-5 space-y-6 select-text">
@@ -42,16 +44,30 @@ export function CalendarManualForm({
             Schedule Google calendar events manually.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onSwitchToAssistant}
-          className="text-xs h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer flex items-center gap-1"
-        >
-          <Bot className="h-3.5 w-3.5 text-primary animate-pulse" />
-          <span>Use Assistant</span>
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onSwitchToAssistant}
+            className="text-xs h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer flex items-center gap-1"
+          >
+            <Bot className="h-3.5 w-3.5 text-primary animate-pulse" />
+            <span>Use Assistant</span>
+          </Button>
+          {onCollapse && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onCollapse}
+              className="h-7 w-7 hover:bg-muted text-muted-foreground cursor-pointer flex items-center justify-center rounded-lg"
+              title="Collapse Assistant"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={onSubmit} className="p-4 rounded-xl border border-border bg-card/25 space-y-4 text-sm">

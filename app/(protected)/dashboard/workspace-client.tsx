@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/components/providers/loading-provider";
 import { authClient } from "@/lib/auth-client";
+import { Bot, ChevronLeft } from "lucide-react";
 
 // Modular components
 import { DashboardSidebar } from "./components/DashboardSidebar";
@@ -44,6 +45,7 @@ export function WorkspaceClient({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openCommandPalette, setOpenCommandPalette] = useState(false);
   const [calendarRightPanelMode, setCalendarRightPanelMode] = useState<"assistant" | "manual">("assistant");
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
 
   // ── URL query param handling ─────────────────────────────────────────────
   useEffect(() => {
@@ -698,34 +700,69 @@ export function WorkspaceClient({
 
       {/* RIGHT: Persistent AI sidecar (when not on Chat tab) */}
       {activeTab !== "chat" && (
-        <section className="w-[380px] flex flex-col overflow-hidden shrink-0 border-l border-border/60 bg-card/25">
-          {activeTab === "inbox" && (
-            <ChatPanel {...chatPanelProps} compact />
-          )}
-          {activeTab === "calendar" && (
-            calendarRightPanelMode === "assistant" ? (
-              <ChatPanel
-                {...chatPanelProps}
-                compact
-                activeTab="calendar"
-                setCalendarRightPanelMode={setCalendarRightPanelMode}
-              />
-            ) : (
-              <CalendarManualForm
-                eventTitle={eventTitle}
-                setEventTitle={setEventTitle}
-                eventStart={eventStart}
-                setEventStart={setEventStart}
-                eventEnd={eventEnd}
-                setEventEnd={setEventEnd}
-                eventGuests={eventGuests}
-                setEventGuests={setEventGuests}
-                eventCreating={eventCreating}
-                eventStatus={eventStatus}
-                onSubmit={handleCreateEvent}
-                onSwitchToAssistant={() => setCalendarRightPanelMode("assistant")}
-              />
-            )
+        <section className={`flex flex-col overflow-hidden shrink-0 border-l border-border/60 bg-card/25 transition-all duration-300 ease-in-out ${
+          rightPanelCollapsed ? "w-16" : "w-[380px]"
+        }`}>
+          {rightPanelCollapsed ? (
+            <div className="h-full flex flex-col items-center py-4 justify-between select-none">
+              {/* Top expand button */}
+              <button
+                onClick={() => setRightPanelCollapsed(false)}
+                className="p-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105 shadow-sm group cursor-pointer"
+                title="Expand Assistant"
+              >
+                <Bot className="h-5 w-5 animate-pulse" />
+              </button>
+
+              {/* Vertical text label */}
+              <div className="flex-1 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-muted-foreground/60 tracking-[0.2em] uppercase select-none [writing-mode:vertical-lr] rotate-180">
+                  Argon Assistant
+                </span>
+              </div>
+
+              {/* Bottom expand chevron */}
+              <button
+                onClick={() => setRightPanelCollapsed(false)}
+                className="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
+                title="Expand Assistant"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <>
+              {activeTab === "inbox" && (
+                <ChatPanel {...chatPanelProps} compact onCollapse={() => setRightPanelCollapsed(true)} />
+              )}
+              {activeTab === "calendar" && (
+                calendarRightPanelMode === "assistant" ? (
+                  <ChatPanel
+                    {...chatPanelProps}
+                    compact
+                    activeTab="calendar"
+                    setCalendarRightPanelMode={setCalendarRightPanelMode}
+                    onCollapse={() => setRightPanelCollapsed(true)}
+                  />
+                ) : (
+                  <CalendarManualForm
+                    eventTitle={eventTitle}
+                    setEventTitle={setEventTitle}
+                    eventStart={eventStart}
+                    setEventStart={setEventStart}
+                    eventEnd={eventEnd}
+                    setEventEnd={setEventEnd}
+                    eventGuests={eventGuests}
+                    setEventGuests={setEventGuests}
+                    eventCreating={eventCreating}
+                    eventStatus={eventStatus}
+                    onSubmit={handleCreateEvent}
+                    onSwitchToAssistant={() => setCalendarRightPanelMode("assistant")}
+                    onCollapse={() => setRightPanelCollapsed(true)}
+                  />
+                )
+              )}
+            </>
           )}
         </section>
       )}

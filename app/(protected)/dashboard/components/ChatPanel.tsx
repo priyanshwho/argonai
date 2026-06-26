@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from "react";
 import {
   Bot, User, Send, RefreshCw, Check, Paperclip,
   Mic, Sparkles, ArrowRight, Mail, PenLine, CalendarClock, Search,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarkdownMessage } from "./MarkdownMessage";
@@ -157,6 +158,7 @@ interface ChatPanelProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleListening: () => void;
   isListening: boolean;
+  onCollapse?: () => void;
 }
 
 export function ChatPanel({
@@ -175,6 +177,7 @@ export function ChatPanel({
   onFileChange,
   onToggleListening,
   isListening,
+  onCollapse,
 }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -244,16 +247,29 @@ export function ChatPanel({
             </span>
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          {activeTab === "calendar" && setCalendarRightPanelMode && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCalendarRightPanelMode("manual")}
-              className="text-[10px] h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer"
-            >
-              Manual Form
-            </Button>
-          )}
+          <div className="flex items-center gap-1.5">
+            {activeTab === "calendar" && setCalendarRightPanelMode && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCalendarRightPanelMode("manual")}
+                className="text-[10px] h-7 px-2 hover:bg-muted text-muted-foreground cursor-pointer"
+              >
+                Manual Form
+              </Button>
+            )}
+            {onCollapse && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCollapse}
+                className="h-7 w-7 hover:bg-muted text-muted-foreground cursor-pointer flex items-center justify-center rounded-lg"
+                title="Collapse Assistant"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
