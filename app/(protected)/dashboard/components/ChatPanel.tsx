@@ -207,12 +207,13 @@ export function ChatPanel({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // A message is "visible" if it has text, is from user, or has tool parts
+  // A message is "visible" if it has text, is from user (but not a system prompt), or has tool parts
   const visibleMessages = messages.filter(
-    (m) =>
-      getMessageText(m).trim() !== "" ||
-      m.role === "user" ||
-      hasToolParts(m)
+    (m) => {
+      const text = getMessageText(m);
+      if (m.role === "user" && text.startsWith("[System:")) return false;
+      return text.trim() !== "" || m.role === "user" || hasToolParts(m);
+    }
   );
 
   const isEmpty = visibleMessages.length === 0;

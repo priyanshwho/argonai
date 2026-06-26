@@ -25,6 +25,8 @@ interface DashboardSidebarProps {
   deleteConversation: (id: string, e: React.MouseEvent) => void;
   hasGmail: boolean;
   hasCalendar: boolean;
+  onTabChange: (tabId: "chat" | "inbox" | "calendar" | "configuration") => void;
+  onChatChange: (chatId: string) => void;
 }
 
 export function DashboardSidebar({
@@ -43,6 +45,8 @@ export function DashboardSidebar({
   deleteConversation,
   hasGmail,
   hasCalendar,
+  onTabChange,
+  onChatChange,
 }: DashboardSidebarProps) {
   const navItems = [
     { id: "chat", label: "AI Assistant", icon: Bot, href: `/dashboard/${activeChatId}` },
@@ -130,6 +134,9 @@ export function DashboardSidebar({
               if (tab.action) {
                 e.preventDefault();
                 tab.action();
+              } else {
+                e.preventDefault();
+                onTabChange(tab.id as any);
               }
             };
 
@@ -187,6 +194,10 @@ export function DashboardSidebar({
                   <div key={c.id} className="group relative flex items-center w-full">
                     <Link
                       href={`/dashboard/${c.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onChatChange(c.id);
+                      }}
                       className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-base transition-all text-left truncate ${
                         isActive
                           ? "bg-accent text-accent-foreground font-medium"

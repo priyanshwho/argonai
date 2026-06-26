@@ -298,12 +298,15 @@ export function WorkspaceClient({
   };
 
   // ── Chat / AI ────────────────────────────────────────────────────────────
+  const [activeChatId, setActiveChatId] = useState<string>(
+    activeChatIdParam || (initialConversations.length > 0 ? initialConversations[0].id : "default-chat")
+  );
+  
   const [conversations, setConversations] = useState<ChatConversation[]>(
     initialConversations.length > 0
       ? initialConversations
-      : [{ id: activeChatIdParam || `chat-${Date.now()}`, title: "New Conversation", messages: [] }]
+      : [{ id: activeChatId, title: "New Conversation", messages: [] }]
   );
-  const activeChatId = activeChatIdParam || (initialConversations.length > 0 ? initialConversations[0].id : conversations[0]?.id || "default-chat");
 
   // Clear search query and results when tab or conversation changes
   useEffect(() => {
@@ -314,7 +317,17 @@ export function WorkspaceClient({
   const [isListening, setIsListening] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const { messages, sendMessage, setMessages, status, addToolResult } = useChat({});
+  const { messages, sendMessage, setMessages, status, addToolResult: defaultAddToolResult } = useChat({});
+
+  const handleAddToolResult = (args: any) => {
+    if (args.tool === 'draft_email' || args.tool === 'draft_calendar_event') {
+      sendMessage({
+        text: `[System: The ${args.tool === 'draft_email' ? 'email was sent' : 'event was scheduled'} successfully. Give a short 1 sentence confirmation to the user.]`
+      }, { body: { conversationId: activeChatId } });
+    } else {
+      defaultAddToolResult(args);
+    }
+  };
 
   // Sync messages into conversation store
   useEffect(() => {
@@ -392,14 +405,24 @@ export function WorkspaceClient({
   const isLoading = status === "submitted" || status === "streaming";
 
   const selectConversation = (chatId: string) => {
+    setActiveChatId(chatId);
     setActiveTab("chat");
     setShowSearchResults(false);
-    router.push(`/dashboard/${chatId}`);
+    window.history.pushState(null, '', `/dashboard/${chatId}`);
   };
 
   const createNewChat = () => {
     const newId = `chat-${Date.now()}`;
-    router.push(`/dashboard/${newId}`);
+    setActiveChatId(newId);
+    setActiveTab("chat");
+    setShowSearchResults(false);
+    window.history.pushState(null, '', `/dashboard/${newId}`);
+  };
+
+  const handleTabChange = (tabId: "chat" | "inbox" | "calendar" | "configuration") => {
+    setActiveTab(tabId);
+    setShowSearchResults(false);
+    window.history.pushState(null, '', `/dashboard/${activeChatId}${tabId === 'chat' ? '' : `?tab=${tabId}`}`);
   };
 
   const deleteConversation = async (chatId: string, e: React.MouseEvent) => {
@@ -412,7 +435,7 @@ export function WorkspaceClient({
         if (id === activeChatId) {
           setTimeout(() => {
             if (next.length > 0) {
-              router.push(`/dashboard/${next[0].id}`);
+              selectConversation(next[0].id);
             } else {
               createNewChat();
             }
@@ -498,7 +521,7 @@ export function WorkspaceClient({
   const submitMessageDirectly = (promptText: string) => {
     if (isLoading) return;
     setShowSearchResults(false);
-    router.push(`/dashboard/${activeChatId}`);
+    selectConversation(activeChatId);
     const userMsg = {
       id: `user-${Date.now()}`,
       role: "user" as const,
@@ -560,7 +583,7 @@ export function WorkspaceClient({
     setInput,
     selectedFiles,
     setSelectedFiles,
-    addToolResult,
+    addToolResult: handleAddToolResult,
     activeTab,
     onSubmit: handleChatSubmit,
     onFileChange: handleFileChange,
@@ -588,6 +611,8 @@ export function WorkspaceClient({
         deleteConversation={deleteConversation}
         hasGmail={initialHasGmail}
         hasCalendar={initialHasCalendar}
+        onTabChange={handleTabChange}
+        onChatChange={selectConversation}
       />
 
       {/* MIDDLE: Main content */}
@@ -608,13 +633,11 @@ export function WorkspaceClient({
               searchResults={searchResults}
               onSelectEmail={(email) => {
                 setSelectedEmail(email);
-                router.push(`/dashboard/${activeChatId}?tab=inbox`);
-                setShowSearchResults(false);
+                handleTabChange("inbox");
                 setSearchQuery("");
               }}
               onSelectEvent={() => {
-                router.push(`/dashboard/${activeChatId}?tab=calendar`);
-                setShowSearchResults(false);
+                handleTabChange("calendar");
                 setSearchQuery("");
               }}
             />
@@ -648,7 +671,7 @@ export function WorkspaceClient({
               onSendReply={handleSendInboxReply}
               onAskAI={(subject, sender, threadId) => {
                 setInput(`Reply to email: "${subject}" from "${sender}" (threadId: ${threadId})`);
-                router.push(`/dashboard/${activeChatId}`);
+                selectConversation(activeChatId);
               }}
               copyToClipboard={(text) => navigator.clipboard.writeText(text)}
               activeLabel={activeLabel}
@@ -712,11 +735,10 @@ export function WorkspaceClient({
         open={openCommandPalette}
         onOpenChange={setOpenCommandPalette}
         onNavigate={(tab) => {
-          setShowSearchResults(false);
           if (tab === "chat") {
-            router.push(`/dashboard/${activeChatId}`);
+            handleTabChange("chat");
           } else {
-            router.push(`/dashboard/${activeChatId}?tab=${tab}`);
+            handleTabChange(tab as any);
           }
         }}
         onSettings={() => router.push("/settings")}
@@ -726,7 +748,7 @@ export function WorkspaceClient({
           setEventStart(formatDateTimeLocal(start));
           setEventEnd(formatDateTimeLocal(end));
           setEventGuests("");
-          router.push(`/dashboard/${activeChatId}?tab=calendar`);
+          handleTabChange("calendar");
           setCalendarRightPanelMode("manual");
         }}
       />
