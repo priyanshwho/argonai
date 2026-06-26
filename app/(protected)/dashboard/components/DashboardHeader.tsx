@@ -31,7 +31,7 @@ export function DashboardHeader({
 
   return (
     <header className="h-14 border-b border-border/60 flex items-center justify-between px-6 shrink-0 bg-background/60 backdrop-blur-sm z-10 gap-4">
-      <div className="text-base font-bold text-foreground shrink-0">{tabLabel}</div>
+      <div className="text-xl font-bold text-foreground shrink-0">{tabLabel}</div>
 
       <div className="flex items-center gap-2 max-w-sm w-full">
         <div className="relative flex-1">
@@ -41,7 +41,7 @@ export function DashboardHeader({
             placeholder="Search emails or events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-card border border-border rounded-xl pl-9 pr-12 py-1.5 text-sm placeholder-muted-foreground text-foreground focus:outline-none focus:border-border/80 transition-colors"
+            className="w-full bg-card border border-border rounded-xl pl-9 pr-12 py-1.5 text-base placeholder-muted-foreground text-foreground focus:outline-none focus:border-border/80 transition-colors"
           />
           {searchQuery && (
             <button

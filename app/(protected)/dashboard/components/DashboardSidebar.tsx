@@ -84,7 +84,7 @@ export function DashboardSidebar({
               <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-9 max-w-none w-auto object-contain" />
             </Link>
           ) : (
-            <Link href="/" className="flex items-center shrink-0 -mt-1 pl-2">
+            <Link href="/" className="flex items-center shrink-0 -mt-1 pl-4">
               <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-14 w-auto object-contain" />
               <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-14 w-auto object-contain" />
             </Link>

@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
   Bot, User, Send, RefreshCw, Check, Paperclip,
-  Mic, MicOff, Sparkles, ArrowRight,
+  Mic, Sparkles, ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarkdownMessage } from "./MarkdownMessage";
@@ -495,11 +495,6 @@ export function ChatPanel({
             className="w-full bg-transparent text-base text-foreground placeholder-muted-foreground py-2 pl-3 pr-28 focus:outline-none focus:ring-0"
           />
           <div className="absolute right-2 flex items-center gap-1.5 z-10">
-            {/* Attach */}
-            <label title="Attach files" className="p-1.5 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground transition-all cursor-pointer shadow-sm flex items-center justify-center">
-              <Paperclip className="h-3.5 w-3.5" />
-              <input type="file" multiple onChange={onFileChange} className="hidden" />
-            </label>
             {/* Voice */}
             <button
               type="button"
@@ -507,7 +502,7 @@ export function ChatPanel({
               title="Voice input"
               className={`p-1.5 rounded-xl transition-all cursor-pointer shadow-sm ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted hover:bg-muted/80 text-muted-foreground"}`}
             >
-              {isListening ? <Mic className="h-3.5 w-3.5" /> : <MicOff className="h-3.5 w-3.5" />}
+              {isListening ? <Mic className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
             </button>
             {/* Submit */}
             <button

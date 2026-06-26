@@ -51,9 +51,9 @@ export async function POST(req: Request) {
       const parts = [
         `--${boundary}`,
         'Content-Type: text/plain; charset="UTF-8"',
-        'Content-Transfer-Encoding: 7bit',
+        'Content-Transfer-Encoding: base64',
         '',
-        body
+        Buffer.from(body).toString('base64')
       ];
 
       for (const att of attachments as Attachment[]) {
