@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { EmailItem } from "./types";
 import { MarkdownMessage } from "./MarkdownMessage";
 
+// 2 days in ms
+const CACHE_EXPIRY_MS = 2 * 24 * 60 * 60 * 1000;
+
 interface InboxPanelProps {
   emailsLoading: boolean;
   emails: EmailItem[];
@@ -65,6 +68,93 @@ export function InboxPanel({
     { id: "TRASH", label: "Trash" },
     { id: "ALL", label: "All Mails" }
   ];
+
+  const [hoveredEmailId, setHoveredEmailId] = React.useState<string | null>(null);
+  const [hoverSummaries, setHoverSummaries] = React.useState<Record<string, string>>({});
+  const [isHoverLoading, setIsHoverLoading] = React.useState(false);
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Cron-style cleanup of stale cache on mount
+  React.useEffect(() => {
+    try {
+      const now = Date.now();
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("email_summary_")) {
+          const itemStr = localStorage.getItem(key);
+          if (itemStr) {
+            try {
+              const item = JSON.parse(itemStr);
+              if (now - item.timestamp > CACHE_EXPIRY_MS) {
+                localStorage.removeItem(key);
+              }
+            } catch (e) {
+              // invalid json
+              localStorage.removeItem(key);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to cleanup local storage:", e);
+    }
+  }, []);
+
+  const handleMouseEnter = (emailId: string) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    
+    hoverTimeoutRef.current = setTimeout(async () => {
+      setHoveredEmailId(emailId);
+      
+      // Check cache
+      const cacheKey = `email_summary_${emailId}`;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const item = JSON.parse(cached);
+          if (Date.now() - item.timestamp <= CACHE_EXPIRY_MS) {
+            setHoverSummaries(prev => ({ ...prev, [emailId]: item.summary }));
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore cache error
+      }
+
+      // Fetch from API
+      setIsHoverLoading(true);
+      try {
+        const res = await fetch("/api/emails/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ emailId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.summary) {
+            setHoverSummaries(prev => ({ ...prev, [emailId]: data.summary }));
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify({
+                summary: data.summary,
+                timestamp: Date.now()
+              }));
+            } catch (e) {
+              console.warn("Failed to save summary to local storage");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch hover summary", err);
+      } finally {
+        setIsHoverLoading(false);
+      }
+    }, 500);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setHoveredEmailId(null);
+  };
 
   return (
     <div className="flex h-full divide-x divide-border/60 overflow-hidden w-full bg-background">
@@ -137,7 +227,9 @@ export function InboxPanel({
                     setAiSummary("");
                     setAiDraft("");
                   }}
-                  className={`w-full p-3 flex items-start gap-2.5 text-left rounded-xl border transition-all ${
+                  onMouseEnter={() => handleMouseEnter(email.id)}
+                  onMouseLeave={handleMouseLeave}
+                  className={`w-full p-3 flex items-start gap-2.5 text-left rounded-xl border transition-all relative group ${
                     selectedEmail?.id === email.id
                       ? "bg-accent border-primary/30 shadow-sm"
                       : "bg-card/60 border-border/60 hover:bg-muted/60 hover:border-border"
@@ -167,6 +259,28 @@ export function InboxPanel({
                       {email.snippet}
                     </span>
                   </div>
+
+                  {/* Hover Summary Tooltip */}
+                  {hoveredEmailId === email.id && !selectedEmail && (
+                    <div className="absolute left-full top-0 ml-4 w-72 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 pointer-events-none">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">AI Summary</span>
+                      </div>
+                      {isHoverLoading && !hoverSummaries[email.id] ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+                          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          <span>Summarizing...</span>
+                        </div>
+                      ) : hoverSummaries[email.id] ? (
+                        <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert">
+                          <MarkdownMessage content={hoverSummaries[email.id]} />
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">Failed to load summary.</div>
+                      )}
+                    </div>
+                  )}
                 </button>
               );
             })}

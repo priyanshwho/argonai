@@ -1,18 +1,43 @@
 "use client";
 
 import React, { useState } from "react";
-import { RefreshCw, CalendarDays, ChevronLeft, ChevronRight, Calendar, Clock, Users } from "lucide-react";
+import { RefreshCw, CalendarDays, ChevronLeft, ChevronRight, Calendar, Clock, Users, Trash2, Loader2 } from "lucide-react";
 import { CalendarItem } from "./types";
 import { Button } from "@/components/ui/button";
 
 interface CalendarPanelProps {
   eventsLoading: boolean;
   events: CalendarItem[];
+  refreshEvents: () => void;
 }
 
-export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
+export function CalendarPanel({ eventsLoading, events, refreshEvents }: CalendarPanelProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [anchorDate, setAnchorDate] = useState<Date>(new Date());
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm("Are you sure you want to delete this event?")) return;
+    setDeletingEventId(eventId);
+    try {
+      const res = await fetch("/api/events/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId }),
+      });
+      if (res.ok) {
+        refreshEvents();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete event.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete event.");
+    } finally {
+      setDeletingEventId(null);
+    }
+  };
 
   // Generate 15 days of dates around anchorDate (7 days prior, anchor, 7 days post)
   const dateWindow = React.useMemo(() => {
@@ -291,10 +316,24 @@ export function CalendarPanel({ eventsLoading, events }: CalendarPanelProps) {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${style.badge}`}>
-                          {isToday ? "Today" : "Upcoming"}
-                        </span>
+                      <div className="flex flex-col items-end gap-2 self-start sm:self-center shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${style.badge}`}>
+                            {isToday ? "Today" : "Upcoming"}
+                          </span>
+                          <button
+                            onClick={() => handleDeleteEvent(event.eventId)}
+                            disabled={deletingEventId === event.eventId}
+                            className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                            title="Delete Event"
+                          >
+                            {deletingEventId === event.eventId ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

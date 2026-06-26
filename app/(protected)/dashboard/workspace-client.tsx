@@ -681,7 +681,7 @@ export function WorkspaceClient({
 
           {/* Calendar */}
           {activeTab === "calendar" && !showSearchResults && (
-            <CalendarPanel eventsLoading={eventsLoading} events={events} />
+            <CalendarPanel eventsLoading={eventsLoading} events={events} refreshEvents={fetchEvents} />
           )}
 
           {/* Configuration — redirects to /settings, kept for graceful fallback */}
