@@ -227,7 +227,7 @@ export function InboxPanel({
                     setAiSummary("");
                     setAiDraft("");
                   }}
-                  onMouseEnter={() => handleMouseEnter(email.id)}
+                  onMouseEnter={() => handleMouseEnter(email.gmailId || email.id)}
                   onMouseLeave={handleMouseLeave}
                   className={`w-full p-3 flex items-start gap-2.5 text-left rounded-xl border transition-all relative group ${
                     selectedEmail?.id === email.id
