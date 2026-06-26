@@ -398,6 +398,8 @@ export function ChatPanel({
 
                           // ── Calendar Draft Card ───────────────────────────
                           if (toolName === "draft_calendar_event") {
+                            // Check if event was already created (output.success = true)
+                            const alreadyCreated = state === "output-available" && output?.success === true;
                             return (
                               <CalendarDraftCard
                                 key={toolCallId}
@@ -408,6 +410,7 @@ export function ChatPanel({
                                 toolCallId={toolCallId}
                                 addToolResult={addToolResult}
                                 isLoading={state === "input-streaming"}
+                                isAlreadyCreated={alreadyCreated}
                               />
                             );
                           }

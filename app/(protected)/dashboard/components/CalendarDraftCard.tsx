@@ -10,7 +10,8 @@ export function CalendarDraftCard({
   attendees: initialAttendees,
   toolCallId,
   addToolResult,
-  isLoading
+  isLoading,
+  isAlreadyCreated,
 }: {
   title: string;
   startTime: string;
@@ -19,13 +20,16 @@ export function CalendarDraftCard({
   toolCallId: string;
   addToolResult: (args: any) => void;
   isLoading?: boolean;
+  isAlreadyCreated?: boolean;
 }) {
   const [title, setTitle] = useState(initialTitle);
   const [startTime, setStartTime] = useState(initialStartTime);
   const [endTime, setEndTime] = useState(initialEndTime);
   const [attendees, setAttendees] = useState<string[]>(initialAttendees || []);
   const [isEditing, setIsEditing] = useState(false);
-  const [status, setStatus] = useState<'checking' | 'ready' | 'creating' | 'created' | 'conflict' | 'error'>('checking');
+  const [status, setStatus] = useState<'checking' | 'ready' | 'creating' | 'created' | 'conflict' | 'error'>(
+    isAlreadyCreated ? 'created' : 'checking'
+  );
   const [currentStep, setCurrentStep] = useState(0); 
   const [conflicts, setConflicts] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
@@ -85,7 +89,7 @@ export function CalendarDraftCard({
   };
 
   useEffect(() => {
-    if (!isLoading && startTime && endTime) {
+    if (!isAlreadyCreated && !isLoading && startTime && endTime) {
       runConflictValidation(startTime, endTime);
     }
   }, [isLoading]);
