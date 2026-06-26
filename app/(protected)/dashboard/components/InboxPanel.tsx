@@ -262,7 +262,7 @@ export function InboxPanel({
 
                   {/* Hover Summary Tooltip */}
                   {hoveredEmailId === email.id && !selectedEmail && (
-                    <div className="absolute left-full top-0 ml-4 w-72 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in slide-in-from-left-2 duration-200 pointer-events-none">
+                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none text-left">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-4 w-4 text-primary" />
                         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">AI Summary</span>

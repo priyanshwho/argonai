@@ -17,7 +17,6 @@ export function CalendarPanel({ eventsLoading, events, refreshEvents }: Calendar
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!confirm("Are you sure you want to delete this event?")) return;
     setDeletingEventId(eventId);
     try {
       const res = await fetch("/api/events/delete", {
