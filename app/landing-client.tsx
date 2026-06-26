@@ -422,7 +422,7 @@ export default function LandingClient() {
         </div>
 
         <div className="preloader-header">
-          <h1>Argon</h1>
+          <h1>ArgonAI</h1>
           <div className="preloader-counter">
             <p>000</p>
           </div>
