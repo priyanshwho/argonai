@@ -141,7 +141,7 @@ html, body {
   top: 0;
   width: 100%;
   max-w: 100%;
-  padding: 1rem 2rem;
+  padding: 0rem 3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
