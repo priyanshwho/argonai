@@ -57,6 +57,20 @@ export function CalendarDraftCard({
     { text: "Analyzing conflicts...", icon: ShieldAlert }
   ];
 
+  // Convert a UTC ISO string to the value format required by datetime-local input
+  // (YYYY-MM-DDTHH:mm in LOCAL time so the browser shows the correct local time)
+  const toLocalDateTimeInput = (isoString: string): string => {
+    if (!isoString) return '';
+    try {
+      const d = new Date(isoString);
+      const offsetMs = d.getTimezoneOffset() * 60000;
+      const local = new Date(d.getTime() - offsetMs);
+      return local.toISOString().slice(0, 16);
+    } catch {
+      return isoString.slice(0, 16);
+    }
+  };
+
   const runConflictValidation = async (start: string, end: string) => {
     setStatus('checking');
     setCurrentStep(0);
@@ -240,7 +254,7 @@ export function CalendarDraftCard({
             {isEditing ? (
               <input
                 type="datetime-local"
-                value={startTime.slice(0, 16)}
+                value={toLocalDateTimeInput(startTime)}
                 onChange={e => setStartTime(new Date(e.target.value).toISOString())}
                 className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
               />
@@ -254,7 +268,7 @@ export function CalendarDraftCard({
             {isEditing ? (
               <input
                 type="datetime-local"
-                value={endTime.slice(0, 16)}
+                value={toLocalDateTimeInput(endTime)}
                 onChange={e => setEndTime(new Date(e.target.value).toISOString())}
                 className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-base focus:outline-none"
               />

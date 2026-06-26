@@ -323,7 +323,7 @@ export function WorkspaceClient({
     if (args.tool === 'draft_email' || args.tool === 'draft_calendar_event') {
       sendMessage({
         text: `[System: The ${args.tool === 'draft_email' ? 'email was sent' : 'event was scheduled'} successfully. Give a short 1 sentence confirmation to the user.]`
-      }, { body: { conversationId: activeChatId } });
+      }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
     } else {
       defaultAddToolResult(args);
     }
@@ -513,7 +513,7 @@ export function WorkspaceClient({
 
     const dt = new DataTransfer();
     selectedFiles.forEach((f) => dt.items.add(f));
-    sendMessage({ text: input, files: dt.files }, { body: { conversationId: activeChatId } });
+    sendMessage({ text: input, files: dt.files }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
     setInput("");
     setSelectedFiles([]);
   };
@@ -533,7 +533,7 @@ export function WorkspaceClient({
         c.id === activeChatId ? { ...c, messages: [...c.messages, userMsg] as any } : c
       )
     );
-    sendMessage({ text: promptText }, { body: { conversationId: activeChatId } });
+    sendMessage({ text: promptText }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
   };
 
   const toggleListening = () => {

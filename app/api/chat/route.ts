@@ -152,7 +152,20 @@ export async function POST(req: Request) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const { messages, conversationId } = await req.json();
+  const { messages, conversationId, timezone } = await req.json();
+
+  // Compute current local time in user's timezone if provided
+  const userTimezone = timezone || 'UTC';
+  const currentLocalDatetime = new Date().toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+    timeZone: userTimezone,
+  });
 
   // Ensure conversation exists and save the user message to keep database in sync
   if (conversationId && messages && messages.length > 0) {
@@ -257,7 +270,8 @@ You manage the user's Gmail and Google Calendar.
 You can read their emails, draft responses, find calendar availability, and schedule meetings.
 Be concise, helpful, and professional.
 
-The current date and time is: ${new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}. Use this to resolve relative dates like "today", "tomorrow", or "next Friday".
+The current date and time is: ${currentLocalDatetime}. The user's local timezone is: ${userTimezone}. Use this to resolve relative dates like "today", "tomorrow", or "next Friday".
+When creating calendar events, ALWAYS generate startTime and endTime as ISO 8601 strings that correctly represent the user's LOCAL time. For example, if the user says "6 PM today" and is in IST (UTC+5:30), startTime should be "2026-06-26T18:00:00+05:30" or the equivalent UTC "2026-06-26T12:30:00Z". Always account for the timezone offset.
 
 CRITICAL: When the user wants to write an email, draft an email, reply to an email, or send an email, you MUST call the "draft_email" tool to present a draft card to the user. Do NOT write the email subject, recipient, or body as plain text in your chat response. You must always invoke the "draft_email" tool so that the user receives an interactive card.
 When the user wants to schedule, create, or book a calendar event, you MUST call the "draft_calendar_event" tool to present the event details to the user for approval. Do NOT write the event details as plain text in your chat response. You must always invoke the "draft_calendar_event" tool to render the animated visual conflict checker card.
