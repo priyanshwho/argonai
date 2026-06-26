@@ -119,6 +119,7 @@ html, body {
   text-transform: uppercase;
   font-size: clamp(2rem, 10vw, 15rem);
   line-height: 0.85;
+  white-space: nowrap;
 }
 
 .landing-page-container .preloader-counter {
