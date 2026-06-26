@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import {
   Bot, User, Send, RefreshCw, Check, Paperclip,
-  Mic, Sparkles, ArrowRight,
+  Mic, Sparkles, ArrowRight, Mail, PenLine, CalendarClock, Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarkdownMessage } from "./MarkdownMessage";
@@ -249,7 +249,7 @@ export function ChatPanel({
       <div className="flex-1 overflow-y-auto py-6">
         {isEmpty ? (
           /* ── Empty state ── */
-          <div className={`${compact ? "w-full px-4" : "max-w-2xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
+          <div className={`${compact ? "w-full px-4" : "max-w-4xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
             <div className="text-center space-y-3">
               <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-lg">
                 <Sparkles className="h-7 w-7 text-primary animate-pulse" />
@@ -263,12 +263,12 @@ export function ChatPanel({
             </div>
 
             {!compact && (
-              <div className="grid grid-cols-2 gap-3 w-full max-w-xl">
+              <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
                 {[
-                  { icon: "📧", title: "Read & Summarize", desc: "Summarize your recent emails", prompt: "Summarize my 5 most recent emails" },
-                  { icon: "✉️", title: "Draft Emails", desc: "Compose and send messages", prompt: "Draft an email to" },
-                  { icon: "📅", title: "Book Meetings", desc: "Schedule with conflict checking", prompt: "Schedule a meeting for tomorrow at 10am" },
-                  { icon: "🔍", title: "Search Inbox", desc: "Find any email by topic", prompt: "Find emails about" },
+                  { icon: Mail, title: "Read & Summarize", desc: "Summarize your recent emails", prompt: "Summarize my 5 most recent emails", color: "text-blue-500" },
+                  { icon: PenLine, title: "Draft Emails", desc: "Compose and send messages", prompt: "Draft an email to", color: "text-emerald-500" },
+                  { icon: CalendarClock, title: "Book Meetings", desc: "Schedule with conflict checking", prompt: "Schedule a meeting for tomorrow at 10am", color: "text-purple-500" },
+                  { icon: Search, title: "Search Inbox", desc: "Find any email by topic", prompt: "Find emails about", color: "text-amber-500" },
                 ].map((item) => (
                   <button
                     key={item.title}
@@ -276,10 +276,12 @@ export function ChatPanel({
                     className="p-4 text-left rounded-xl border border-border bg-card/50 hover:bg-muted/60 transition-all group cursor-pointer shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-2xl">{item.icon}</span>
+                      <div className={`p-2 rounded-lg bg-background border border-border shadow-sm ${item.color}`}>
+                        <item.icon className="h-5 w-5" />
+                      </div>
                       <ArrowRight className="h-4.5 w-4.5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <p className="text-base font-bold text-foreground">{item.title}</p>
+                    <p className="text-base font-bold text-foreground mt-2">{item.title}</p>
                     <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
                   </button>
                 ))}
@@ -298,7 +300,7 @@ export function ChatPanel({
           </div>
         ) : (
           /* ── Message list ── */
-          <div key={renderKey} className={`${compact ? "w-full" : "max-w-2xl mx-auto"} space-y-4 px-4`}>
+          <div key={renderKey} className={`${compact ? "w-full" : "max-w-4xl mx-auto"} space-y-4 px-4`}>
             {visibleMessages.map((m) => {
               const toolParts = getToolParts(m);
 
@@ -473,7 +475,7 @@ export function ChatPanel({
       <div className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-3" : "p-4"}`}>
         {/* File chips */}
         {selectedFiles.length > 0 && (
-          <div className="w-full max-w-2xl mx-auto flex flex-wrap gap-1.5 mb-2 px-1 animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl mx-auto flex flex-wrap gap-1.5 mb-2 px-1 animate-in fade-in duration-200">
             {selectedFiles.map((file, idx) => (
               <div key={idx} className="flex items-center gap-1.5 bg-secondary border border-border rounded-lg px-2 py-1 text-xs">
                 <Paperclip className="h-2.5 w-2.5 text-muted-foreground" />
@@ -486,7 +488,7 @@ export function ChatPanel({
 
         <form
           onSubmit={onSubmit}
-          className="w-full max-w-2xl mx-auto relative flex items-center bg-card border border-border rounded-xl px-2.5 py-1 hover:border-border/80 focus-within:border-border transition-all shadow-inner"
+          className="w-full max-w-4xl mx-auto relative flex items-center bg-card border border-border rounded-xl px-2.5 py-1 hover:border-border/80 focus-within:border-border transition-all shadow-inner"
         >
           <input
             type="text"
