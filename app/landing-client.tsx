@@ -387,11 +387,9 @@ export default function LandingClient() {
     setActiveSection(id);
     const element = document.getElementById(id);
     if (element) {
-      const wrapper = element.closest(".section-stack-wrapper") || element;
-      const targetY = (wrapper as HTMLElement).offsetTop;
-      window.scrollTo({
-        top: targetY,
-        behavior: "smooth"
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
       });
     }
   };
@@ -607,16 +605,16 @@ export default function LandingClient() {
       </section>
 
       {/* Additional Page Sections — sticky stacking scroll */}
-      <div className="section-stack-wrapper" style={{ zIndex: 2 }}>
+      <div id="features" className="section-stack-wrapper" style={{ zIndex: 2 }}>
         <Features />
       </div>
-      <div className="section-stack-wrapper" style={{ zIndex: 3 }}>
+      <div id="testimonials" className="section-stack-wrapper" style={{ zIndex: 3 }}>
         <Testimonials />
       </div>
-      <div className="section-stack-wrapper" style={{ zIndex: 4 }}>
+      <div id="pricing" className="section-stack-wrapper" style={{ zIndex: 4 }}>
         <Pricing />
       </div>
-      <div className="section-stack-wrapper" style={{ zIndex: 5 }}>
+      <div id="faqs" className="section-stack-wrapper" style={{ zIndex: 5 }}>
         <FAQs />
       </div>
       <div className="section-stack-wrapper" style={{ zIndex: 6 }}>

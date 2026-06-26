@@ -20,16 +20,16 @@ export default function Navbar() {
 
         {/* Navigation Links */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-          <a href="#features" className="nav-anim-link hover:text-white transition-colors">
+          <a href="/#features" className="nav-anim-link hover:text-white transition-colors">
             Features
           </a>
-          <a href="#testimonials" className="nav-anim-link hover:text-white transition-colors">
+          <a href="/#testimonials" className="nav-anim-link hover:text-white transition-colors">
             Testimonials
           </a>
-          <a href="#pricing" className="nav-anim-link hover:text-white transition-colors">
+          <a href="/#pricing" className="nav-anim-link hover:text-white transition-colors">
             Pricing
           </a>
-          <a href="#faqs" className="nav-anim-link hover:text-white transition-colors">
+          <a href="/#faqs" className="nav-anim-link hover:text-white transition-colors">
             FAQs
           </a>
         </nav>
