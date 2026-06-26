@@ -207,12 +207,24 @@ export function ChatPanel({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // A message is "visible" if it has text, is from user (but not a system prompt), or has tool parts
+  // A message is "visible" if it has text, is from user (but not a system prompt), or has visible UI tool parts
   const visibleMessages = messages.filter(
     (m) => {
       const text = getMessageText(m);
       if (m.role === "user" && text.startsWith("[System:")) return false;
-      return text.trim() !== "" || m.role === "user" || hasToolParts(m);
+      
+      const hasVisibleTools = getToolParts(m).some((p: any) => {
+         const toolName = p.type.replace(/^tool-/, "");
+         if (toolName === "draft_email") return true;
+         if (toolName === "draft_calendar_event") return true;
+         if (toolName === "run_script" && p.state === "output-available" && p.output) {
+           const list = Array.isArray(p.output) ? p.output : Array.isArray(p.output?.emails) ? p.output.emails : [];
+           if (list.length > 0 && (list[0]?.subject || list[0]?.sender || list[0]?.from || list[0]?.snippet)) return true;
+         }
+         return false;
+      });
+
+      return text.trim() !== "" || m.role === "user" || hasVisibleTools;
     }
   );
 

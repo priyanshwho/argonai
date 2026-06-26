@@ -127,7 +127,7 @@ export function InboxPanel({
         const res = await fetch("/api/emails/summarize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ emailId }),
+          body: JSON.stringify({ gmailId: emailId }),
         });
         if (res.ok) {
           const data = await res.json();
