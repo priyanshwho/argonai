@@ -4,8 +4,8 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import Footer from "@/components/landing/footer";
 
 export const metadata = {
-  title: "Privacy Policy | ARGON AI",
-  description: "Privacy Policy and Google OAuth Data Disclosure for ARGON AI Workspace Command Center.",
+  title: "Privacy Policy | ArgonAI",
+  description: "Privacy Policy and Google OAuth Data Disclosure for ArgonAI Workspace Command Center.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
               <Shield className="h-4.5 w-4.5" />
             </div>
             <span className="text-lg font-bold tracking-tight font-serif uppercase text-foreground group-hover:text-primary transition-colors">
-              ARGON AI
+              ArgonAI
             </span>
           </Link>
 
@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-            ARGON AI (Arkham Labs) values your privacy. This policy details how we handle, process, and protect your Google user data.
+            ArgonAI values your privacy. This policy details how we handle, process, and protect your Google user data.
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
                 1. Overview & Google User Data Policy Compliance
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                ARGON AI integrates directly with Google Workspace APIs (Gmail and Google Calendar) to create an unified inbox and scheduler co-pilot. Our use and transfer of information received from Google APIs to any other app will adhere to the{" "}
+                ArgonAI integrates directly with Google Workspace APIs (Gmail and Google Calendar) to create a unified inbox and scheduler co-pilot. Our use and transfer of information received from Google APIs to any other app will adhere to the{" "}
                 <a 
                   href="https://developers.google.com/terms/api-services-user-data-policy" 
                   target="_blank" 
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
                 2. What Google Data We Access
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                To activate the AI assistant, Argon AI requests permission to connect to your Google Account. We access:
+                To activate the AI assistant, ArgonAI requests permission to connect to your Google Account. We access:
               </p>
               <div className="grid gap-4 sm:grid-cols-2 mt-2">
                 <div className="flex gap-3 bg-secondary/10 border border-border/30 rounded-xl p-4">
@@ -149,7 +149,7 @@ export default function PrivacyPolicyPage() {
                 <div className="flex items-start gap-2.5">
                   <Eye className="h-4 w-4 text-primary shrink-0 mt-1" />
                   <p>
-                    <span className="font-semibold text-foreground">No Permanent Email Body Retention:</span> We cache mail headers (subject, sender, date, snippets) locally to facilitate lightning-fast searches. Full email contents are fetched dynamically from the Google APIs on-demand and are never persistently written to disk.
+                    <span className="font-semibold text-foreground">No Permanent Email Body Retention:</span> We cache mail headers (subject, sender, date, snippets) locally to facilitate lightning-fast searches. Full email contents are fetched dynamically from the Google APIs on-demand and are never persistently stored.
                   </p>
                 </div>
                 <div className="flex items-start gap-2.5">
@@ -173,13 +173,13 @@ export default function PrivacyPolicyPage() {
                 <div className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 text-primary shrink-0 mt-1" />
                   <p>
-                    <span className="font-semibold text-foreground">Deleting Your Account:</span> In the dashboard configurations settings page, you can delete your Argon AI account. This instantly executes a cascade delete, purging all saved sessions, conversations, user accounts, and local integration metadata from our database.
+                    <span className="font-semibold text-foreground">Deleting Your Account:</span> In the dashboard configurations settings page, you can delete your ArgonAI account. This instantly executes a cascade delete, purging all saved sessions, conversations, user accounts, and local integration metadata from our database.
                   </p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <Shield className="h-4 w-4 text-primary shrink-0 mt-1" />
                   <p>
-                    <span className="font-semibold text-foreground">Revoking Google OAuth:</span> You can disconnect Argon AI access at any time through Google's Account Security permissions console at{" "}
+                    <span className="font-semibold text-foreground">Revoking Google OAuth:</span> You can disconnect ArgonAI access at any time through Google's Account Security permissions console at{" "}
                     <a 
                       href="https://myaccount.google.com/permissions" 
                       target="_blank" 

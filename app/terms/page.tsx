@@ -4,8 +4,8 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import Footer from "@/components/landing/footer";
 
 export const metadata = {
-  title: "Terms of Service | ARGON AI",
-  description: "Terms of Service and User Agreement for ARGON AI Workspace Command Center.",
+  title: "Terms of Service | ArgonAI",
+  description: "Terms of Service and User Agreement for ArgonAI Workspace Command Center.",
 };
 
 export default function TermsOfServicePage() {
@@ -23,7 +23,7 @@ export default function TermsOfServicePage() {
               <Scale className="h-4.5 w-4.5" />
             </div>
             <span className="text-lg font-bold tracking-tight font-serif uppercase text-foreground group-hover:text-primary transition-colors">
-              ARGON AI
+              ArgonAI
             </span>
           </Link>
 
@@ -50,7 +50,7 @@ export default function TermsOfServicePage() {
             Terms of Service
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-            Please read these terms carefully before accessing or using the ARGON AI workspace command center.
+            Please read these terms carefully before accessing or using the ArgonAI workspace command center.
           </p>
         </div>
 
@@ -74,7 +74,7 @@ export default function TermsOfServicePage() {
                 <span>1. Acceptance of Terms</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                By signing up for, logging into, or using ARGON AI (operated under Arkham Labs), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree with any part of these terms, you are prohibited from utilizing our service and must disconnect your integrations.
+                By signing up for, logging into, or using ArgonAI, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree with any part of these terms, you are prohibited from utilizing our service and must disconnect your integrations.
               </p>
             </section>
 
@@ -85,7 +85,7 @@ export default function TermsOfServicePage() {
                 <span>2. Description of Service</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                ARGON AI is an artificial intelligence-driven productivity tool. It integrates with Google Workspace via OAuth, synchronizing Gmail threads and Calendar events into a local, isolated dashboard. The service generates text summaries, drafts replies, searches messages, and checks calendar slots using large language models (LLMs).
+                ArgonAI is an artificial intelligence-driven productivity tool. It integrates with Google Workspace via OAuth, synchronizing Gmail threads and Calendar events into a local, isolated dashboard. The service generates text summaries, drafts replies, searches messages, and checks calendar slots using large language models (LLMs).
               </p>
             </section>
 
@@ -96,10 +96,10 @@ export default function TermsOfServicePage() {
                 <span>3. AI Disclaimer & Human-in-the-Loop Rule</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                ARGON AI uses generative artificial intelligence models to formulate summaries and email/calendar drafts. Generative AI may occasionally produce inaccurate, misleading, or incorrect text (commonly referred to as "hallucinations").
+                ArgonAI uses generative artificial intelligence models to formulate summaries and email/calendar drafts. Generative AI may occasionally produce inaccurate, misleading, or incorrect text (commonly referred to as "hallucinations").
               </p>
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-xs md:text-sm text-foreground/90 font-mono leading-relaxed">
-                <span className="font-bold text-primary">CRITICAL USER REQUIREMENT:</span> ARGON AI implements interactive drafting cards. You MUST review, verify, and approve all AI-drafted email replies and calendar events before clicking the "Send" or "Schedule" triggers. You assume full legal responsibility for any messages transmitted or scheduled via your connected Google Account.
+                <span className="font-bold text-primary">CRITICAL USER REQUIREMENT:</span> ArgonAI implements interactive drafting cards. You MUST review, verify, and approve all AI-drafted email replies and calendar events before clicking the "Send" or "Schedule" triggers. You assume full legal responsibility for any messages transmitted or scheduled via your connected Google Account.
               </div>
             </section>
 
@@ -110,7 +110,7 @@ export default function TermsOfServicePage() {
                 <span>4. Acceptable Use Guidelines</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                You agree not to use ARGON AI to:
+                You agree not to use ArgonAI to:
               </p>
               <ul className="list-disc list-inside space-y-1.5 text-sm text-muted-foreground pl-2">
                 <li>Send automated spam, phishing campaigns, or bulk marketing emails.</li>
@@ -127,10 +127,10 @@ export default function TermsOfServicePage() {
                 <span>5. Limitation of Liability & Disclaimers</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. ARGON AI DISCLAIMS ALL WARRANTIES, EXPRESSED OR IMPLIED, INCLUDING FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+                THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS. ArgonAI DISCLAIMS ALL WARRANTIES, EXPRESSED OR IMPLIED, INCLUDING FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Under no circumstances shall ARGON AI, Arkham Labs, or its developers be liable for direct, indirect, incidental, or consequential damages resulting from data loss, sync errors, Google service outages, account revocation, or AI-generated output.
+                Under no circumstances shall ArgonAI or its developers be liable for direct, indirect, incidental, or consequential damages resulting from data loss, sync errors, Google service outages, account revocation, or AI-generated output.
               </p>
             </section>
 
@@ -141,7 +141,7 @@ export default function TermsOfServicePage() {
                 <span>6. Account Termination</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                We reserve the right to suspend or terminate your access to ARGON AI if these Terms of Service are violated. You can delete your account and clear all local caches at any time via the Settings console.
+                We reserve the right to suspend or terminate your access to ArgonAI if these Terms of Service are violated. You can delete your account and clear all local caches at any time via the Settings console.
               </p>
             </section>
 

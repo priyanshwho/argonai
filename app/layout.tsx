@@ -25,8 +25,8 @@ const sarala = Sarala({
 });
 
 export const metadata: Metadata = {
-  title: "ARGON — AI Command Center",
-  description: "AI-powered command center for Gmail and Google Calendar",
+  title: "ArgonAI — AI Command Center",
+  description: "ArgonAI is an AI-powered command center that integrates with Gmail and Google Calendar to summarize emails, draft replies, and manage schedules.",
 };
 
 export default function RootLayout({

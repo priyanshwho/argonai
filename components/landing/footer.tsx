@@ -140,14 +140,14 @@ export default function Footer() {
       <div className="relative z-10 grid w-full gap-8 xl:grid-cols-3 xl:gap-8 items-start">
         <AnimatedContainer className="space-y-4">
           <Link href="/" className="flex items-center select-none -mt-8">
-            <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-20 w-auto" />
-            <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-20 w-auto" />
+            <img src="/BL-ARGON.png" alt="ArgonAI" className="dark:hidden h-20 w-auto" />
+            <img src="/WL-ARGON.png" alt="ArgonAI" className="hidden dark:block h-20 w-auto" />
           </Link>
           <p className="text-muted-foreground mt-2 text-sm font-sans max-w-xs leading-relaxed">
             AI-powered command center for Gmail and Google Calendar. Secure, multi-tenant workspace sync.
           </p>
           <p className="text-muted-foreground mt-4 text-xs font-mono">
-            © {new Date().getFullYear()} ARGON AI. All rights reserved.
+            © {new Date().getFullYear()} ArgonAI. All rights reserved.
           </p>
         </AnimatedContainer>
 

@@ -534,7 +534,7 @@ export default function LandingClient() {
         <div className="header z-10">
           <span className="welcome-label text-xs md:text-sm uppercase tracking-[0.3em] text-foreground/60 mb-2 select-none block">Welcome to</span>
           <Link href="/sign-in" className="cursor-pointer">
-            <h1>ARGON AI</h1>
+            <h1>ArgonAI</h1>
           </Link>
         </div>
 
@@ -547,7 +547,7 @@ export default function LandingClient() {
               It <span className="italic font-bold text-primary">Acts.</span>
             </p>
             <span className="text-xs md:text-sm font-sans text-muted-foreground/80 max-w-lg mx-auto tracking-wide select-none leading-relaxed px-4 block text-center">
-              Argon AI is an AI executive assistant that integrates with Gmail and Google Calendar to summarize emails, draft replies, manage schedules, and automate workflows.
+              ArgonAI is an intelligent workspace co-pilot that securely integrates with your Gmail inbox and Google Calendar. By accessing your emails and calendar data, ArgonAI summarizes threads, drafts replies, monitors scheduling overlaps, and organizes events directly within a single dashboard.
             </span>
           </div>
           <div className="w-full max-w-[600px] h-[110px] flex items-center justify-center relative" style={{ marginTop: "-30px" }}>
