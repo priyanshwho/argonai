@@ -546,8 +546,8 @@ export default function LandingClient() {
               <br />
               It <span className="italic font-bold text-primary">Acts.</span>
             </p>
-            <span className="text-xs md:text-sm font-sans text-muted-foreground/80 max-w-lg mx-auto tracking-wide select-none leading-relaxed px-4 block text-center">
-              ArgonAI is an intelligent workspace co-pilot that securely integrates with your Gmail inbox and Google Calendar. By accessing your emails and calendar data, ArgonAI summarizes threads, drafts replies, monitors scheduling overlaps, and organizes events directly within a single dashboard.
+            <span className="text-xs md:text-sm font-sans text-muted-foreground/80 max-w-lg mx-auto tracking-wide select-none leading-relaxed px-4 block text-center font-medium">
+              ArgonAI is an AI executive assistant that connects to Gmail and Google Calendar to summarize emails, draft replies, organize schedules, and automate workflows—all from a single dashboard.
             </span>
           </div>
           <div className="w-full max-w-[600px] h-[110px] flex items-center justify-center relative" style={{ marginTop: "-30px" }}>
