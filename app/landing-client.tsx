@@ -19,7 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const heroBeams = [
   {
-    path: "M 0,100 L 220,100",
+    path: "M 0,80 L 260,80",
     gradientConfig: {
       initial: { x1: "0%", x2: "0%", y1: "50%", y2: "50%" },
       animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["50%", "50%"], y2: ["50%", "50%"] },
@@ -27,7 +27,7 @@ const heroBeams = [
     }
   },
   {
-    path: "M 600,100 L 380,100",
+    path: "M 600,80 L 340,80",
     gradientConfig: {
       initial: { x1: "100%", x2: "100%", y1: "50%", y2: "50%" },
       animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["50%", "50%"], y2: ["50%", "50%"] },
@@ -35,7 +35,7 @@ const heroBeams = [
     }
   },
   {
-    path: "M 100,0 C 100,50 150,100 220,100",
+    path: "M 100,0 C 100,40 150,80 260,80",
     gradientConfig: {
       initial: { x1: "0%", x2: "0%", y1: "0%", y2: "0%" },
       animate: { x1: ["0%", "100%"], x2: ["10%", "110%"], y1: ["0%", "50%"], y2: ["0%", "50%"] },
@@ -43,7 +43,7 @@ const heroBeams = [
     }
   },
   {
-    path: "M 500,200 C 500,150 450,100 380,100",
+    path: "M 500,160 C 500,120 450,80 340,80",
     gradientConfig: {
       initial: { x1: "100%", x2: "100%", y1: "100%", y2: "100%" },
       animate: { x1: ["100%", "0%"], x2: ["90%", "-10%"], y1: ["100%", "50%"], y2: ["100%", "50%"] },
@@ -564,9 +564,13 @@ export default function LandingClient() {
                 }}
                 className="w-full h-full"
               >
-                <Link href="/sign-up" className="get-started-btn inline-flex items-center justify-center select-none z-20">
-                  ✦ &nbsp; Get Started
-                </Link>
+                <div className="get-started-btn-wrapper">
+                  <div className="get-started-btn-pulse-ring" />
+                  <div className="get-started-btn-pulse-ring-2" />
+                  <Link href="/sign-up" className="get-started-btn inline-flex items-center justify-center select-none z-20">
+                    ✦ &nbsp; Get Started
+                  </Link>
+                </div>
               </PulseBeams>
             </div>
           </div>
