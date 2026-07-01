@@ -145,8 +145,18 @@
 }
 
 ::view-transition-new(root) {
-  animation: none;
+  /* 700ms clip-path reveal from the toggle origin — vars are set by JS before startViewTransition */
+  animation: 700ms ease-in-out forwards circle-reveal;
   mix-blend-mode: normal;
+}
+
+@keyframes circle-reveal {
+  from {
+    clip-path: circle(0px at var(--toggle-x, 50%) var(--toggle-y, 50%));
+  }
+  to {
+    clip-path: circle(var(--toggle-r, 200%) at var(--toggle-x, 50%) var(--toggle-y, 50%));
+  }
 }
 
 

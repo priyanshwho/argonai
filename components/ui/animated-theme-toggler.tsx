@@ -17,7 +17,7 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
   const darkMode = resolvedTheme === "dark"
   const transitioningRef = useRef(false)
 
-  const onToggle = useCallback(async () => {
+  const onToggle = useCallback(() => {
     if (!buttonRef.current || transitioningRef.current) return
 
     const toggled = !darkMode
@@ -30,12 +30,17 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
     transitioningRef.current = true
 
     const { left, top, width, height } = buttonRef.current.getBoundingClientRect()
-    const centerX = left + width / 2
-    const centerY = top + height / 2
-    const maxDistance = Math.hypot(
-      Math.max(centerX, window.innerWidth - centerX),
-      Math.max(centerY, window.innerHeight - centerY)
+    const cx = left + width / 2
+    const cy = top + height / 2
+    const r = Math.hypot(
+      Math.max(cx, window.innerWidth - cx),
+      Math.max(cy, window.innerHeight - cy)
     )
+
+    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
+    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
+    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
+    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
 
     const transition = document.startViewTransition(() => {
       flushSync(() => {
@@ -43,29 +48,9 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
       })
     })
 
-    try {
-      await transition.ready
-
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${centerX}px ${centerY}px)`,
-            `circle(${maxDistance}px at ${centerX}px ${centerY}px)`,
-          ],
-        },
-        {
-          duration: 700,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      )
-
-      await transition.finished
-    } catch {
-      // Transition was aborted by a new one — safe to ignore
-    } finally {
-      transitioningRef.current = false
-    }
+    transition.finished
+      .then(() => { transitioningRef.current = false })
+      .catch(() => { transitioningRef.current = false })
   }, [darkMode, setTheme])
 
   return (
@@ -111,7 +96,7 @@ export function useAnimatedThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const transitioningRef = useRef(false)
 
-  const toggle = useCallback(async (originX?: number, originY?: number) => {
+  const toggle = useCallback((originX?: number, originY?: number) => {
     if (transitioningRef.current) return
     const toggled = resolvedTheme !== "dark"
 
@@ -124,10 +109,15 @@ export function useAnimatedThemeToggle() {
 
     const cx = originX ?? window.innerWidth / 2
     const cy = originY ?? window.innerHeight / 2
-    const maxDistance = Math.hypot(
+    const r = Math.hypot(
       Math.max(cx, window.innerWidth - cx),
       Math.max(cy, window.innerHeight - cy)
     )
+
+    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
+    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
+    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
+    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
 
     const transition = document.startViewTransition(() => {
       flushSync(() => {
@@ -135,29 +125,9 @@ export function useAnimatedThemeToggle() {
       })
     })
 
-    try {
-      await transition.ready
-
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${cx}px ${cy}px)`,
-            `circle(${maxDistance}px at ${cx}px ${cy}px)`,
-          ],
-        },
-        {
-          duration: 700,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      )
-
-      await transition.finished
-    } catch {
-      // Transition was aborted — safe to ignore
-    } finally {
-      transitioningRef.current = false
-    }
+    transition.finished
+      .then(() => { transitioningRef.current = false })
+      .catch(() => { transitioningRef.current = false })
   }, [resolvedTheme, setTheme])
 
   return toggle

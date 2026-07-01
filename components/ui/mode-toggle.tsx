@@ -9,7 +9,7 @@ export function ModeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
   const transitioningRef = useRef(false)
 
-  const toggleTheme = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const toggleTheme = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (transitioningRef.current) return
     const toggled = resolvedTheme !== "dark"
 
@@ -23,10 +23,15 @@ export function ModeToggle() {
     const rect = event.currentTarget.getBoundingClientRect()
     const cx = event.clientX || rect.left + rect.width / 2
     const cy = event.clientY || rect.top + rect.height / 2
-    const maxDistance = Math.hypot(
+    const r = Math.hypot(
       Math.max(cx, window.innerWidth - cx),
       Math.max(cy, window.innerHeight - cy)
     )
+
+    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
+    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
+    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
+    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
 
     const transition = document.startViewTransition(() => {
       flushSync(() => {
@@ -34,29 +39,9 @@ export function ModeToggle() {
       })
     })
 
-    try {
-      await transition.ready
-
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${cx}px ${cy}px)`,
-            `circle(${maxDistance}px at ${cx}px ${cy}px)`,
-          ],
-        },
-        {
-          duration: 700,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        }
-      )
-
-      await transition.finished
-    } catch {
-      // Aborted by a rapid re-click — safe to ignore
-    } finally {
-      transitioningRef.current = false
-    }
+    transition.finished
+      .then(() => { transitioningRef.current = false })
+      .catch(() => { transitioningRef.current = false })
   }
 
   return (
