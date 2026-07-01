@@ -13,7 +13,8 @@ export function EmailDraftCard({
   threadId,
   toolCallId,
   addToolResult,
-  isLoading
+  isLoading,
+  isAlreadySent
 }: {
   to: string;
   subject: string;
@@ -23,13 +24,16 @@ export function EmailDraftCard({
   toolCallId: string;
   addToolResult: (args: any) => void;
   isLoading?: boolean;
+  isAlreadySent?: boolean;
 }) {
   const [to, setTo] = useState(initialTo);
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState(initialBody);
   const [attachments, setAttachments] = useState<EmailAttachment[]>(initialAttachments);
   const [isEditing, setIsEditing] = useState(false);
-  const [status, setStatus] = useState<'draft' | 'refining' | 'sending' | 'sent' | 'error'>('draft');
+  const [status, setStatus] = useState<'draft' | 'refining' | 'sending' | 'sent' | 'error'>(
+    isAlreadySent ? 'sent' : 'draft'
+  );
   const [errorMessage, setErrorMessage] = useState('');
 
   // Sync state with props while loading (streaming)
@@ -41,6 +45,12 @@ export function EmailDraftCard({
       setAttachments(initialAttachments || []);
     }
   }, [initialTo, initialSubject, initialBody, initialAttachments, isLoading]);
+
+  useEffect(() => {
+    if (isAlreadySent) {
+      setStatus('sent');
+    }
+  }, [isAlreadySent]);
 
   const handleRefine = async (tone: string) => {
     setStatus('refining');

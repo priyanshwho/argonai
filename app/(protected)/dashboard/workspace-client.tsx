@@ -323,6 +323,48 @@ export function WorkspaceClient({
 
   const handleAddToolResult = (args: any) => {
     if (args.tool === 'draft_email' || args.tool === 'draft_calendar_event') {
+      let targetMessageId: string | undefined;
+      let updatedPartsList: any[] = [];
+
+      messages.forEach((msg) => {
+        if (Array.isArray(msg.parts)) {
+          const hasTool = msg.parts.some((p: any) => p.toolCallId === args.toolCallId);
+          if (hasTool) {
+            targetMessageId = msg.id;
+            updatedPartsList = msg.parts.map((p: any) => {
+              if (p.toolCallId === args.toolCallId) {
+                return {
+                  ...p,
+                  state: 'output-available',
+                  output: args.output
+                };
+              }
+              return p;
+            });
+          }
+        }
+      });
+
+      if (targetMessageId) {
+        setMessages((prevMessages) => {
+          return prevMessages.map((msg) => {
+            if (msg.id === targetMessageId) {
+              return { ...msg, parts: updatedPartsList };
+            }
+            return msg;
+          });
+        });
+
+        fetch('/api/chat/update-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messageId: targetMessageId,
+            parts: updatedPartsList
+          })
+        }).catch((err) => console.error('Failed to persist tool output state to DB:', err));
+      }
+
       sendMessage({
         text: `[System: The ${args.tool === 'draft_email' ? 'email was sent' : 'event was scheduled'} successfully. Give a short 1 sentence confirmation to the user.]`
       }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
@@ -625,6 +667,7 @@ export function WorkspaceClient({
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onOpenCommandPalette={() => setOpenCommandPalette(true)}
+          chatTitle={conversations.find((c) => c.id === activeChatId)?.title}
         />
 
         <div className="flex-1 overflow-y-auto relative">

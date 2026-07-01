@@ -49,7 +49,6 @@ export function DashboardSidebar({
   onChatChange,
 }: DashboardSidebarProps) {
   const navItems = [
-    { id: "chat", label: "AI Assistant", icon: Bot, href: `/dashboard/${activeChatId}` },
     {
       id: "inbox",
       label: "Inbox Workspace",
@@ -187,7 +186,7 @@ export function DashboardSidebar({
               Recent Conversations
             </div>
             {conversations
-              .filter((c) => c.messages.length > 0 || c.id === activeChatId)
+              .filter((c) => c.messages.length > 0)
               .map((c) => {
                 const isActive = activeTab === "chat" && activeChatId === c.id && !showSearchResults;
                 return (

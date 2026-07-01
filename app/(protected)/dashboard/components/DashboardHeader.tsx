@@ -10,6 +10,7 @@ interface DashboardHeaderProps {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   onOpenCommandPalette: () => void;
+  chatTitle?: string;
 }
 
 export function DashboardHeader({
@@ -18,11 +19,12 @@ export function DashboardHeader({
   searchQuery,
   setSearchQuery,
   onOpenCommandPalette,
+  chatTitle,
 }: DashboardHeaderProps) {
   const tabLabel = showSearchResults
     ? "Search Results"
     : activeTab === "chat"
-    ? "AI Assistant"
+    ? (chatTitle || "AI Assistant")
     : activeTab === "inbox"
     ? "Emails Inbox"
     : activeTab === "calendar"

@@ -397,6 +397,7 @@ export function ChatPanel({
                               }
                             }
 
+                            const alreadySent = state === "output-available" && output?.success === true;
                             return (
                               <EmailDraftCard
                                 key={toolCallId}
@@ -408,6 +409,7 @@ export function ChatPanel({
                                 toolCallId={toolCallId}
                                 addToolResult={addToolResult}
                                 isLoading={state === "input-streaming"}
+                                isAlreadySent={alreadySent}
                               />
                             );
                           }

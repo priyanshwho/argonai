@@ -108,6 +108,12 @@ export function CalendarDraftCard({
     }
   }, [isLoading]);
 
+  useEffect(() => {
+    if (isAlreadyCreated) {
+      setStatus('created');
+    }
+  }, [isAlreadyCreated]);
+
   const handleSuggestAlternative = async () => {
     setRefiningAlternative(true);
     try {
