@@ -138,11 +138,20 @@
   }
 }
 
-/* Animated theme transition - suppress default cross-fade */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
+/* Animated theme transition - suppress default cross-fade and keep transition alive for 700ms */
+::view-transition-old(root) {
+  animation: dummy-fade 700ms;
   mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: dummy-fade 700ms;
+  mix-blend-mode: normal;
+}
+
+@keyframes dummy-fade {
+  from { opacity: 1; }
+  to { opacity: 1; }
 }
 
 /* Testimonials Column Vertical Scrolling Animation */

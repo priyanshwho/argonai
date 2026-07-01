@@ -485,7 +485,7 @@ export default function LandingClient() {
       <section className="hero">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 z-0 bg-no-repeat bg-cover opacity-[0.3] dark:opacity-[1] pointer-events-none blur-md dark:blur-none"
+          className="absolute inset-0 z-0 bg-no-repeat bg-cover opacity-[0] dark:opacity-[1] pointer-events-none blur-md dark:blur-none"
           style={{ 
             backgroundImage: "url('/HERO-BGMM.png')",
             backgroundPosition: "50% center",

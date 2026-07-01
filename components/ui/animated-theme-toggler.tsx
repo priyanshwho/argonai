@@ -26,12 +26,6 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
       return
     }
 
-    await document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(toggled ? "dark" : "light")
-      })
-    }).ready
-
     const { left, top, width, height } = buttonRef.current.getBoundingClientRect()
     const centerX = left + width / 2
     const centerY = top + height / 2
@@ -39,6 +33,14 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
       Math.max(centerX, window.innerWidth - centerX),
       Math.max(centerY, window.innerHeight - centerY)
     )
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(toggled ? "dark" : "light")
+      })
+    })
+
+    await transition.ready
 
     document.documentElement.animate(
       {
@@ -107,17 +109,18 @@ export function useAnimatedThemeToggle() {
 
     const cx = originX ?? window.innerWidth / 2
     const cy = originY ?? window.innerHeight / 2
-
-    await document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(toggled ? "dark" : "light")
-      })
-    }).ready
-
     const maxDistance = Math.hypot(
       Math.max(cx, window.innerWidth - cx),
       Math.max(cy, window.innerHeight - cy)
     )
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(toggled ? "dark" : "light")
+      })
+    })
+
+    await transition.ready
 
     document.documentElement.animate(
       {

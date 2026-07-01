@@ -2,12 +2,48 @@
 import { useTheme } from "next-themes"
 import { Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { flushSync } from "react-dom"
+import React from "react"
 
 export function ModeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  const toggleTheme = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const toggled = resolvedTheme !== "dark"
+
+    if (!document.startViewTransition) {
+      setTheme(toggled ? "dark" : "light")
+      return
+    }
+
+    const cx = event.clientX
+    const cy = event.clientY
+    const maxDistance = Math.hypot(
+      Math.max(cx, window.innerWidth - cx),
+      Math.max(cy, window.innerHeight - cy)
+    )
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(toggled ? "dark" : "light")
+      })
+    })
+
+    await transition.ready
+
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${cx}px ${cy}px)`,
+          `circle(${maxDistance}px at ${cx}px ${cy}px)`,
+        ],
+      },
+      {
+        duration: 700,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    )
   }
 
   return (

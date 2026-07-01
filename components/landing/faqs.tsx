@@ -72,7 +72,7 @@ export default function FAQs() {
     >
       {/* Background Image */}
       <div 
-        className="absolute inset-0 z-0 bg-no-repeat bg-cover bg-center opacity-[0.2] dark:opacity-[0.5] pointer-events-none blur-md dark:blur-none"
+        className="absolute inset-0 z-0 bg-no-repeat bg-cover bg-center opacity-[0] dark:opacity-[0.5] pointer-events-none blur-md dark:blur-none"
         style={{ 
           backgroundImage: "url('/FAQ-bgm.png')",
         }}
