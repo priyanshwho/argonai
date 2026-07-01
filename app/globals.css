@@ -176,3 +176,22 @@
   box-shadow: 0 0 25px rgba(196, 30, 58, 0.25);
   background-color: var(--card);
 }
+
+/* Custom Scrollbar - Cherry Red */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c41e3a; /* Cherry Red */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a0172e;
+}
