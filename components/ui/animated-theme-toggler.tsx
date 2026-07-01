@@ -11,6 +11,48 @@ type AnimatedThemeTogglerProps = {
   className?: string
 }
 
+function runCircleTransition(
+  cx: number,
+  cy: number,
+  toggled: boolean,
+  setTheme: (t: string) => void,
+  onDone: () => void
+) {
+  const r = Math.hypot(
+    Math.max(cx, window.innerWidth - cx),
+    Math.max(cy, window.innerHeight - cy)
+  )
+
+  const transition = document.startViewTransition(() => {
+    flushSync(() => {
+      setTheme(toggled ? "dark" : "light")
+    })
+  })
+
+  // .then() fires after the pseudo-elements are mounted but before the
+  // CSS vt-keepalive animation has changed anything — WAAPI runs at higher
+  // cascade priority and takes over clip-path for exactly 700ms.
+  transition.ready.then(() => {
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${cx}px ${cy}px)`,
+          `circle(${r}px at ${cx}px ${cy}px)`,
+        ],
+      },
+      {
+        duration: 700,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    )
+  }).catch(() => {/* aborted – safe to ignore */})
+
+  transition.finished
+    .then(onDone)
+    .catch(onDone)
+}
+
 export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { resolvedTheme, setTheme } = useTheme()
@@ -19,38 +61,20 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
 
   const onToggle = useCallback(() => {
     if (!buttonRef.current || transitioningRef.current) return
-
-    const toggled = !darkMode
-
     if (!document.startViewTransition) {
-      setTheme(toggled ? "dark" : "light")
+      setTheme(!darkMode ? "dark" : "light")
       return
     }
 
     transitioningRef.current = true
 
-    const { left, top, width, height } = buttonRef.current.getBoundingClientRect()
-    const cx = left + width / 2
-    const cy = top + height / 2
-    const r = Math.hypot(
-      Math.max(cx, window.innerWidth - cx),
-      Math.max(cy, window.innerHeight - cy)
-    )
+    const rect = buttonRef.current.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
 
-    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
-    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
-    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
-    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
-
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(toggled ? "dark" : "light")
-      })
+    runCircleTransition(cx, cy, !darkMode, setTheme, () => {
+      transitioningRef.current = false
     })
-
-    transition.finished
-      .then(() => { transitioningRef.current = false })
-      .catch(() => { transitioningRef.current = false })
   }, [darkMode, setTheme])
 
   return (
@@ -98,10 +122,8 @@ export function useAnimatedThemeToggle() {
 
   const toggle = useCallback((originX?: number, originY?: number) => {
     if (transitioningRef.current) return
-    const toggled = resolvedTheme !== "dark"
-
     if (!document.startViewTransition) {
-      setTheme(toggled ? "dark" : "light")
+      setTheme(resolvedTheme !== "dark" ? "dark" : "light")
       return
     }
 
@@ -109,25 +131,10 @@ export function useAnimatedThemeToggle() {
 
     const cx = originX ?? window.innerWidth / 2
     const cy = originY ?? window.innerHeight / 2
-    const r = Math.hypot(
-      Math.max(cx, window.innerWidth - cx),
-      Math.max(cy, window.innerHeight - cy)
-    )
 
-    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
-    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
-    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
-    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
-
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(toggled ? "dark" : "light")
-      })
+    runCircleTransition(cx, cy, resolvedTheme !== "dark", setTheme, () => {
+      transitioningRef.current = false
     })
-
-    transition.finished
-      .then(() => { transitioningRef.current = false })
-      .catch(() => { transitioningRef.current = false })
   }, [resolvedTheme, setTheme])
 
   return toggle

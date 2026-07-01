@@ -28,16 +28,27 @@ export function ModeToggle() {
       Math.max(cy, window.innerHeight - cy)
     )
 
-    // Set CSS vars BEFORE startViewTransition so the CSS @keyframe picks them up
-    document.documentElement.style.setProperty("--toggle-x", `${cx}px`)
-    document.documentElement.style.setProperty("--toggle-y", `${cy}px`)
-    document.documentElement.style.setProperty("--toggle-r", `${r}px`)
-
     const transition = document.startViewTransition(() => {
       flushSync(() => {
         setTheme(toggled ? "dark" : "light")
       })
     })
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${cx}px ${cy}px)`,
+            `circle(${r}px at ${cx}px ${cy}px)`,
+          ],
+        },
+        {
+          duration: 700,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      )
+    }).catch(() => {})
 
     transition.finished
       .then(() => { transitioningRef.current = false })

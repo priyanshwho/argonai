@@ -138,27 +138,25 @@
   }
 }
 
-/* Animated theme transition */
+/* Animated theme transition
+   - ::view-transition-old: freeze the old snapshot (no animation)
+   - ::view-transition-new: run vt-keepalive so the pseudo-element stays
+     alive for 700ms — giving the WAAPI clip-path animation time to finish.
+     WAAPI has higher cascade priority and overrides the clip-path. */
 ::view-transition-old(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
 ::view-transition-new(root) {
-  /* 700ms clip-path reveal from the toggle origin — vars are set by JS before startViewTransition */
-  animation: 700ms ease-in-out forwards circle-reveal;
+  animation: 700ms forwards vt-keepalive;
   mix-blend-mode: normal;
 }
 
-@keyframes circle-reveal {
-  from {
-    clip-path: circle(0px at var(--toggle-x, 50%) var(--toggle-y, 50%));
-  }
-  to {
-    clip-path: circle(var(--toggle-r, 200%) at var(--toggle-x, 50%) var(--toggle-y, 50%));
-  }
+@keyframes vt-keepalive {
+  from { opacity: 1; }
+  to   { opacity: 1; }
 }
-
 
 
 /* Testimonials Column Vertical Scrolling Animation */
