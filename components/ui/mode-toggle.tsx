@@ -3,18 +3,22 @@ import { useTheme } from "next-themes"
 import { Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { flushSync } from "react-dom"
-import React from "react"
+import React, { useRef } from "react"
 
 export function ModeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
+  const transitioningRef = useRef(false)
 
   const toggleTheme = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (transitioningRef.current) return
     const toggled = resolvedTheme !== "dark"
 
     if (!document.startViewTransition) {
       setTheme(toggled ? "dark" : "light")
       return
     }
+
+    transitioningRef.current = true
 
     const rect = event.currentTarget.getBoundingClientRect()
     const cx = event.clientX || rect.left + rect.width / 2
@@ -28,10 +32,17 @@ export function ModeToggle() {
     document.documentElement.style.setProperty("--theme-toggle-y", `${cy}px`)
     document.documentElement.style.setProperty("--theme-toggle-r", `${maxDistance}px`)
 
-    document.startViewTransition(() => {
+    const transition = document.startViewTransition(() => {
       flushSync(() => {
         setTheme(toggled ? "dark" : "light")
       })
+    })
+
+    transition.ready.catch(() => {})
+    transition.finished.then(() => {
+      transitioningRef.current = false
+    }).catch(() => {
+      transitioningRef.current = false
     })
   }
 

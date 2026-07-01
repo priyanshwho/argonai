@@ -16,8 +16,10 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
   const { resolvedTheme, setTheme } = useTheme()
   const darkMode = resolvedTheme === "dark"
 
+  const transitioningRef = useRef(false)
+
   const onToggle = useCallback(() => {
-    if (!buttonRef.current) return
+    if (!buttonRef.current || transitioningRef.current) return
 
     const toggled = !darkMode
 
@@ -25,6 +27,8 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
       setTheme(toggled ? "dark" : "light")
       return
     }
+
+    transitioningRef.current = true
 
     const { left, top, width, height } = buttonRef.current.getBoundingClientRect()
     const centerX = left + width / 2
@@ -38,10 +42,17 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
     document.documentElement.style.setProperty("--theme-toggle-y", `${centerY}px`)
     document.documentElement.style.setProperty("--theme-toggle-r", `${maxDistance}px`)
 
-    document.startViewTransition(() => {
+    const transition = document.startViewTransition(() => {
       flushSync(() => {
         setTheme(toggled ? "dark" : "light")
       })
+    })
+
+    transition.ready.catch(() => {})
+    transition.finished.then(() => {
+      transitioningRef.current = false
+    }).catch(() => {
+      transitioningRef.current = false
     })
   }, [darkMode, setTheme])
 
@@ -87,13 +98,18 @@ export const AnimatedThemeToggler = ({ className }: AnimatedThemeTogglerProps) =
 export function useAnimatedThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
 
+  const transitioningRef = useRef(false)
+
   const toggle = useCallback((originX?: number, originY?: number) => {
+    if (transitioningRef.current) return
     const toggled = resolvedTheme !== "dark"
 
     if (!document.startViewTransition) {
       setTheme(toggled ? "dark" : "light")
       return
     }
+
+    transitioningRef.current = true
 
     const cx = originX ?? window.innerWidth / 2
     const cy = originY ?? window.innerHeight / 2
@@ -106,10 +122,17 @@ export function useAnimatedThemeToggle() {
     document.documentElement.style.setProperty("--theme-toggle-y", `${cy}px`)
     document.documentElement.style.setProperty("--theme-toggle-r", `${maxDistance}px`)
 
-    document.startViewTransition(() => {
+    const transition = document.startViewTransition(() => {
       flushSync(() => {
         setTheme(toggled ? "dark" : "light")
       })
+    })
+
+    transition.ready.catch(() => {})
+    transition.finished.then(() => {
+      transitioningRef.current = false
+    }).catch(() => {
+      transitioningRef.current = false
     })
   }, [resolvedTheme, setTheme])
 
