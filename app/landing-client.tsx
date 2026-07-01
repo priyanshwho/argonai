@@ -52,20 +52,27 @@ const heroBeams = [
   }
 ];
 
-const getStaticOffsetTop = (element: HTMLElement): number => {
-  const originalPosition = element.style.position;
-  const originalPriority = element.style.getPropertyPriority("position");
-  
-  element.style.setProperty("position", "static", "important");
-  const offset = element.offsetTop;
-  
-  if (originalPosition) {
-    element.style.setProperty("position", originalPosition, originalPriority);
-  } else {
-    element.style.removeProperty("position");
+/**
+ * Compute the scroll-Y needed to bring a sticky section-stack-wrapper into
+ * view. Because every wrapper is `position:sticky; top:0`, the browser
+ * stacks them visually, but `offsetTop` only returns each element's
+ * normal-flow position — which is NOT the scroll offset the user needs.
+ *
+ * Instead we sum the hero height + the heights of every wrapper that
+ * precedes the target wrapper in the DOM.
+ */
+const getStickyScrollTarget = (targetWrapper: HTMLElement): number => {
+  const allWrappers = Array.from(
+    document.querySelectorAll<HTMLElement>(".section-stack-wrapper")
+  );
+  const hero = document.querySelector<HTMLElement>(".hero");
+  let scrollY = hero ? hero.offsetHeight : window.innerHeight;
+
+  for (const wrapper of allWrappers) {
+    if (wrapper === targetWrapper) break;
+    scrollY += wrapper.offsetHeight;
   }
-  
-  return offset;
+  return scrollY;
 };
 
 export default function LandingClient() {
@@ -101,8 +108,8 @@ export default function LandingClient() {
   const handleScrollClick = () => {
     const element = document.getElementById("features");
     if (element) {
-      const wrapper = element.closest(".section-stack-wrapper") || element;
-      const targetY = getStaticOffsetTop(wrapper as HTMLElement);
+      const wrapper = (element.closest(".section-stack-wrapper") || element) as HTMLElement;
+      const targetY = getStickyScrollTarget(wrapper);
       window.scrollTo({
         top: targetY,
         behavior: "smooth"
@@ -131,7 +138,7 @@ export default function LandingClient() {
     const handleDblTap = (e: MouseEvent) => {
       const now = Date.now();
       if (now - lastTap < 350) {
-        toggleThemeRef.current(e.clientX, e.clientY);
+        toggleThemeRef.current();
       }
       lastTap = now;
     };
@@ -378,8 +385,8 @@ export default function LandingClient() {
       for (const id of sections) {
         const el = document.getElementById(id);
         if (el) {
-          const wrapper = el.closest(".section-stack-wrapper") || el;
-          const top = getStaticOffsetTop(wrapper as HTMLElement);
+          const wrapper = (el.closest(".section-stack-wrapper") || el) as HTMLElement;
+          const top = getStickyScrollTarget(wrapper);
           if (scrollPosition >= top) {
             currentSection = id;
           }
@@ -404,14 +411,45 @@ export default function LandingClient() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Intercept all hash-based anchor link clicks (e.g. from the footer) to smoothly scroll
+  useEffect(() => {
+    if (typeof window === "undefined" || !containerRef.current) return;
+
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (!href) return;
+
+      const hashMatch = href.match(/#([a-zA-Z0-9_-]+)$/);
+      if (!hashMatch) return;
+
+      const id = hashMatch[1];
+      const sections = ["features", "testimonials", "pricing", "faqs"];
+      if (sections.includes(id)) {
+        const element = document.getElementById(id);
+        if (element) {
+          e.preventDefault();
+          scrollToSection(id);
+        }
+      }
+    };
+
+    const el = containerRef.current;
+    el.addEventListener("click", handleAnchorClick);
+    return () => el.removeEventListener("click", handleAnchorClick);
+  }, []);
+
   const scrollToSection = (id: string) => {
     setActiveSection(id);
     // Update URL hash without triggering a page jump
     history.pushState(null, "", `#${id}`);
     const element = document.getElementById(id);
     if (element) {
-      const wrapper = element.closest(".section-stack-wrapper") || element;
-      const targetY = getStaticOffsetTop(wrapper as HTMLElement);
+      const wrapper = (element.closest(".section-stack-wrapper") || element) as HTMLElement;
+      const targetY = getStickyScrollTarget(wrapper);
       window.scrollTo({
         top: targetY,
         behavior: "smooth"
@@ -428,8 +466,8 @@ export default function LandingClient() {
       requestAnimationFrame(() => {
         const element = document.getElementById(id);
         if (element) {
-          const wrapper = element.closest(".section-stack-wrapper") || element;
-          const targetY = getStaticOffsetTop(wrapper as HTMLElement);
+          const wrapper = (element.closest(".section-stack-wrapper") || element) as HTMLElement;
+          const targetY = getStickyScrollTarget(wrapper);
           window.scrollTo({ top: targetY, behavior: "smooth" });
           setActiveSection(id);
         }

@@ -138,25 +138,7 @@
   }
 }
 
-/* Animated theme transition
-   - ::view-transition-old: freeze the old snapshot (no animation)
-   - ::view-transition-new: run vt-keepalive so the pseudo-element stays
-     alive for 700ms — giving the WAAPI clip-path animation time to finish.
-     WAAPI has higher cascade priority and overrides the clip-path. */
-::view-transition-old(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
 
-::view-transition-new(root) {
-  animation: 700ms forwards vt-keepalive;
-  mix-blend-mode: normal;
-}
-
-@keyframes vt-keepalive {
-  from { opacity: 1; }
-  to   { opacity: 1; }
-}
 
 
 /* Testimonials Column Vertical Scrolling Animation */
