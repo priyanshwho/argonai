@@ -52,6 +52,22 @@ const heroBeams = [
   }
 ];
 
+const getStaticOffsetTop = (element: HTMLElement): number => {
+  const originalPosition = element.style.position;
+  const originalPriority = element.style.getPropertyPriority("position");
+  
+  element.style.setProperty("position", "static", "important");
+  const offset = element.offsetTop;
+  
+  if (originalPosition) {
+    element.style.setProperty("position", originalPosition, originalPriority);
+  } else {
+    element.style.removeProperty("position");
+  }
+  
+  return offset;
+};
+
 export default function LandingClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const toggleTheme = useAnimatedThemeToggle();
@@ -86,7 +102,7 @@ export default function LandingClient() {
     const element = document.getElementById("features");
     if (element) {
       const wrapper = element.closest(".section-stack-wrapper") || element;
-      const targetY = (wrapper as HTMLElement).offsetTop;
+      const targetY = getStaticOffsetTop(wrapper as HTMLElement);
       window.scrollTo({
         top: targetY,
         behavior: "smooth"
@@ -363,7 +379,7 @@ export default function LandingClient() {
         const el = document.getElementById(id);
         if (el) {
           const wrapper = el.closest(".section-stack-wrapper") || el;
-          const top = (wrapper as HTMLElement).offsetTop;
+          const top = getStaticOffsetTop(wrapper as HTMLElement);
           if (scrollPosition >= top) {
             currentSection = id;
           }
@@ -388,7 +404,7 @@ export default function LandingClient() {
     const element = document.getElementById(id);
     if (element) {
       const wrapper = element.closest(".section-stack-wrapper") || element;
-      const targetY = (wrapper as HTMLElement).offsetTop;
+      const targetY = getStaticOffsetTop(wrapper as HTMLElement);
       window.scrollTo({
         top: targetY,
         behavior: "smooth"
