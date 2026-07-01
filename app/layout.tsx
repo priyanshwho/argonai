@@ -27,6 +27,9 @@ const sarala = Sarala({
 export const metadata: Metadata = {
   title: "ARGON — AI Command Center",
   description: "AI-powered command center for Gmail and Google Calendar",
+  icons: {
+    icon: "/logo.jpeg",
+  },
 };
 
 export default function RootLayout({
