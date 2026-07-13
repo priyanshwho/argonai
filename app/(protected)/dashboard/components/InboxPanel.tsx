@@ -337,17 +337,16 @@ export function InboxPanel({
                 <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider block mb-2">
                   {selectedEmail.htmlBody || selectedEmail.body ? "Message Content" : "Snippet"}
                 </span>
-                <div className="border border-border/80 rounded-xl overflow-hidden bg-white shadow-inner">
+                <div className="border border-border/80 rounded-xl overflow-hidden bg-background shadow-inner">
                   {selectedEmail.htmlBody ? (
                     <iframe
                       srcDoc={selectedEmail.htmlBody}
                       sandbox="allow-popups allow-popups-to-escape-sandbox"
-                      className="w-full border-0 h-[400px] bg-white"
+                      className="w-full border-0 h-[400px] bg-background"
                       title="Email Content"
-                      style={{ colorScheme: "light" }}
                     />
                   ) : (
-                    <div className="text-base text-foreground/90 p-4 leading-relaxed break-words whitespace-pre-wrap select-text max-h-[300px] overflow-y-auto pr-1 bg-card/10">
+                    <div className="text-base text-foreground p-4 leading-relaxed break-words whitespace-pre-wrap select-text max-h-[300px] overflow-y-auto pr-1">
                       {selectedEmail.body || selectedEmail.snippet}
                     </div>
                   )}
