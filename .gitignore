@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-implemetation_plan.txt
+
 # testing
 /coverage
 
@@ -44,5 +44,22 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Ignore all markdown files except README.md
+*.md
+**/*.md
+!README.md
+!**/README.md
 
-argon.md
+# Large media / demo files
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Internal planning & scratch files
+implemetation_plan.txt
+/scratch/
+
+# Agent workspace files
+AGENTS.md
+CLAUDE.md
