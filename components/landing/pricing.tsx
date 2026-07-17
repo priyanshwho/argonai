@@ -56,7 +56,7 @@ export default function Pricing() {
   ];
 
   return (
-    <section className="min-h-screen flex flex-col justify-center py-4 md:py-5 border-t border-border bg-background text-foreground relative overflow-hidden">
+    <section className="min-h-screen flex flex-col justify-center pt-20 pb-8 border-t border-border bg-background text-foreground relative overflow-hidden">
       {/* Background glow decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px] pointer-events-none" />
 
