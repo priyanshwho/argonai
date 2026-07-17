@@ -29,14 +29,14 @@ export default function CTA() {
         {/* CTA Actions */}
         <div className="flex flex-col sm:flex-row gap-5 items-center justify-center pt-4">
           <Link
-            href="/sign-up"
+            href="/sign-in"
             className="group flex h-14 items-center justify-center gap-2.5 rounded-full bg-primary px-10 text-base font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all shadow-lg"
           >
             <span>✦ Start for Free</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <a
-            href="https://youtube.com"
+            href="https://youtu.be/STNAG8hqJO8?si=Z5yjuEOuXLreFGz1"
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-14 items-center justify-center gap-2.5 rounded-full border border-border/80 bg-card/40 hover:bg-card/90 px-10 text-base font-medium text-foreground backdrop-blur-sm active:scale-95 transition-all"
