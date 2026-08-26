@@ -6,14 +6,15 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, Sparkles, ArrowRight } from "lucide-react";
 import { DEFAULT_AUTH_CALLBACK } from "../utils";
 
 interface CredentialSignUpProps {
   callbackUrl?: string;
+  onUseDemo?: () => void;
 }
 
-export function CredentialSignUp({ callbackUrl }: CredentialSignUpProps) {
+export function CredentialSignUp({ callbackUrl, onUseDemo }: CredentialSignUpProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -69,6 +70,31 @@ export function CredentialSignUp({ callbackUrl }: CredentialSignUpProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Demo Credentials Quick Fill & Switch Banner */}
+      {onUseDemo && (
+        <div className="flex items-center justify-between p-2.5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all duration-200">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-foreground">Explore with Demo Account</p>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary/20 text-primary font-medium">Instant Test</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground font-mono truncate">demo.argon22@gmail.com</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onUseDemo}
+            className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-foreground hover:bg-primary transition-all duration-150 cursor-pointer bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20 active:scale-95"
+          >
+            <span>Fill & Sign In</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+      )}
       {error && (
         <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20">
           <AlertCircle className="h-4 w-4 shrink-0" />

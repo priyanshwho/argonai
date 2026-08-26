@@ -19,6 +19,7 @@ export function AuthSwitch({ callbackUrl }: AuthSwitchProps) {
   // Set default active tab based on current pathname
   const initialTab = pathname?.includes("/sign-up") ? "signup" : "signin";
   const [activeTab, setActiveTab] = useState<"signin" | "signup">(initialTab);
+  const [demoTrigger, setDemoTrigger] = useState<{ email: string; password: string; timestamp: number } | null>(null);
 
   // Sync active tab with pathname changes (e.g. browser back/forward buttons)
   useEffect(() => {
@@ -36,6 +37,17 @@ export function AuthSwitch({ callbackUrl }: AuthSwitchProps) {
       : `/sign-up${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`;
     
     router.replace(targetUrl);
+  };
+
+  const handleUseDemo = () => {
+    setDemoTrigger({
+      email: "demo.argon22@gmail.com",
+      password: "peter@22",
+      timestamp: Date.now(),
+    });
+    if (activeTab !== "signin") {
+      handleTabChange("signin");
+    }
   };
 
   return (
@@ -64,9 +76,9 @@ export function AuthSwitch({ callbackUrl }: AuthSwitchProps) {
               transition={{ duration: 0.2 }}
             >
               {activeTab === "signin" ? (
-                <CredentialSignIn callbackUrl={callbackUrl} />
+                <CredentialSignIn callbackUrl={callbackUrl} demoTrigger={demoTrigger} />
               ) : (
-                <CredentialSignUp callbackUrl={callbackUrl} />
+                <CredentialSignUp callbackUrl={callbackUrl} onUseDemo={handleUseDemo} />
               )}
             </motion.div>
           </AnimatePresence>
