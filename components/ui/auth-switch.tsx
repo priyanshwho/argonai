@@ -51,12 +51,12 @@ export function AuthSwitch({ callbackUrl }: AuthSwitchProps) {
   };
 
   return (
-    <Card className="border border-[#c41e3a]/40 dark:border-[#c41e3a]/30 bg-white/5 dark:bg-black/20 backdrop-blur-3xl shadow-2xl sm:rounded-2xl transition-all duration-300 hover:border-[#c41e3a]/70 dark:hover:border-[#c41e3a]/60 hover:shadow-[0_0_25px_rgba(196,30,58,0.15)]">
-      <CardHeader className="space-y-4 text-center pt-8">
-        <CardTitle className="text-4xl font-semibold tracking-tight font-serif text-foreground">
+    <Card className="border border-[#c41e3a]/40 dark:border-[#c41e3a]/30 bg-white/5 dark:bg-black/20 backdrop-blur-3xl shadow-2xl rounded-2xl transition-all duration-300 hover:border-[#c41e3a]/70 dark:hover:border-[#c41e3a]/60 hover:shadow-[0_0_25px_rgba(196,30,58,0.15)] overflow-hidden">
+      <CardHeader className="space-y-2 sm:space-y-3 text-center pt-6 sm:pt-8 px-4 sm:px-6 pb-2 sm:pb-4">
+        <CardTitle className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight font-serif text-foreground">
           ARGON AI
         </CardTitle>
-        <CardDescription className="text-muted-foreground text-sm max-w-[280px] mx-auto">
+        <CardDescription className="text-muted-foreground text-xs sm:text-sm max-w-[280px] mx-auto">
           {activeTab === "signin" 
             ? "Welcome back. Enter your credentials."
             : "Create an account to manage Gmail and Calendar."
@@ -64,7 +64,7 @@ export function AuthSwitch({ callbackUrl }: AuthSwitchProps) {
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="grid gap-6">
+      <CardContent className="grid gap-4 sm:gap-6 px-4 sm:px-6 pb-6 sm:pb-8">
         {/* Tab Forms Content with Fade Animation */}
         <div className="relative min-h-[220px]">
           <AnimatePresence mode="wait">

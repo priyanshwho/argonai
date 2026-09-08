@@ -104,7 +104,7 @@ export default function AuthLayoutClient({ children }: { children: React.ReactNo
   ];
 
   return (
-    <div className="relative flex min-h-svh w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-12 transition-colors duration-300 auth-page-container">
+    <div className="relative flex min-h-svh w-full flex-col items-center overflow-x-hidden overflow-y-auto bg-background transition-colors duration-300 auth-page-container">
       {/* Dynamic Theme color overlay */}
       <div className="absolute inset-0 z-0 bg-background/10 dark:bg-background/25 transition-colors duration-300 pointer-events-none" />
 
@@ -134,7 +134,7 @@ export default function AuthLayoutClient({ children }: { children: React.ReactNo
       </div>
 
       {/* Pulse Beams Background Animation */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
         <PulseBeams
           beams={beams}
           width={dimensions.width}
@@ -211,23 +211,25 @@ export default function AuthLayoutClient({ children }: { children: React.ReactNo
       `}</style>
 
       {/* Top Header Controls */}
-      <header className="absolute top-0 left-0 right-0 z-10 flex w-full justify-between items-center px-6 py-4 md:px-8">
+      <header className="sticky top-0 z-30 flex w-full items-center justify-between px-4 py-3 sm:px-6 sm:py-4 md:px-8 shrink-0">
         <Link 
           href="/" 
-          className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1.5 px-3 rounded-full hover:bg-muted/40 border border-transparent hover:border-border/30"
+          className="group flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors py-1.5 px-3 rounded-full hover:bg-muted/40 border border-border/20 bg-background/50 backdrop-blur-md"
         >
-          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:-translate-x-0.5" />
           <span>Back to ARGON AI</span>
         </Link>
 
-        <div className="flex items-center justify-center rounded-full border border-border/30 bg-background/50 p-1 backdrop-blur-xs">
+        <div className="flex items-center justify-center rounded-full border border-border/30 bg-background/50 p-1">
           <ModeToggle />
         </div>
       </header>
 
       {/* Content Container */}
-      <main ref={cardRef} className="relative z-10 w-full max-w-md animate-fade-in duration-500">
-        {children}
+      <main ref={cardRef} className="relative z-10 flex w-full max-w-md flex-1 flex-col items-center justify-center px-3 py-4 sm:px-4 sm:py-8 my-auto animate-fade-in duration-500">
+        <div className="w-full">
+          {children}
+        </div>
       </main>
     </div>
   );

@@ -78,17 +78,17 @@ export function OAuthSignIn({ callbackUrl }: OAuthSignInProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       <form onSubmit={handleGoogleSignIn}>
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
         <Button
           type="submit"
           variant="outline"
-          className="w-full flex items-center justify-center cursor-pointer py-5 border-border/20 bg-background/20 dark:bg-background/15 backdrop-blur-xs hover:bg-background/40 dark:hover:bg-background/30 transition-all duration-300 hover:shadow-[0_0_15px_rgba(66,133,244,0.25)] hover:border-[#4285F4]/40"
+          className="w-full h-10 sm:h-11 flex items-center justify-center cursor-pointer text-xs sm:text-sm border-border/20 bg-background/20 dark:bg-background/15 backdrop-blur-xs hover:bg-background/40 dark:hover:bg-background/30 transition-all duration-300 hover:shadow-[0_0_15px_rgba(66,133,244,0.25)] hover:border-[#4285F4]/40"
           disabled={loadingProvider !== null}
         >
           {loadingProvider === "google" ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-muted-foreground" />
           ) : (
             <GoogleIcon />
           )}
@@ -101,11 +101,11 @@ export function OAuthSignIn({ callbackUrl }: OAuthSignInProps) {
         <Button
           type="submit"
           variant="outline"
-          className="w-full flex items-center justify-center cursor-pointer py-5 border-border/20 bg-background/20 dark:bg-background/15 backdrop-blur-xs hover:bg-background/40 dark:hover:bg-background/30 transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:border-foreground/30"
+          className="w-full h-10 sm:h-11 flex items-center justify-center cursor-pointer text-xs sm:text-sm border-border/20 bg-background/20 dark:bg-background/15 backdrop-blur-xs hover:bg-background/40 dark:hover:bg-background/30 transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] dark:hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:border-foreground/30"
           disabled={loadingProvider !== null}
         >
           {loadingProvider === "github" ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin text-muted-foreground" />
           ) : (
             <GitHubIcon />
           )}
