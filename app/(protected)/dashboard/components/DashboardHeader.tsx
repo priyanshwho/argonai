@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Menu, Download } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardHeaderProps {
@@ -12,8 +12,6 @@ interface DashboardHeaderProps {
   onOpenCommandPalette: () => void;
   chatTitle?: string;
   onOpenMobileMenu?: () => void;
-  onOpenInstall?: () => void;
-  canInstall?: boolean;
 }
 
 export function DashboardHeader({
@@ -24,8 +22,6 @@ export function DashboardHeader({
   onOpenCommandPalette,
   chatTitle,
   onOpenMobileMenu,
-  onOpenInstall,
-  canInstall,
 }: DashboardHeaderProps) {
   const tabLabel = showSearchResults
     ? "Search Results"
@@ -52,18 +48,6 @@ export function DashboardHeader({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 max-w-[200px] sm:max-w-xs md:max-w-sm w-full justify-end">
-        {canInstall && onOpenInstall && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onOpenInstall}
-            className="hidden sm:flex h-8 border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs px-2.5 gap-1.5 rounded-lg font-semibold cursor-pointer shrink-0"
-            title="Install ARGON AI as Application"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Install</span>
-          </Button>
-        )}
 
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground/60" />

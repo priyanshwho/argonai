@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/components/providers/loading-provider";
 import { authClient } from "@/lib/auth-client";
 import { Bot, ChevronLeft } from "lucide-react";
-import { usePwaInstall, PwaInstallDialog } from "@/components/ui/pwa-install-dialog";
 
 // Modular components
 import { DashboardSidebar } from "./components/DashboardSidebar";
@@ -49,8 +48,6 @@ export function WorkspaceClient({
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAssistantOpen, setMobileAssistantOpen] = useState(false);
-  const [pwaInstallOpen, setPwaInstallOpen] = useState(false);
-  const { canInstall, isInstalled } = usePwaInstall();
 
   // ── URL query param handling ─────────────────────────────────────────────
   useEffect(() => {
@@ -670,8 +667,6 @@ export function WorkspaceClient({
         onChatChange={selectConversation}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        onOpenInstall={() => setPwaInstallOpen(true)}
-        canInstall={canInstall}
       />
 
       {/* MIDDLE: Main content */}
@@ -684,8 +679,6 @@ export function WorkspaceClient({
           onOpenCommandPalette={() => setOpenCommandPalette(true)}
           chatTitle={conversations.find((c) => c.id === activeChatId)?.title}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onOpenInstall={() => setPwaInstallOpen(true)}
-          canInstall={canInstall}
         />
 
         <div className="flex-1 overflow-y-auto relative">
@@ -889,13 +882,8 @@ export function WorkspaceClient({
           setCalendarRightPanelMode("manual");
         }}
       />
-
-      {/* PWA Install Dialog */}
-      <PwaInstallDialog
-        open={pwaInstallOpen}
-        onOpenChange={setPwaInstallOpen}
-      />
     </div>
   );
 }
+
 
