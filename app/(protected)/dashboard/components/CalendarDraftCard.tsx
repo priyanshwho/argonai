@@ -301,7 +301,7 @@ export function CalendarDraftCard({
           <div className="flex gap-2 text-destructive">
             <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <p className="text-xs font-bold">⚠️ Calendar Conflict Detected</p>
+              <p className="text-xs font-bold">Calendar Conflict Detected</p>
               <p className="text-xs text-destructive/80">The proposed slot overlaps with these events in your schedule:</p>
             </div>
           </div>

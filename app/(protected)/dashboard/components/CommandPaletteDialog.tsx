@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  Bot, Sparkles, Calendar,
+  Bot, Sparkles, Calendar, Inbox, Settings,
 } from "lucide-react";
 import {
   Command,
@@ -49,7 +49,7 @@ export function CommandPaletteDialog({
               <CommandShortcut>⌘1</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => { onNavigate("inbox"); close(); }}>
-              <span className="mr-2">📥</span>
+              <Inbox className="mr-2 h-4 w-4" />
               <span>Go to Emails Inbox</span>
               <CommandShortcut>⌘2</CommandShortcut>
             </CommandItem>
@@ -59,7 +59,7 @@ export function CommandPaletteDialog({
               <CommandShortcut>⌘3</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => { onSettings(); close(); }}>
-              <span className="mr-2">⚙️</span>
+              <Settings className="mr-2 h-4 w-4" />
               <span>Go to Settings Panel</span>
               <CommandShortcut>⌘4</CommandShortcut>
             </CommandItem>
