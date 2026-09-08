@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/components/providers/loading-provider";
 import { authClient } from "@/lib/auth-client";
 import { Bot, ChevronLeft } from "lucide-react";
+import { usePwaInstall, PwaInstallDialog } from "@/components/ui/pwa-install-dialog";
 
 // Modular components
 import { DashboardSidebar } from "./components/DashboardSidebar";
@@ -46,6 +47,10 @@ export function WorkspaceClient({
   const [openCommandPalette, setOpenCommandPalette] = useState(false);
   const [calendarRightPanelMode, setCalendarRightPanelMode] = useState<"assistant" | "manual">("assistant");
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileAssistantOpen, setMobileAssistantOpen] = useState(false);
+  const [pwaInstallOpen, setPwaInstallOpen] = useState(false);
+  const { canInstall, isInstalled } = usePwaInstall();
 
   // ── URL query param handling ─────────────────────────────────────────────
   useEffect(() => {
@@ -451,6 +456,8 @@ export function WorkspaceClient({
   const selectConversation = (chatId: string) => {
     setActiveChatId(chatId);
     setActiveTab("chat");
+    setMobileMenuOpen(false);
+    setMobileAssistantOpen(false);
     setShowSearchResults(false);
     window.history.pushState(null, '', `/dashboard/${chatId}`);
   };
@@ -459,12 +466,16 @@ export function WorkspaceClient({
     const newId = `chat-${Date.now()}`;
     setActiveChatId(newId);
     setActiveTab("chat");
+    setMobileMenuOpen(false);
+    setMobileAssistantOpen(false);
     setShowSearchResults(false);
     window.history.pushState(null, '', `/dashboard/${newId}`);
   };
 
   const handleTabChange = (tabId: "chat" | "inbox" | "calendar" | "configuration") => {
     setActiveTab(tabId);
+    setMobileMenuOpen(false);
+    setMobileAssistantOpen(false);
     setShowSearchResults(false);
     window.history.pushState(null, '', `/dashboard/${activeChatId}${tabId === 'chat' ? '' : `?tab=${tabId}`}`);
   };
@@ -657,6 +668,10 @@ export function WorkspaceClient({
         hasCalendar={initialHasCalendar}
         onTabChange={handleTabChange}
         onChatChange={selectConversation}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        onOpenInstall={() => setPwaInstallOpen(true)}
+        canInstall={canInstall}
       />
 
       {/* MIDDLE: Main content */}
@@ -668,6 +683,9 @@ export function WorkspaceClient({
           setSearchQuery={setSearchQuery}
           onOpenCommandPalette={() => setOpenCommandPalette(true)}
           chatTitle={conversations.find((c) => c.id === activeChatId)?.title}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          onOpenInstall={() => setPwaInstallOpen(true)}
+          canInstall={canInstall}
         />
 
         <div className="flex-1 overflow-y-auto relative">
@@ -741,9 +759,9 @@ export function WorkspaceClient({
         </div>
       </section>
 
-      {/* RIGHT: Persistent AI sidecar (when not on Chat tab) */}
+      {/* RIGHT: Persistent AI sidecar (desktop only when not on Chat tab) */}
       {activeTab !== "chat" && (
-        <section className={`flex flex-col overflow-hidden shrink-0 border-l border-border/60 bg-card/25 transition-all duration-300 ease-in-out ${
+        <section className={`hidden md:flex flex-col overflow-hidden shrink-0 border-l border-border/60 bg-card/25 transition-all duration-300 ease-in-out ${
           rightPanelCollapsed ? "w-16" : "w-[380px]"
         }`}>
           {rightPanelCollapsed ? (
@@ -810,6 +828,45 @@ export function WorkspaceClient({
         </section>
       )}
 
+      {/* MOBILE: Floating Assistant Action Button when on Inbox or Calendar */}
+      {activeTab !== "chat" && (
+        <button
+          onClick={() => setMobileAssistantOpen(true)}
+          className="md:hidden fixed bottom-5 right-5 z-40 px-3.5 py-2.5 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center gap-2 font-bold text-xs hover:scale-105 active:scale-95 transition-all cursor-pointer border border-primary-foreground/20"
+          title="Open ARGON AI Assistant"
+        >
+          <Bot className="h-4 w-4 animate-pulse" />
+          <span>Assistant</span>
+        </button>
+      )}
+
+      {/* MOBILE: Assistant Drawer / Bottom Sheet */}
+      {activeTab !== "chat" && mobileAssistantOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setMobileAssistantOpen(false)}
+          />
+          <div className="relative z-10 w-full h-[85vh] bg-background border-t border-border rounded-t-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+            <div className="h-12 border-b border-border flex items-center justify-between px-4 shrink-0 bg-card/90 backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold text-foreground">ARGON AI Assistant</span>
+              </div>
+              <button
+                onClick={() => setMobileAssistantOpen(false)}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground py-1 px-2.5 rounded-lg hover:bg-muted cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ChatPanel {...chatPanelProps} compact onCollapse={() => setMobileAssistantOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Command Palette ⌘K */}
       <CommandPaletteDialog
         open={openCommandPalette}
@@ -832,6 +889,13 @@ export function WorkspaceClient({
           setCalendarRightPanelMode("manual");
         }}
       />
+
+      {/* PWA Install Dialog */}
+      <PwaInstallDialog
+        open={pwaInstallOpen}
+        onOpenChange={setPwaInstallOpen}
+      />
     </div>
   );
 }
+

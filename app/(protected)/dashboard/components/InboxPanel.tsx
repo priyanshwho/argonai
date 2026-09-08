@@ -3,7 +3,7 @@
 import React from "react";
 import {
   RefreshCw, Inbox, Sparkles, Send, Edit3, Clipboard,
-  Check, AlertCircle, ArrowRight,
+  Check, AlertCircle, ArrowRight, ChevronLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmailItem } from "./types";
@@ -106,12 +106,15 @@ export function InboxPanel({
     hoverTimeoutRef.current = setTimeout(async () => {
       setHoveredEmailId(emailId);
       
-      // Check cache
+      // Check in-memory cache first
+      if (hoverSummaries[emailId]) return;
+
+      // Check localStorage cache
       const cacheKey = `email_summary_${emailId}`;
       try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          const item = JSON.parse(cached);
+        const cachedItem = localStorage.getItem(cacheKey);
+        if (cachedItem) {
+          const item = JSON.parse(cachedItem);
           if (Date.now() - item.timestamp <= CACHE_EXPIRY_MS) {
             setHoverSummaries(prev => ({ ...prev, [emailId]: item.summary }));
             return;
@@ -161,7 +164,7 @@ export function InboxPanel({
       {/* Email List Workspace */}
       <div
         className={`flex flex-col h-full shrink-0 transition-all ${
-          selectedEmail ? "w-[360px]" : "flex-1"
+          selectedEmail ? "hidden md:flex md:w-[360px]" : "w-full flex-1"
         }`}
       >
         {/* Sticky Filters row */}
@@ -172,7 +175,7 @@ export function InboxPanel({
               <button
                 key={f.id}
                 onClick={() => onFilterChange(f.id)}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm font-bold scale-[1.02]"
                     : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
@@ -185,7 +188,7 @@ export function InboxPanel({
         </div>
 
         {/* Scrollable Email List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
           {emailsLoading ? (
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-24">
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -229,7 +232,7 @@ export function InboxPanel({
                   }}
                   onMouseEnter={() => handleMouseEnter(email.gmailId || email.id)}
                   onMouseLeave={handleMouseLeave}
-                  className={`w-full p-3 flex items-start gap-2.5 text-left rounded-xl border transition-all relative group ${
+                  className={`w-full p-3 flex items-start gap-2.5 text-left rounded-xl border transition-all relative group cursor-pointer ${
                     selectedEmail?.id === email.id
                       ? "bg-accent border-primary/30 shadow-sm"
                       : "bg-card/60 border-border/60 hover:bg-muted/60 hover:border-border"
@@ -262,7 +265,7 @@ export function InboxPanel({
 
                   {/* Hover Summary Tooltip */}
                   {hoveredEmailId === email.id && !selectedEmail && (
-                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none text-left">
+                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none text-left hidden lg:block">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-4 w-4 text-primary" />
                         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">AI Summary</span>
@@ -291,18 +294,29 @@ export function InboxPanel({
 
       {/* Email Detail */}
       {selectedEmail && (
-        <div className="flex-1 overflow-y-auto p-6 bg-card/10 select-text flex flex-col gap-6">
+        <div className="flex-1 w-full overflow-y-auto p-4 sm:p-6 bg-card/10 select-text flex flex-col gap-5 sm:gap-6 animate-in fade-in duration-200">
           <div className="flex justify-between items-center pb-3 border-b border-border/60">
-            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-              Email Details
-            </h3>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedEmail(null)}
+                className="md:hidden text-xs -ml-2 hover:bg-muted text-primary font-bold cursor-pointer h-8 px-2 flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>Inbox</span>
+              </Button>
+              <h3 className="text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                Email Details
+              </h3>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedEmail(null)}
-              className="text-sm hover:bg-muted text-muted-foreground shrink-0 cursor-pointer h-8"
+              className="text-xs sm:text-sm hover:bg-muted text-muted-foreground shrink-0 cursor-pointer h-8"
             >
-              Close Details
+              Close
             </Button>
           </div>
 

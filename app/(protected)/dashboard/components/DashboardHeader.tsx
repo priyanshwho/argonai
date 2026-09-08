@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search } from "lucide-react";
+import { Search, Menu, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardHeaderProps {
@@ -11,6 +11,9 @@ interface DashboardHeaderProps {
   setSearchQuery: (v: string) => void;
   onOpenCommandPalette: () => void;
   chatTitle?: string;
+  onOpenMobileMenu?: () => void;
+  onOpenInstall?: () => void;
+  canInstall?: boolean;
 }
 
 export function DashboardHeader({
@@ -20,6 +23,9 @@ export function DashboardHeader({
   setSearchQuery,
   onOpenCommandPalette,
   chatTitle,
+  onOpenMobileMenu,
+  onOpenInstall,
+  canInstall,
 }: DashboardHeaderProps) {
   const tabLabel = showSearchResults
     ? "Search Results"
@@ -32,23 +38,46 @@ export function DashboardHeader({
     : "Configuration";
 
   return (
-    <header className="h-14 border-b border-border/60 flex items-center justify-between px-6 shrink-0 bg-background/60 backdrop-blur-sm z-10 gap-4">
-      <div className="text-xl font-bold text-foreground shrink-0">{tabLabel}</div>
+    <header className="h-14 border-b border-border/60 flex items-center justify-between px-3 sm:px-6 shrink-0 bg-background/80 backdrop-blur-md z-10 gap-2 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          onClick={onOpenMobileMenu}
+          className="md:hidden p-2 -ml-1 text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 rounded-xl transition-all cursor-pointer shrink-0"
+          title="Open Menu"
+          aria-label="Open Navigation Menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="text-base sm:text-xl font-bold text-foreground truncate">{tabLabel}</div>
+      </div>
 
-      <div className="flex items-center gap-2 max-w-sm w-full">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+      <div className="flex items-center gap-1.5 sm:gap-2 max-w-[200px] sm:max-w-xs md:max-w-sm w-full justify-end">
+        {canInstall && onOpenInstall && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenInstall}
+            className="hidden sm:flex h-8 border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs px-2.5 gap-1.5 rounded-lg font-semibold cursor-pointer shrink-0"
+            title="Install ARGON AI as Application"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Install</span>
+          </Button>
+        )}
+
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground/60" />
           <input
             type="text"
-            placeholder="Search emails or events..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-card border border-border rounded-xl pl-9 pr-12 py-1.5 text-base placeholder-muted-foreground text-foreground focus:outline-none focus:border-border/80 transition-colors"
+            className="w-full bg-card border border-border rounded-xl pl-8 sm:pl-9 pr-8 sm:pr-12 py-1 sm:py-1.5 text-xs sm:text-sm placeholder-muted-foreground text-foreground focus:outline-none focus:border-border/80 transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/60 hover:text-foreground"
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 hover:text-foreground cursor-pointer"
             >
               Clear
             </button>
@@ -58,7 +87,7 @@ export function DashboardHeader({
           variant="outline"
           size="sm"
           onClick={onOpenCommandPalette}
-          className="h-8 border-border/80 bg-card text-muted-foreground hover:bg-muted hover:text-foreground text-xs px-2 gap-1 cursor-pointer"
+          className="h-7 sm:h-8 border-border/80 bg-card text-muted-foreground hover:bg-muted hover:text-foreground text-xs px-2 gap-1 cursor-pointer shrink-0"
           title="Open Command Palette (⌘K)"
         >
           <span className="font-mono text-[10px]">⌘K</span>
@@ -67,3 +96,4 @@ export function DashboardHeader({
     </header>
   );
 }
+

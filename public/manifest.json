@@ -1,0 +1,60 @@
+{
+  "name": "ARGON AI — Executive Command Center",
+  "short_name": "ARGON AI",
+  "description": "Next-generation AI executive assistant for Gmail, Google Calendar, and workflow automation.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "utilities", "business"],
+  "shortcuts": [
+    {
+      "name": "New AI Chat",
+      "short_name": "New Chat",
+      "description": "Start a new conversation with ARGON AI",
+      "url": "/dashboard/new",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Inbox Workspace",
+      "short_name": "Inbox",
+      "description": "View and manage email threads",
+      "url": "/dashboard?tab=inbox",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calendar Board",
+      "short_name": "Calendar",
+      "description": "View schedule and upcoming events",
+      "url": "/dashboard?tab=calendar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

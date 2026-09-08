@@ -3,7 +3,7 @@
 import React from "react";
 import {
   Bot, Plus, Settings, LogOut, Mail, Calendar,
-  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2,
+  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X, Download
 } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import Link from "next/link";
@@ -27,6 +27,10 @@ interface DashboardSidebarProps {
   hasCalendar: boolean;
   onTabChange: (tabId: "chat" | "inbox" | "calendar" | "configuration") => void;
   onChatChange: (chatId: string) => void;
+  mobileMenuOpen?: boolean;
+  setMobileMenuOpen?: (v: boolean) => void;
+  onOpenInstall?: () => void;
+  canInstall?: boolean;
 }
 
 export function DashboardSidebar({
@@ -47,6 +51,10 @@ export function DashboardSidebar({
   hasCalendar,
   onTabChange,
   onChatChange,
+  mobileMenuOpen,
+  setMobileMenuOpen,
+  onOpenInstall,
+  canInstall,
 }: DashboardSidebarProps) {
   const navItems = [
     {
@@ -73,187 +81,375 @@ export function DashboardSidebar({
   ];
 
   return (
-    <aside
-      className={`bg-card border-r border-border flex flex-col justify-between shrink-0 transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? "w-16" : "w-64"
-      }`}
-    >
-      {/* Top Header Section (Aligned with Dashboard Header height) */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-border/60 shrink-0">
-        <div className="flex items-center gap-2 overflow-hidden select-none">
-          {sidebarCollapsed ? (
-            <Link href="/" className="flex items-center shrink-0 justify-center w-10 h-10 overflow-hidden rounded-lg">
-              <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-9 max-w-none w-auto object-contain" />
-              <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-9 max-w-none w-auto object-contain" />
-            </Link>
-          ) : (
-            <Link href="/" className="flex items-center shrink-0 -mt-1 pl-4">
-              <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-14 w-auto object-contain" />
-              <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-14 w-auto object-contain" />
-            </Link>
-          )}
-        </div>
-        <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors shrink-0"
-          title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          <ChevronRight
-            className={`h-4.5 w-4.5 transform transition-transform duration-300 ${sidebarCollapsed ? "" : "rotate-180"}`}
+    <>
+      {/* ── MOBILE DRAWER (Slide-over with blur backdrop) ── */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex animate-in fade-in duration-200">
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen?.(false)}
           />
-        </button>
-      </div>
 
-      {/* Main Sidebar Contents */}
-      <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
-        {/* New Chat Button */}
-        <Link
-          href="/dashboard/new"
-          onClick={(e) => {
-            if (!e.metaKey && !e.ctrlKey && e.button !== 1) {
-              e.preventDefault();
-              createNewChat();
-            }
-          }}
-          className={`flex items-center gap-2 border border-border bg-background text-foreground hover:bg-muted hover:text-foreground transition-all rounded-lg font-semibold text-base ${
-            sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2"
-          }`}
-          title={sidebarCollapsed ? "New Chat" : undefined}
-        >
-          <Plus className="h-4 w-4 shrink-0" />
-          {!sidebarCollapsed && <span>New Chat</span>}
-        </Link>
-
-        {/* Navigation */}
-        <nav className="space-y-1">
-          {navItems.map((tab) => {
-            const isTabActive = activeTab === tab.id && !showSearchResults;
-            
-            const handleClick = (e: React.MouseEvent) => {
-              if (tab.action) {
-                e.preventDefault();
-                tab.action();
-              } else {
-                e.preventDefault();
-                onTabChange(tab.id as any);
-              }
-            };
-
-            return (
+          {/* Drawer content */}
+          <div className="relative w-72 max-w-[85vw] bg-card border-r border-border h-full flex flex-col justify-between shadow-2xl z-10 animate-in slide-in-from-left duration-300">
+            {/* Header with Logo & Close Button */}
+            <div className="h-14 flex items-center justify-between px-4 border-b border-border/60 shrink-0">
               <Link
-                key={tab.id}
-                href={tab.href}
-                onClick={handleClick}
-                title={tab.label}
-                className={`flex items-center rounded-lg text-base transition-all text-left relative group ${
-                  isTabActive
-                    ? "bg-accent text-accent-foreground font-medium shadow-sm"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                } ${sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2.5 gap-2.5"}`}
+                href="/"
+                onClick={() => setMobileMenuOpen?.(false)}
+                className="flex items-center shrink-0 pl-1"
               >
-                <tab.icon className="h-4.5 w-4.5 shrink-0 opacity-85" />
-                {!sidebarCollapsed && (
-                  <div className="flex-1 flex items-center justify-between min-w-0">
-                    <span className="truncate">{tab.label}</span>
-                    {tab.status !== undefined && (
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                          tab.status
-                            ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
-                            : "bg-muted-foreground/30"
-                        }`}
-                        title={tab.status ? "Connected" : "Not Connected"}
-                      />
-                    )}
-                  </div>
-                )}
-                {sidebarCollapsed && tab.status !== undefined && (
-                  <span
-                    className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ${
-                      tab.status ? "bg-emerald-500" : "bg-muted-foreground/30"
-                    }`}
-                  />
-                )}
+                <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-12 w-auto object-contain" />
+                <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-12 w-auto object-contain" />
               </Link>
-            );
-          })}
-        </nav>
-
-        {/* Conversations List */}
-        {!sidebarCollapsed && (
-          <div className="flex-1 overflow-y-auto space-y-1.5 pt-3 pr-1 transition-opacity duration-300">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
-              Recent Conversations
+              <button
+                onClick={() => setMobileMenuOpen?.(false)}
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                title="Close Menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            {conversations
-              .filter((c) => c.messages.length > 0)
-              .map((c) => {
-                const isActive = activeTab === "chat" && activeChatId === c.id && !showSearchResults;
-                return (
-                  <div key={c.id} className="group relative flex items-center w-full">
-                    <Link
-                      href={`/dashboard/${c.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onChatChange(c.id);
-                      }}
-                      className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-base transition-all text-left truncate ${
-                        isActive
-                          ? "bg-accent text-accent-foreground font-medium"
-                          : "text-muted-foreground/90 hover:bg-muted hover:text-foreground"
+
+            {/* Mobile Body */}
+            <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
+              {/* New Chat Button */}
+              <button
+                onClick={() => {
+                  createNewChat();
+                  setMobileMenuOpen?.(false);
+                }}
+                className="w-full flex items-center justify-center gap-2 border border-border bg-background text-foreground hover:bg-muted transition-all rounded-xl font-bold text-sm py-2.5 shadow-sm cursor-pointer"
+              >
+                <Plus className="h-4 w-4 shrink-0 text-primary" />
+                <span>New Chat</span>
+              </button>
+
+              {/* Navigation Tabs */}
+              <nav className="space-y-1">
+                {navItems.map((tab) => {
+                  const isTabActive = activeTab === tab.id && !showSearchResults;
+                  const handleClick = (e: React.MouseEvent) => {
+                    e.preventDefault();
+                    setMobileMenuOpen?.(false);
+                    if (tab.action) {
+                      tab.action();
+                    } else {
+                      onTabChange(tab.id as any);
+                    }
+                  };
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={handleClick}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left cursor-pointer ${
+                        isTabActive
+                          ? "bg-accent text-accent-foreground font-bold shadow-sm"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
-                      <MessageSquare className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                      <span className="truncate">{c.title}</span>
-                    </Link>
-                    <button
-                      onClick={(e) => deleteConversation(c.id, e)}
-                      className="absolute right-2 opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive hover:bg-muted rounded-md transition-all cursor-pointer"
-                      title="Delete Conversation"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <tab.icon className="h-4 w-4 shrink-0 opacity-85 text-foreground/80" />
+                      <div className="flex-1 flex items-center justify-between min-w-0">
+                        <span className="truncate">{tab.label}</span>
+                        {tab.status !== undefined && (
+                          <span
+                            className={`h-2 w-2 rounded-full shrink-0 ${
+                              tab.status
+                                ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+                                : "bg-muted-foreground/30"
+                            }`}
+                          />
+                        )}
+                      </div>
                     </button>
-                  </div>
-                );
-              })}
-          </div>
-        )}
-      </div>
+                  );
+                })}
 
-      {/* Profile + Sign Out */}
-      <div className="p-4 border-t border-border">
-        <div
-          className={`flex items-center justify-between p-2 rounded-xl bg-background/40 border border-border/50 transition-all ${
-            sidebarCollapsed ? "flex-col gap-2 p-1" : ""
-          }`}
-        >
-          <div className={`flex items-center gap-2.5 overflow-hidden ${sidebarCollapsed ? "flex-col justify-center" : ""}`}>
-            {userImage ? (
-              <img src={userImage} alt={userName} className="h-8 w-8 rounded-full" />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                {userName[0]?.toUpperCase() || "U"}
+                {/* Install App Button inside Mobile Menu */}
+                {onOpenInstall && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen?.(false);
+                      onOpenInstall();
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left cursor-pointer text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20"
+                  >
+                    <Download className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Download / Install App</span>
+                  </button>
+                )}
+              </nav>
+
+              {/* Mobile Conversations List */}
+              <div className="flex-1 overflow-y-auto space-y-1 pt-2 pr-1 border-t border-border/50">
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-2 pb-1.5">
+                  Recent Conversations
+                </div>
+                {conversations
+                  .filter((c) => c.messages.length > 0)
+                  .map((c) => {
+                    const isActive = activeTab === "chat" && activeChatId === c.id && !showSearchResults;
+                    return (
+                      <div key={c.id} className="group relative flex items-center w-full">
+                        <button
+                          onClick={() => {
+                            onChatChange(c.id);
+                            setMobileMenuOpen?.(false);
+                          }}
+                          className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-xs transition-all text-left truncate cursor-pointer ${
+                            isActive
+                              ? "bg-accent text-accent-foreground font-bold"
+                              : "text-muted-foreground/90 hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          <MessageSquare className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                          <span className="truncate">{c.title}</span>
+                        </button>
+                        <button
+                          onClick={(e) => deleteConversation(c.id, e)}
+                          className="absolute right-1.5 p-1 text-muted-foreground hover:text-destructive hover:bg-muted rounded-md transition-all cursor-pointer"
+                          title="Delete Conversation"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
-            )}
-            {!sidebarCollapsed && (
-              <div className="flex flex-col truncate transition-opacity duration-300">
-                <span className="text-sm font-semibold text-foreground truncate">{userName}</span>
-                <span className="text-xs text-muted-foreground truncate">{userEmail}</span>
+            </div>
+
+            {/* Mobile Footer */}
+            <div className="p-3 border-t border-border">
+              <div className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-border/50">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  {userImage ? (
+                    <img src={userImage} alt={userName} className="h-8 w-8 rounded-full" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
+                      {userName[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <div className="flex flex-col truncate">
+                    <span className="text-xs font-semibold text-foreground truncate">{userName}</span>
+                    <span className="text-[10px] text-muted-foreground truncate">{userEmail}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <AnimatedThemeToggler className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" />
+                  <button
+                    onClick={onSignOut}
+                    className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors cursor-pointer"
+                    title="Sign Out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <AnimatedThemeToggler className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" />
-            <button
-              onClick={onSignOut}
-              className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors"
-              title="Sign Out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      )}
+
+      {/* ── DESKTOP SIDEBAR (Collapsible) ── */}
+      <aside
+        className={`hidden md:flex bg-card border-r border-border flex-col justify-between shrink-0 transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "w-16" : "w-64"
+        }`}
+      >
+        {/* Top Header Section */}
+        <div className="h-14 flex items-center justify-between px-4 border-b border-border/60 shrink-0">
+          <div className="flex items-center gap-2 overflow-hidden select-none">
+            {sidebarCollapsed ? (
+              <Link href="/" className="flex items-center shrink-0 justify-center w-10 h-10 overflow-hidden rounded-lg">
+                <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-9 max-w-none w-auto object-contain" />
+                <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-9 max-w-none w-auto object-contain" />
+              </Link>
+            ) : (
+              <Link href="/" className="flex items-center shrink-0 -mt-1 pl-4">
+                <img src="/BL-ARGON.png" alt="ARGON AI" className="dark:hidden h-14 w-auto object-contain" />
+                <img src="/WL-ARGON.png" alt="ARGON AI" className="hidden dark:block h-14 w-auto object-contain" />
+              </Link>
+            )}
+          </div>
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors shrink-0 cursor-pointer"
+            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <ChevronRight
+              className={`h-4.5 w-4.5 transform transition-transform duration-300 ${sidebarCollapsed ? "" : "rotate-180"}`}
+            />
+          </button>
+        </div>
+
+        {/* Main Sidebar Contents */}
+        <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+          {/* New Chat Button */}
+          <Link
+            href="/dashboard/new"
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && e.button !== 1) {
+                e.preventDefault();
+                createNewChat();
+              }
+            }}
+            className={`flex items-center gap-2 border border-border bg-background text-foreground hover:bg-muted hover:text-foreground transition-all rounded-lg font-semibold text-base ${
+              sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2"
+            }`}
+            title={sidebarCollapsed ? "New Chat" : undefined}
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            {!sidebarCollapsed && <span>New Chat</span>}
+          </Link>
+
+          {/* Navigation */}
+          <nav className="space-y-1">
+            {navItems.map((tab) => {
+              const isTabActive = activeTab === tab.id && !showSearchResults;
+              
+              const handleClick = (e: React.MouseEvent) => {
+                if (tab.action) {
+                  e.preventDefault();
+                  tab.action();
+                } else {
+                  e.preventDefault();
+                  onTabChange(tab.id as any);
+                }
+              };
+
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  onClick={handleClick}
+                  title={tab.label}
+                  className={`flex items-center rounded-lg text-base transition-all text-left relative group ${
+                    isTabActive
+                      ? "bg-accent text-accent-foreground font-medium shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  } ${sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2.5 gap-2.5"}`}
+                >
+                  <tab.icon className="h-4.5 w-4.5 shrink-0 opacity-85" />
+                  {!sidebarCollapsed && (
+                    <div className="flex-1 flex items-center justify-between min-w-0">
+                      <span className="truncate">{tab.label}</span>
+                      {tab.status !== undefined && (
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                            tab.status
+                              ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+                              : "bg-muted-foreground/30"
+                          }`}
+                          title={tab.status ? "Connected" : "Not Connected"}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {sidebarCollapsed && tab.status !== undefined && (
+                    <span
+                      className={`absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full ${
+                        tab.status ? "bg-emerald-500" : "bg-muted-foreground/30"
+                      }`}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+
+            {/* Install App Trigger in Desktop Sidebar */}
+            {onOpenInstall && (
+              <button
+                onClick={onOpenInstall}
+                title="Install App"
+                className={`flex items-center rounded-lg text-xs font-semibold transition-all text-left text-primary hover:bg-primary/10 cursor-pointer ${
+                  sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2 gap-2.5"
+                }`}
+              >
+                <Download className="h-4 w-4 shrink-0" />
+                {!sidebarCollapsed && <span className="truncate">Install App</span>}
+              </button>
+            )}
+          </nav>
+
+          {/* Conversations List */}
+          {!sidebarCollapsed && (
+            <div className="flex-1 overflow-y-auto space-y-1.5 pt-3 pr-1 transition-opacity duration-300">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2.5 pb-2">
+                Recent Conversations
+              </div>
+              {conversations
+                .filter((c) => c.messages.length > 0)
+                .map((c) => {
+                  const isActive = activeTab === "chat" && activeChatId === c.id && !showSearchResults;
+                  return (
+                    <div key={c.id} className="group relative flex items-center w-full">
+                      <Link
+                        href={`/dashboard/${c.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onChatChange(c.id);
+                        }}
+                        className={`w-full flex items-center gap-2 pl-2.5 pr-8 py-2 rounded-lg text-base transition-all text-left truncate ${
+                          isActive
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : "text-muted-foreground/90 hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                        <span className="truncate">{c.title}</span>
+                      </Link>
+                      <button
+                        onClick={(e) => deleteConversation(c.id, e)}
+                        className="absolute right-2 opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive hover:bg-muted rounded-md transition-all cursor-pointer"
+                        title="Delete Conversation"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+
+        {/* Profile + Sign Out */}
+        <div className="p-4 border-t border-border">
+          <div
+            className={`flex items-center justify-between p-2 rounded-xl bg-background/40 border border-border/50 transition-all ${
+              sidebarCollapsed ? "flex-col gap-2 p-1" : ""
+            }`}
+          >
+            <div className={`flex items-center gap-2.5 overflow-hidden ${sidebarCollapsed ? "flex-col justify-center" : ""}`}>
+              {userImage ? (
+                <img src={userImage} alt={userName} className="h-8 w-8 rounded-full" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
+                  {userName[0]?.toUpperCase() || "U"}
+                </div>
+              )}
+              {!sidebarCollapsed && (
+                <div className="flex flex-col truncate transition-opacity duration-300">
+                  <span className="text-sm font-semibold text-foreground truncate">{userName}</span>
+                  <span className="text-xs text-muted-foreground truncate">{userEmail}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <AnimatedThemeToggler className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors" />
+              <button
+                onClick={onSignOut}
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
+

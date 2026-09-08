@@ -130,19 +130,19 @@ export function CalendarPanel({ eventsLoading, events, refreshEvents }: Calendar
   };
 
   return (
-    <div className="p-6 flex flex-col h-full overflow-hidden gap-6 bg-background">
+    <div className="p-4 sm:p-6 flex flex-col h-full overflow-hidden gap-4 sm:gap-6 bg-background">
       {/* Calendar Header with Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
+        <div className="space-y-0.5 sm:space-y-1">
+          <h2 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+            <Calendar className="h-4 sm:h-5 w-4 sm:w-5 text-primary" />
             Calendar Board
           </h2>
-          <p className="text-sm text-muted-foreground/75">
+          <p className="text-xs sm:text-sm text-muted-foreground/75">
             Scroll dates horizontally to check availability and conflict dots.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-muted/40 border border-border/60 rounded-xl p-1.5 shrink-0 self-start sm:self-auto shadow-sm">
+        <div className="flex items-center gap-2 bg-muted/40 border border-border/60 rounded-xl p-1 shrink-0 self-start sm:self-auto shadow-sm">
           <Button
             variant="ghost"
             size="icon"
