@@ -76,13 +76,8 @@ export default async function DashboardPage({ params }: PageProps) {
   }));
 
   // Handle route param redirects to keep the URL matching the active chat
-  if (!chatIdParam) {
-    if (initialConversations.length > 0) {
-      redirect(`/dashboard/${initialConversations[0].id}`);
-    } else {
-      redirect(`/dashboard/chat-${Date.now()}`);
-    }
-  } else if (chatIdParam === "new") {
+  // When no chat ID is provided (e.g. after login), always start a fresh new chat
+  if (!chatIdParam || chatIdParam === "new") {
     redirect(`/dashboard/chat-${Date.now()}`);
   }
 
