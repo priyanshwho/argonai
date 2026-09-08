@@ -187,3 +187,43 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* ─── Mobile viewport & safe-area fixes ─────────────────────────────────── */
+
+/* dvh fallback for older browsers */
+@supports not (height: 100dvh) {
+  .h-dvh {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+}
+
+/* iOS safe area support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* Prevent iOS rubber-band bounce on the root container */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix mobile input zoom on iOS (font-size < 16px triggers zoom) */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets for primary nav/action buttons */
+  nav button,
+  nav a,
+  form button[type="submit"] {
+    min-height: 44px;
+  }
+}

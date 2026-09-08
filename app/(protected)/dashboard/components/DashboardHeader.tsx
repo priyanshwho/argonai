@@ -34,7 +34,10 @@ export function DashboardHeader({
     : "Configuration";
 
   return (
-    <header className="h-14 border-b border-border/60 flex items-center justify-between px-3 sm:px-6 shrink-0 bg-background/80 backdrop-blur-md z-10 gap-2 sm:gap-4">
+    <header
+      className="h-14 border-b border-border/60 flex items-center justify-between px-3 sm:px-6 shrink-0 bg-background/80 backdrop-blur-md z-10 gap-2 sm:gap-4 sticky top-0"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={onOpenMobileMenu}

@@ -274,7 +274,7 @@ export function ChatPanel({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto py-6">
+      <div className="flex-1 overflow-y-auto py-6 overscroll-contain">
         {isEmpty ? (
           /* ── Empty state ── */
           <div className={`${compact ? "w-full px-4" : "max-w-4xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
@@ -291,7 +291,7 @@ export function ChatPanel({
             </div>
 
             {!compact && (
-              <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 {[
                   { icon: Mail, title: "Read & Summarize", desc: "Summarize your recent emails", prompt: "Summarize my 5 most recent emails", color: "text-blue-500" },
                   { icon: PenLine, title: "Draft Emails", desc: "Compose and send messages", prompt: "Draft an email to", color: "text-emerald-500" },
@@ -504,8 +504,10 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* ── Chat Input ── */}
-      <div className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-3" : "p-4"}`}>
+      <div
+        className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-3" : "p-4"}`}
+        style={{ paddingBottom: `max(env(safe-area-inset-bottom, 0px), ${compact ? '0.75rem' : '1rem'})` }}
+      >
         {/* File chips */}
         {selectedFiles.length > 0 && (
           <div className="w-full max-w-4xl mx-auto flex flex-wrap gap-1.5 mb-2 px-1 animate-in fade-in duration-200">

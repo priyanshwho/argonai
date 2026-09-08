@@ -644,7 +644,7 @@ export function WorkspaceClient({
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden">
+    <div className="flex h-dvh bg-background text-foreground font-sans overflow-hidden">
 
       {/* LEFT: Sidebar */}
       <DashboardSidebar
@@ -670,7 +670,7 @@ export function WorkspaceClient({
       />
 
       {/* MIDDLE: Main content */}
-      <section className="flex-1 flex flex-col bg-background border-r border-border/60 overflow-hidden relative">
+      <section className="flex-1 flex flex-col bg-background border-r border-border/60 overflow-hidden relative min-w-0">
         <DashboardHeader
           activeTab={activeTab}
           showSearchResults={showSearchResults}
