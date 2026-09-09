@@ -73,6 +73,7 @@ export function InboxPanel({
   const [hoverSummaries, setHoverSummaries] = React.useState<Record<string, string>>({});
   const [isHoverLoading, setIsHoverLoading] = React.useState(false);
   const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const leaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Cron-style cleanup of stale cache on mount
   React.useEffect(() => {
@@ -102,7 +103,7 @@ export function InboxPanel({
 
   const handleMouseEnter = (emailId: string) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(async () => {
       setHoveredEmailId(emailId);
       
@@ -156,7 +157,19 @@ export function InboxPanel({
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setHoveredEmailId(null);
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHoveredEmailId(null);
+    }, 200);
+  };
+
+  const handleTooltipEnter = () => {
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
+  };
+
+  const handleTooltipLeave = () => {
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHoveredEmailId(null);
+    }, 150);
   };
 
   return (
@@ -265,7 +278,11 @@ export function InboxPanel({
 
                   {/* Hover Summary Tooltip */}
                   {hoveredEmailId === email.id && !selectedEmail && (
-                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-80 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 pointer-events-none text-left hidden lg:block">
+                    <div
+                      className="absolute right-8 top-1/2 -translate-y-1/2 w-80 p-4 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-[100] animate-in fade-in zoom-in-95 duration-200 text-left hidden lg:block max-h-[70vh] overflow-y-auto"
+                      onMouseEnter={handleTooltipEnter}
+                      onMouseLeave={handleTooltipLeave}
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-4 w-4 text-primary" />
                         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">AI Summary</span>
