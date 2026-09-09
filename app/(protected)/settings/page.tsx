@@ -18,6 +18,7 @@ import Link from "next/link";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { PwaInstallCard } from "@/components/settings/pwa-install-card";
 import { SignOutButton } from "@/components/settings/sign-out-button";
+import { DisconnectButton } from "@/components/settings/disconnect-button";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
@@ -171,15 +172,7 @@ export default async function SettingsPage() {
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Connected</span>
                     </div>
-                    <a href="/api/integrations/gmail/connect">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs border-border hover:bg-muted text-muted-foreground hover:text-foreground h-8 px-3 rounded-xl cursor-pointer"
-                      >
-                        Reconnect
-                      </Button>
-                    </a>
+                    <DisconnectButton pluginId="gmail" label="Gmail" />
                   </>
                 ) : (
                   <>
@@ -231,15 +224,7 @@ export default async function SettingsPage() {
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Connected</span>
                     </div>
-                    <a href="/api/integrations/googlecalendar/connect">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs border-border hover:bg-muted text-muted-foreground hover:text-foreground h-8 px-3 rounded-xl cursor-pointer"
-                      >
-                        Reconnect
-                      </Button>
-                    </a>
+                    <DisconnectButton pluginId="googlecalendar" label="Google Calendar" />
                   </>
                 ) : (
                   <>

@@ -5,6 +5,7 @@ import { CheckCircle2, AlertCircle, Mail, Calendar, ShieldCheck } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PwaInstallCard } from "@/components/settings/pwa-install-card";
+import { DisconnectButton } from "@/components/settings/disconnect-button";
 
 interface ConfigurationPanelProps {
   userId?: string;
@@ -91,15 +92,7 @@ export function ConfigurationPanel({
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Connected</span>
                     </div>
-                    <a href="/api/integrations/gmail/connect">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-foreground text-xs hover:bg-muted h-8"
-                      >
-                        Reconnect
-                      </Button>
-                    </a>
+                    <DisconnectButton pluginId="gmail" label="Gmail" compact />
                   </>
                 ) : (
                   <>
@@ -144,15 +137,7 @@ export function ConfigurationPanel({
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Connected</span>
                     </div>
-                    <a href="/api/integrations/googlecalendar/connect">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-foreground text-xs hover:bg-muted h-8"
-                      >
-                        Reconnect
-                      </Button>
-                    </a>
+                    <DisconnectButton pluginId="googlecalendar" label="Google Calendar" compact />
                   </>
                 ) : (
                   <>
