@@ -17,7 +17,7 @@ import { CalendarManualForm } from "./components/CalendarManualForm";
 import { ConfigurationPanel } from "./components/ConfigurationPanel";
 import { SearchResultsPanel } from "./components/SearchResultsPanel";
 import { CommandPaletteDialog } from "./components/CommandPaletteDialog";
-import { PwaInstallDialog, usePwaInstall } from "@/components/ui/pwa-install-dialog";
+import { PwaInstallDialog } from "@/components/ui/pwa-install-dialog";
 
 // Types & utils
 import {
@@ -50,7 +50,6 @@ export function WorkspaceClient({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileAssistantOpen, setMobileAssistantOpen] = useState(false);
   const [pwaInstallOpen, setPwaInstallOpen] = useState(false);
-  const { canInstall } = usePwaInstall();
 
   // ── URL query param handling ─────────────────────────────────────────────
   useEffect(() => {
@@ -670,7 +669,6 @@ export function WorkspaceClient({
         onChatChange={selectConversation}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        onOpenInstall={() => setPwaInstallOpen(true)}
       />
 
       {/* MIDDLE: Main content */}
@@ -683,8 +681,6 @@ export function WorkspaceClient({
           onOpenCommandPalette={() => setOpenCommandPalette(true)}
           chatTitle={conversations.find((c) => c.id === activeChatId)?.title}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onOpenInstall={() => setPwaInstallOpen(true)}
-          canInstall={canInstall}
         />
 
         <div className="flex-1 overflow-y-auto relative">

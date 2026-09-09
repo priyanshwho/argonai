@@ -3,7 +3,7 @@
 import React from "react";
 import {
   Bot, Plus, Settings, LogOut, Mail, Calendar,
-  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X, Download
+  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X
 } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import Link from "next/link";
@@ -29,7 +29,6 @@ interface DashboardSidebarProps {
   onChatChange: (chatId: string) => void;
   mobileMenuOpen?: boolean;
   setMobileMenuOpen?: (v: boolean) => void;
-  onOpenInstall?: () => void;
 }
 
 export function DashboardSidebar({
@@ -52,7 +51,6 @@ export function DashboardSidebar({
   onChatChange,
   mobileMenuOpen,
   setMobileMenuOpen,
-  onOpenInstall,
 }: DashboardSidebarProps) {
   const navItems = [
     {
@@ -165,19 +163,6 @@ export function DashboardSidebar({
                   );
                 })}
 
-                {/* Download Mobile App Button inside Mobile Menu */}
-                {onOpenInstall && (
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen?.(false);
-                      onOpenInstall();
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left cursor-pointer text-primary bg-primary/10 border border-primary/25 hover:bg-primary/20 active:scale-[0.99]"
-                  >
-                    <Download className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Download Mobile App</span>
-                  </button>
-                )}
               </nav>
 
               {/* Mobile Conversations List */}
@@ -356,19 +341,6 @@ export function DashboardSidebar({
               );
             })}
 
-            {/* Install App Trigger in Desktop Sidebar */}
-            {onOpenInstall && (
-              <button
-                onClick={onOpenInstall}
-                title="Install ARGON AI App"
-                className={`flex items-center rounded-lg text-xs font-semibold transition-all text-left text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 cursor-pointer ${
-                  sidebarCollapsed ? "w-10 h-10 p-0 justify-center mx-auto" : "w-full px-3.5 py-2 gap-2.5"
-                }`}
-              >
-                <Download className="h-4 w-4 shrink-0" />
-                {!sidebarCollapsed && <span className="truncate">Install App</span>}
-              </button>
-            )}
           </nav>
 
           {/* Conversations List */}
