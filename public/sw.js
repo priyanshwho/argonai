@@ -1,7 +1,6 @@
 // ARGON AI Service Worker
-const CACHE_NAME = "argon-ai-v1";
+const CACHE_NAME = "argon-ai-v2";
 const STATIC_ASSETS = [
-  "/",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
@@ -11,13 +10,20 @@ const STATIC_ASSETS = [
   "/WL-ARGON.png"
 ];
 
-// Install: Cache essential shell assets
+// Install: Cache essential shell assets safely
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn("[SW] Cache addAll warning:", err);
-      });
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const asset of STATIC_ASSETS) {
+        try {
+          const response = await fetch(asset);
+          if (response && response.status === 200) {
+            await cache.put(asset, response);
+          }
+        } catch (err) {
+          console.warn("[SW] Cache item warning:", asset, err);
+        }
+      }
     })
   );
   self.skipWaiting();

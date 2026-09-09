@@ -26,12 +26,13 @@ export function PwaRegister() {
     }
 
     // Listen for the beforeinstallprompt event
-    // By NOT calling e.preventDefault(), we allow Chrome's native
-    // mini-infobar to appear at the top of the screen on mobile
+    // We call e.preventDefault() to take manual control of the installation prompt,
+    // allowing our custom UI button / dialog to trigger e.prompt() cleanly.
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Store the event for potential programmatic use later
+      e.preventDefault();
       (window as any).__pwaInstallPrompt = e;
-      console.log("[PWA] Install prompt available — Chrome mini-infobar should appear");
+      window.dispatchEvent(new CustomEvent("pwa-installable"));
+      console.log("[PWA] Install prompt event captured and ready");
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -40,6 +41,7 @@ export function PwaRegister() {
     const handleAppInstalled = () => {
       console.log("[PWA] App was installed successfully");
       (window as any).__pwaInstallPrompt = null;
+      window.dispatchEvent(new CustomEvent("pwa-installed"));
     };
 
     window.addEventListener("appinstalled", handleAppInstalled);
