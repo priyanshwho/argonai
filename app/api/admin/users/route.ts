@@ -109,18 +109,6 @@ export async function GET() {
       0
     );
 
-    // Signup trend (last 30 days)
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const signupTrend: { date: string; count: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dayStr = day.toISOString().split("T")[0];
-      const count = formattedUsers.filter(
-        (u) => u.createdAt.split("T")[0] === dayStr
-      ).length;
-      signupTrend.push({ date: dayStr, count });
-    }
-
     return NextResponse.json({
       stats: {
         totalUsers,
@@ -130,7 +118,6 @@ export async function GET() {
         totalConversations,
         totalMessages,
       },
-      signupTrend,
       users: formattedUsers,
     });
   } catch (err) {

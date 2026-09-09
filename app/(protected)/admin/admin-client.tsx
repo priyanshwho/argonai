@@ -11,7 +11,6 @@ import {
   MessageSquare,
   MessagesSquare,
   Search,
-  TrendingUp,
   Shield,
   ChevronDown,
   ChevronUp,
@@ -42,11 +41,6 @@ interface AdminStats {
   calendarConnected: number;
   totalConversations: number;
   totalMessages: number;
-}
-
-interface SignupTrendItem {
-  date: string;
-  count: number;
 }
 
 type SortField = "name" | "email" | "createdAt" | "lastActive" | "conversationCount" | "messageCount";
@@ -119,60 +113,10 @@ function StatCard({
   );
 }
 
-// ─── Signup Trend Sparkline ───────────────────────────────────────────────────
-function SignupChart({ data }: { data: SignupTrendItem[] }) {
-  const max = Math.max(...data.map((d) => d.count), 1);
-  const totalSignups = data.reduce((s, d) => s + d.count, 0);
-
-  return (
-    <div className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Signups (30 days)
-          </span>
-        </div>
-        <span className="text-sm font-bold text-foreground tabular-nums">
-          {totalSignups} total
-        </span>
-      </div>
-      <div className="flex items-end gap-[2px] sm:gap-1 h-20 sm:h-24">
-        {data.map((d, i) => {
-          const height = Math.max((d.count / max) * 100, 4);
-          return (
-            <div
-              key={i}
-              className="flex-1 group relative"
-              title={`${d.date}: ${d.count} signup${d.count !== 1 ? "s" : ""}`}
-            >
-              <div
-                className="w-full rounded-t-sm bg-primary/20 group-hover:bg-primary/40 transition-colors"
-                style={{ height: `${height}%` }}
-              />
-              {d.count > 0 && (
-                <div
-                  className="w-full rounded-t-sm bg-primary absolute bottom-0 transition-all"
-                  style={{ height: `${height}%` }}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex justify-between mt-2">
-        <span className="text-[10px] text-muted-foreground">{data[0]?.date}</span>
-        <span className="text-[10px] text-muted-foreground">{data[data.length - 1]?.date}</span>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Admin Client ───────────────────────────────────────────────────────
 export function AdminClient() {
   const [data, setData] = useState<{
     stats: AdminStats;
-    signupTrend: SignupTrendItem[];
     users: AdminUser[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -363,9 +307,6 @@ export function AdminClient() {
           <StatCard icon={MessageSquare} label="Conversations" value={data.stats.totalConversations} color="bg-purple-500/10 text-purple-500 border-purple-500/20" />
           <StatCard icon={MessagesSquare} label="Total Messages" value={data.stats.totalMessages} color="bg-amber-500/10 text-amber-500 border-amber-500/20" />
         </section>
-
-        {/* ── Signup Trend ── */}
-        <SignupChart data={data.signupTrend} />
 
         {/* ── Filters ── */}
         <section className="flex flex-col sm:flex-row gap-3">
