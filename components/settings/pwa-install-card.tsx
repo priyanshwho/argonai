@@ -3,27 +3,22 @@
 import React, { useState } from "react";
 import {
   Download,
-  CheckCircle2,
   Smartphone,
-  Monitor,
   Share,
   PlusSquare,
-  Sparkles,
-  Zap,
-  ShieldCheck,
+  ExternalLink,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { usePwaInstall, PwaInstallDialog } from "@/components/ui/pwa-install-dialog";
 
 export function PwaInstallCard() {
   const { isInstalled, isPromptReady, isIOS, isAndroid, triggerInstall } = usePwaInstall();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [showGuides, setShowGuides] = useState(false);
-  const [activePlatformTab, setActivePlatformTab] = useState<"ios" | "android" | "desktop">(
+  const [showSteps, setShowSteps] = useState(false);
+  const [activeTab, setActiveTab] = useState<"ios" | "android" | "desktop">(
     isIOS ? "ios" : isAndroid ? "android" : "desktop"
   );
   const [isInstalling, setIsInstalling] = useState(false);
@@ -43,285 +38,133 @@ export function PwaInstallCard() {
 
   return (
     <>
-      <Card className="relative overflow-hidden border-border/80 bg-card text-card-foreground shadow-lg transition-all">
-        {/* Subtle accent gradient background bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/80 via-primary to-emerald-500" />
-
-        <CardHeader className="p-5 sm:p-6 pb-4">
+      <Card className="border-border/80 bg-card text-card-foreground shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <Smartphone className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-                    Mobile & Desktop Application
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
-                      PWA
-                    </span>
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                    Fast, standalone executive command center with offline caching
-                  </CardDescription>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base sm:text-lg font-bold text-foreground">
+                  Get the ARGON AI App
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                  Add to your phone's home screen or computer dock for quick 1-tap access.
+                </CardDescription>
               </div>
             </div>
 
-            {/* Live Status Badge */}
             <div className="shrink-0 self-start sm:self-auto">
               {isInstalled ? (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <span>Installed & Active</span>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span>Installed on this device</span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Ready to Install</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-5 sm:p-6 pt-0 space-y-5">
-          {/* Main prompt banner */}
-          <div className="p-4 rounded-xl bg-muted/40 border border-border/70 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1 max-w-xl">
-              <p className="text-sm text-foreground font-medium">
-                {isInstalled
-                  ? "ARGON AI is installed on this device in native standalone mode."
-                  : "Install ARGON AI on your home screen or desktop for direct, distraction-free access."}
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {isInstalled
-                  ? "Enjoy instant launch without browser frames, safe offline caching, and faster keyboard workflows."
-                  : "No app store required. Runs instantly with zero storage bloat, native gestures, and cached speed."}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2.5 shrink-0">
-              {isInstalled ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDialogOpen(true)}
-                  className="h-9 px-4 text-xs font-medium border-border hover:bg-muted text-foreground cursor-pointer"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                  Installation Guide
-                </Button>
               ) : (
                 <Button
                   size="sm"
                   onClick={handleInstallClick}
                   disabled={isInstalling}
-                  className="h-9 px-4 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                  className="h-8 sm:h-9 px-3 sm:px-4 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm cursor-pointer flex items-center gap-2 rounded-xl"
                 >
-                  <Download className="h-4 w-4" />
-                  {isPromptReady ? "Install App Now" : "Install / Setup Guide"}
+                  <Download className="h-3.5 w-3.5" />
+                  <span>{isPromptReady ? "Install App" : "How to Install"}</span>
                 </Button>
               )}
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowGuides((v) => !v)}
-                className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Toggle platform instructions"
-              >
-                {showGuides ? (
-                  <>
-                    <span>Hide Steps</span>
-                    <ChevronUp className="h-3.5 w-3.5 ml-1" />
-                  </>
-                ) : (
-                  <>
-                    <span>Quick Steps</span>
-                    <ChevronDown className="h-3.5 w-3.5 ml-1" />
-                  </>
-                )}
-              </Button>
             </div>
           </div>
+        </CardHeader>
 
-          {/* Quick Platform Guide Drawer */}
-          {showGuides && (
-            <div className="p-4 rounded-xl border border-border/80 bg-card/60 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-              {/* Platform selector tabs */}
-              <div className="flex items-center gap-2 border-b border-border/60 pb-2.5 overflow-x-auto">
+        <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
+          <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+            <span>
+              {isInstalled
+                ? "You are using the installed app. Open from your home screen or dock anytime."
+                : "Works on iPhone, iPad, Android, Mac, and Windows."}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSteps((v) => !v)}
+              className="text-primary hover:underline font-medium flex items-center gap-1 cursor-pointer shrink-0 ml-2"
+            >
+              <span>{showSteps ? "Hide instructions" : "Show instructions"}</span>
+              {showSteps ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </button>
+          </div>
+
+          {/* Quick steps drawer */}
+          {showSteps && (
+            <div className="p-3.5 sm:p-4 rounded-xl border border-border/80 bg-muted/30 space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-center gap-2 border-b border-border/60 pb-2">
                 <button
                   type="button"
-                  onClick={() => setActivePlatformTab("ios")}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    activePlatformTab === "ios"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  onClick={() => setActiveTab("ios")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    activeTab === "ios"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  iOS (iPhone / iPad)
+                  iPhone / iPad
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActivePlatformTab("android")}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    activePlatformTab === "android"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  onClick={() => setActiveTab("android")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    activeTab === "android"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Android (Chrome)
+                  Android
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActivePlatformTab("desktop")}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    activePlatformTab === "desktop"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  onClick={() => setActiveTab("desktop")}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    activeTab === "desktop"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  macOS & Windows
+                  Mac / Windows
                 </button>
               </div>
 
-              {/* iOS instructions */}
-              {activePlatformTab === "ios" && (
-                <div className="space-y-2 text-xs text-muted-foreground pt-1">
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      1
-                    </span>
-                    <p className="pt-0.5">
-                      Open this page in <strong>Apple Safari</strong>.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      2
-                    </span>
-                    <p className="pt-0.5 flex items-center gap-1.5 flex-wrap">
-                      Tap the <strong>Share</strong> button <Share className="h-3.5 w-3.5 text-primary inline" /> in Safari’s bottom toolbar.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      3
-                    </span>
-                    <p className="pt-0.5 flex items-center gap-1.5 flex-wrap">
-                      Scroll down and tap <strong>"Add to Home Screen"</strong>{" "}
-                      <PlusSquare className="h-3.5 w-3.5 text-primary inline" />.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      4
-                    </span>
-                    <p className="pt-0.5">Tap <strong>Add</strong> in the top-right corner.</p>
-                  </div>
-                </div>
+              {activeTab === "ios" && (
+                <ol className="space-y-1.5 text-xs text-muted-foreground list-decimal list-inside">
+                  <li>Open this site in <strong>Safari</strong> on your iPhone or iPad.</li>
+                  <li className="flex items-center gap-1.5 flex-wrap">
+                    Tap the <strong>Share</strong> button <Share className="h-3.5 w-3.5 text-primary inline" /> at the bottom.
+                  </li>
+                  <li className="flex items-center gap-1.5 flex-wrap">
+                    Scroll down and tap <strong>"Add to Home Screen"</strong> <PlusSquare className="h-3.5 w-3.5 text-primary inline" />.
+                  </li>
+                  <li>Tap <strong>Add</strong> in the top right. That’s it!</li>
+                </ol>
               )}
 
-              {/* Android instructions */}
-              {activePlatformTab === "android" && (
-                <div className="space-y-2 text-xs text-muted-foreground pt-1">
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      1
-                    </span>
-                    <p className="pt-0.5">Open this page in <strong>Google Chrome</strong>.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      2
-                    </span>
-                    <p className="pt-0.5">
-                      Tap the <strong>"Install App Now"</strong> button above, or tap Chrome's three dots menu (<strong>⋮</strong>).
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      3
-                    </span>
-                    <p className="pt-0.5">
-                      Select <strong>"Install App"</strong> or <strong>"Add to Home screen"</strong> and confirm.
-                    </p>
-                  </div>
-                </div>
+              {activeTab === "android" && (
+                <ol className="space-y-1.5 text-xs text-muted-foreground list-decimal list-inside">
+                  <li>Open this site in <strong>Chrome</strong> on your Android device.</li>
+                  <li>Tap <strong>"Install App"</strong> above, or tap the three dots menu (<strong>⋮</strong>).</li>
+                  <li>Select <strong>"Install App"</strong> or <strong>"Add to Home screen"</strong>.</li>
+                </ol>
               )}
 
-              {/* Desktop instructions */}
-              {activePlatformTab === "desktop" && (
-                <div className="space-y-2 text-xs text-muted-foreground pt-1">
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      1
-                    </span>
-                    <p className="pt-0.5">
-                      Using Chrome, Edge, or Brave on Mac/Windows/Linux:
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      2
-                    </span>
-                    <p className="pt-0.5">
-                      Click the <strong>Install icon</strong> in your browser's URL address bar (right side) or click <strong>Install App Now</strong> above.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                      3
-                    </span>
-                    <p className="pt-0.5">
-                      Confirm installation to add ARGON AI to your macOS Dock or Windows Start menu.
-                    </p>
-                  </div>
-                </div>
+              {activeTab === "desktop" && (
+                <ol className="space-y-1.5 text-xs text-muted-foreground list-decimal list-inside">
+                  <li>In Chrome, Edge, or Brave, look at the right side of the address bar.</li>
+                  <li>Click the <strong>Install icon</strong> (or click the Install App button above).</li>
+                  <li>Confirm to add ARGON AI as a dedicated app on your computer.</li>
+                </ol>
               )}
             </div>
           )}
-
-          {/* Features grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div className="p-3 rounded-xl border border-border/60 bg-card/40 flex items-start gap-2.5">
-              <Zap className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <div>
-                <div className="text-xs font-bold text-foreground">Instant Launch</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Pre-cached service worker assets boot in milliseconds.
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl border border-border/60 bg-card/40 flex items-start gap-2.5">
-              <Monitor className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
-              <div>
-                <div className="text-xs font-bold text-foreground">Standalone Workspace</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Runs without browser URL bars or tabs for maximum focus.
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl border border-border/60 bg-card/40 flex items-start gap-2.5">
-              <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-              <div>
-                <div className="text-xs font-bold text-foreground">Secure & Offline-Ready</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Cached interface works smoothly through network flickers.
-                </div>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
-      {/* Full walkthrough dialog */}
       <PwaInstallDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );

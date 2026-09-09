@@ -5,10 +5,9 @@ import { CheckCircle2, AlertCircle, Mail, Calendar, ShieldCheck } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PwaInstallCard } from "@/components/settings/pwa-install-card";
-import { CopyTenantButton } from "@/components/settings/copy-tenant-button";
 
 interface ConfigurationPanelProps {
-  userId: string;
+  userId?: string;
   initialHasGmail: boolean;
   initialHasCalendar: boolean;
   notification: { type: "success" | "error"; message: string } | null;
@@ -25,10 +24,10 @@ export function ConfigurationPanel({
       {/* Title */}
       <div className="space-y-1">
         <h1 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
-          Workspace Configuration
+          Settings & Configuration
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Manage service connections, install the desktop/mobile application, and verify security isolation.
+          Manage your connected accounts, install the mobile app, and customize your workspace.
         </p>
       </div>
 
@@ -171,19 +170,18 @@ export function ConfigurationPanel({
         </div>
       </div>
 
-      {/* 3. Multi-Tenancy & Security Notice */}
-      <div className="rounded-xl border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-        <div className="flex items-start gap-3">
-          <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-          <div className="text-xs text-muted-foreground leading-relaxed">
-            <span className="text-foreground font-semibold">Tenant Isolation:</span> All credentials and sync caches are partitioned under your isolated tenant ID.
-          </div>
+      {/* 3. Privacy Assurance */}
+      <div className="rounded-xl border border-border bg-card p-4 sm:p-5 flex items-start gap-3.5">
+        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0 mt-0.5">
+          <ShieldCheck className="h-4.5 w-4.5" />
         </div>
-        <div className="flex items-center gap-2 pl-8 sm:pl-0">
-          <code className="text-foreground bg-muted border border-border px-2 py-0.5 rounded font-mono text-[11px] max-w-[150px] truncate">
-            {userId}
-          </code>
-          <CopyTenantButton tenantId={userId} />
+        <div className="space-y-1">
+          <div className="text-xs sm:text-sm font-bold text-foreground">
+            Privacy & Data Protection
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Your emails, calendar events, and conversations belong solely to you. ARGON AI never sells your data, never shares your correspondence, and never uses your personal information to train public AI models.
+          </p>
         </div>
       </div>
     </div>
