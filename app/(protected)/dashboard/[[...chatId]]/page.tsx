@@ -99,6 +99,7 @@ export default async function DashboardPage({ params }: PageProps) {
         initialHasCalendar={hasCalendar}
         initialConversations={initialConversations}
         activeChatIdParam={chatIdParam}
+        isAdmin={!!process.env.ADMIN_EMAIL && session.user.email === process.env.ADMIN_EMAIL}
       />
     </Suspense>
   );

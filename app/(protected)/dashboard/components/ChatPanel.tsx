@@ -277,21 +277,21 @@ export function ChatPanel({
       <div className="flex-1 overflow-y-auto py-6 overscroll-contain">
         {isEmpty ? (
           /* ── Empty state ── */
-          <div className={`${compact ? "w-full px-4" : "max-w-4xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-8`}>
-            <div className="text-center space-y-3">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-lg">
-                <Sparkles className="h-7 w-7 text-primary animate-pulse" />
+          <div className={`${compact ? "w-full px-4" : "max-w-4xl mx-auto px-4"} flex flex-col items-center justify-center h-full gap-4 sm:gap-8`}>
+            <div className="text-center space-y-2 sm:space-y-3">
+              <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto shadow-lg">
+                <Sparkles className="h-5 w-5 sm:h-7 sm:w-7 text-primary animate-pulse" />
               </div>
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">Argon AI Assistant</h2>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              <div className="space-y-0.5 sm:space-y-1">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">Argon AI Assistant</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
                   Your AI-powered Gmail & Calendar command center
                 </p>
               </div>
             </div>
 
             {!compact && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-2xl">
                 {[
                   { icon: Mail, title: "Read & Summarize", desc: "Summarize your recent emails", prompt: "Summarize my 5 most recent emails", color: "text-blue-500" },
                   { icon: PenLine, title: "Draft Emails", desc: "Compose and send messages", prompt: "Draft an email to", color: "text-emerald-500" },
@@ -301,22 +301,22 @@ export function ChatPanel({
                   <button
                     key={item.title}
                     onClick={() => setInput(item.prompt)}
-                    className="p-4 text-left rounded-xl border border-border bg-card/50 hover:bg-muted/60 transition-all group cursor-pointer shadow-sm"
+                    className="p-2.5 sm:p-4 text-left rounded-xl border border-border bg-card/50 hover:bg-muted/60 transition-all group cursor-pointer shadow-sm"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className={`p-2 rounded-lg bg-background border border-border shadow-sm ${item.color}`}>
-                        <item.icon className="h-5 w-5" />
+                    <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                      <div className={`p-1.5 sm:p-2 rounded-lg bg-background border border-border shadow-sm ${item.color}`}>
+                        <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
-                      <ArrowRight className="h-4.5 w-4.5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                      <ArrowRight className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5 text-muted-foreground/50 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <p className="text-base font-bold text-foreground mt-2">{item.title}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
+                    <p className="text-sm sm:text-base font-bold text-foreground mt-1.5 sm:mt-2">{item.title}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">{item.desc}</p>
                   </button>
                 ))}
               </div>
             )}
 
-            <div className="text-center space-y-1.5 max-w-sm">
+            <div className="text-center space-y-1 sm:space-y-1.5 max-w-sm hidden sm:block">
               <p className="text-xs text-muted-foreground/80 font-bold uppercase tracking-wider">
                 Operations Guide
               </p>

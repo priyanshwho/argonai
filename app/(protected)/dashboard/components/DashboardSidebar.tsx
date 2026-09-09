@@ -3,7 +3,7 @@
 import React from "react";
 import {
   Bot, Plus, Settings, LogOut, Mail, Calendar,
-  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X
+  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X, Shield
 } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import Link from "next/link";
@@ -29,6 +29,8 @@ interface DashboardSidebarProps {
   onChatChange: (chatId: string) => void;
   mobileMenuOpen?: boolean;
   setMobileMenuOpen?: (v: boolean) => void;
+  isAdmin?: boolean;
+  onAdmin?: () => void;
 }
 
 export function DashboardSidebar({
@@ -51,6 +53,8 @@ export function DashboardSidebar({
   onChatChange,
   mobileMenuOpen,
   setMobileMenuOpen,
+  isAdmin = false,
+  onAdmin,
 }: DashboardSidebarProps) {
   const navItems = [
     {
@@ -75,6 +79,18 @@ export function DashboardSidebar({
       action: onSettings,
     },
   ];
+
+  // Conditionally add admin nav item above configuration
+  if (isAdmin && onAdmin) {
+    navItems.splice(navItems.length - 1, 0, {
+      id: "admin",
+      label: "Admin Panel",
+      icon: Shield,
+      href: "/admin",
+      action: onAdmin,
+      status: undefined,
+    });
+  }
 
   return (
     <>

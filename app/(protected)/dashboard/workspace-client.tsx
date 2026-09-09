@@ -37,6 +37,7 @@ export function WorkspaceClient({
   initialHasCalendar,
   initialConversations = [],
   activeChatIdParam,
+  isAdmin = false,
 }: WorkspaceClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -669,6 +670,8 @@ export function WorkspaceClient({
         onChatChange={selectConversation}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
+        isAdmin={isAdmin}
+        onAdmin={() => router.push("/admin")}
       />
 
       {/* MIDDLE: Main content */}
