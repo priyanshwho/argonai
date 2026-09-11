@@ -29,11 +29,12 @@
 - [Core Subsystems](#-core-subsystems)
   - [Landing UI & GSAP Preloader](#1-landing-ui--gsap-preloader)
   - [Authentication (Better Auth)](#2-multi-tenant-authentication-better-auth)
-  - [Real-Time Webhook Sync](#3-real-time-webhook-sync--corsair-engine)
-  - [SSE Live Broadcast](#4-sse-live-broadcast-manager)
-  - [Double-Envelope Encryption](#5-double-envelope-encryption-layer)
-  - [AI Routing & Action Interception](#6-ai-routing--action-interception-engine)
-  - [Conflict Validation Algorithms](#7-conflict-validation--alternative-slot-algorithms)
+  - [Role-Based Access Control](#3-role-based-access-control-rbac)
+  - [Real-Time Webhook Sync](#4-real-time-webhook-sync--corsair-engine)
+  - [SSE Live Broadcast](#5-sse-live-broadcast-manager)
+  - [Double-Envelope Encryption](#6-double-envelope-encryption-layer)
+  - [AI Routing & Action Interception](#7-ai-routing--action-interception-engine)
+  - [Conflict Validation Algorithms](#8-conflict-validation--alternative-slot-algorithms)
 - [Application Routes](#-application-routes)
 - [Database Schema](#-database-schema)
 - [Key API Endpoints](#-key-api-endpoints)
@@ -262,7 +263,56 @@ graph LR
 
 ---
 
-### 3. Real-Time Webhook Sync (Corsair Engine)
+### 3. Role-Based Access Control (RBAC)
+
+Argon AI implements a 3-tier role hierarchy for platform governance:
+
+```mermaid
+graph TD
+    subgraph Roles["👑 Role Hierarchy"]
+        SA["Super Admin\n(priyanshu82711@gmail.com)\nPermanent · Cannot be changed"]
+        AD["Admin\nAppointed by Super Admin"]
+        CL["Client\nDefault for all users"]
+    end
+
+    subgraph Permissions["🔐 Permission Matrix"]
+        P1["Access Admin Dashboard"]
+        P2["View All Users & Stats"]
+        P3["Change User Roles"]
+        P4["Change Own Role"]
+    end
+
+    SA -->|✅| P1
+    SA -->|✅| P2
+    SA -->|✅ Promote/Demote| P3
+    SA -->|❌ Protected| P4
+
+    AD -->|✅| P1
+    AD -->|✅| P2
+    AD -->|❌| P3
+    AD -->|❌| P4
+
+    CL -->|❌| P1
+    CL -->|❌| P2
+    CL -->|❌| P3
+    CL -->|❌| P4
+```
+
+| Role | Assignment | Dashboard Access | Can Change Roles |
+|:-----|:-----------|:----------------:|:----------------:|
+| **Super Admin** | Permanent — set via `ADMIN_EMAIL` env var | ✅ Full control | ✅ Promote client → admin, demote admin → client |
+| **Admin** | Appointed by Super Admin | ✅ Read-only view | ❌ No role controls visible |
+| **Client** | Default for every new user | ❌ Redirected to `/dashboard` | ❌ No access |
+
+**Key Security Rules:**
+- The Super Admin's role is **immutable** — no one (including themselves) can change it
+- Regular Admins see the full admin dashboard but **cannot modify any user's role**
+- The `PATCH /api/admin/users/role` endpoint enforces server-side Super Admin verification
+- Role changes use **optimistic UI** with automatic rollback on API failure
+
+---
+
+### 4. Real-Time Webhook Sync (Corsair Engine)
 
 ```mermaid
 graph TD
@@ -293,7 +343,7 @@ graph TD
 
 ---
 
-### 4. SSE Live Broadcast Manager
+### 5. SSE Live Broadcast Manager
 
 The `/api/sync/events` route maintains a persistent `text/event-stream` connection:
 
@@ -310,7 +360,7 @@ This eliminates polling and delivers sub-second UI updates when emails arrive or
 
 ---
 
-### 5. Double-Envelope Encryption Layer
+### 6. Double-Envelope Encryption Layer
 
 All personal workspace data stored in `corsair_entities` is protected by two layers of encryption:
 
@@ -337,7 +387,7 @@ All personal workspace data stored in `corsair_entities` is protected by two lay
 
 ---
 
-### 6. AI Routing & Action Interception Engine
+### 7. AI Routing & Action Interception Engine
 
 > **Core Safety Protocol: AI reasons, humans authorize.**
 
@@ -405,7 +455,7 @@ This forces streaming to halt the moment a write tool is detected — the raw pa
 
 ---
 
-### 7. Conflict Validation & Alternative Slot Algorithms
+### 8. Conflict Validation & Alternative Slot Algorithms
 
 #### Conflict Check — `/api/events/check-conflicts`
 
@@ -454,19 +504,22 @@ This forces streaming to halt the moment a write tool is detected — the raw pa
   ├── Tab: inbox            → Gmail inbox with email reader
   ├── Tab: calendar         → Google Calendar board view
   └── Tab: configuration    → Redirects to /settings
+/admin                      → Admin dashboard (Super Admin + Admins only)
 /settings                   → Integration management, webhook logs, sync stats
 /privacy                    → Privacy policy
 /terms                      → Terms of service
 
 API Routes:
-/api/chat                   → POST — AI streaming chat endpoint
-/api/webhooks               → POST — Google Pub/Sub webhook receiver
-/api/sync/events            → GET  — SSE live update stream
-/api/emails/summarize       → POST — Summarize email with AI
-/api/emails/refine          → POST — Refine email tone with AI
-/api/events/check-conflicts → POST — Check calendar conflicts
-/api/events/alternative-slot→ POST — Find next available time slot
-/api/integrations/*/connect → GET  — OAuth connection flow per service
+/api/chat                   → POST  — AI streaming chat endpoint
+/api/webhooks               → POST  — Google Pub/Sub webhook receiver
+/api/sync/events            → GET   — SSE live update stream
+/api/admin/users            → GET   — Fetch all users + stats (admin only)
+/api/admin/users/role       → PATCH — Change user role (Super Admin only)
+/api/emails/summarize       → POST  — Summarize email with AI
+/api/emails/refine          → POST  — Refine email tone with AI
+/api/events/check-conflicts → POST  — Check calendar conflicts
+/api/events/alternative-slot→ POST  — Find next available time slot
+/api/integrations/*/connect → GET   — OAuth connection flow per service
 ```
 
 ---
@@ -476,7 +529,8 @@ API Routes:
 Key Prisma models powering the platform:
 
 ```
-User ─────────────┬── Session (auth sessions)
+User ─────────────┬── role ("client" | "admin" | "super_admin")
+                  ├── Session (auth sessions)
                   ├── Account (OAuth provider tokens)
                   ├── Conversation ─── Message[]
                   ├── corsair_entities (encrypted email cache)
@@ -523,6 +577,31 @@ corsair_events:
 
 ---
 
+### `GET /api/admin/users`
+**Purpose:** Fetches all platform users with role, integration, and activity data for the admin dashboard.
+
+| Output Field | Type | Description |
+|-------------|------|-------------|
+| `isSuperAdmin` | `boolean` | Whether the caller is the Super Admin |
+| `stats` | `object` | Aggregate counts: total users, active today, admins, clients, integrations |
+| `users` | `AdminUser[]` | Full user list with role, auth methods, integrations, activity |
+
+**Access:** Requires `admin` or `super_admin` role, or `ADMIN_EMAIL` match.
+
+---
+
+### `PATCH /api/admin/users/role`
+**Purpose:** Changes a user's role between `client` and `admin`.
+
+| Input | Type | Description |
+|-------|------|-------------|
+| `userId` | `string` | Target user ID |
+| `role` | `string` | New role: `"client"` or `"admin"` |
+
+**Access:** Super Admin only. Rejects attempts to change the Super Admin's own role or assign `"super_admin"`.
+
+---
+
 ### `GET /api/sync/events`
 **Purpose:** Establishes persistent SSE connection for real-time dashboard updates.
 
@@ -555,6 +634,9 @@ CORSAIR_KEK="..."          # 32-byte hex — Master Key Encryption Key
 
 # Google Pub/Sub (Webhook delivery)
 GOOGLE_PUBSUB_TOPIC="projects/your-project/topics/your-topic"
+
+# Admin Panel
+ADMIN_EMAIL="your-admin-email@example.com"  # Super Admin — permanent, immutable role
 ```
 
 See [`.env.example`](./.env.example) for the full list with descriptions.
@@ -617,11 +699,18 @@ argon-ai/
 │   │   │   │   ├── EmailDraftCard.tsx     # Editable email draft UI
 │   │   │   │   └── CalendarDraftCard.tsx  # Conflict-aware calendar UI
 │   │   │   └── workspace-client.tsx       # Main 4-tab workspace layout
+│   │   ├── admin/
+│   │   │   ├── page.tsx                   # Admin page (server guard)
+│   │   │   └── admin-client.tsx           # RBAC admin dashboard UI
 │   │   └── settings/             # Integration management UI
 │   ├── api/
 │   │   ├── chat/route.ts         # AI streaming endpoint
 │   │   ├── webhooks/route.ts     # Google Pub/Sub receiver
 │   │   ├── sync/events/route.ts  # SSE broadcaster
+│   │   ├── admin/
+│   │   │   └── users/
+│   │   │       ├── route.ts      # GET — All users + stats
+│   │   │       └── role/route.ts # PATCH — Role changes (Super Admin)
 │   │   ├── emails/
 │   │   │   ├── summarize/        # AI email summarization
 │   │   │   └── refine/           # AI tone refinement
@@ -635,6 +724,7 @@ argon-ai/
 ├── features/                     # Feature-scoped logic modules
 ├── hooks/                        # Custom React hooks
 ├── lib/
+│   ├── admin.ts                  # RBAC guards (requireAdmin, isAdmin, isSuperAdmin)
 │   ├── auth.ts                   # Better Auth configuration
 │   ├── corsair.ts                # Corsair engine client wrapper
 │   ├── prisma.ts                 # Prisma client singleton
