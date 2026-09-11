@@ -142,19 +142,26 @@ export function DashboardSidebar({
               <nav className="space-y-1">
                 {navItems.map((tab) => {
                   const isTabActive = activeTab === tab.id && !showSearchResults;
+                  // For items that navigate to different pages (admin, configuration),
+                  // let the native <Link> handle it for instant loading.tsx display.
+                  // For tab-switching items, use client-side state change.
+                  const isPageNavigation = tab.id === "configuration" || tab.id === "admin";
                   const handleClick = (e: React.MouseEvent) => {
+                    if (isPageNavigation) {
+                      // Let <Link> handle it natively — don't preventDefault
+                      setMobileMenuOpen?.(false);
+                      return;
+                    }
                     e.preventDefault();
                     setMobileMenuOpen?.(false);
-                    if (tab.action) {
-                      tab.action();
-                    } else {
-                      onTabChange(tab.id as any);
-                    }
+                    onTabChange(tab.id as any);
                   };
 
                   return (
-                    <button
+                    <Link
                       key={tab.id}
+                      href={tab.href}
+                      prefetch={isPageNavigation}
                       onClick={handleClick}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left cursor-pointer ${
                         isTabActive
@@ -175,7 +182,7 @@ export function DashboardSidebar({
                           />
                         )}
                       </div>
-                    </button>
+                    </Link>
                   );
                 })}
 
@@ -307,21 +314,24 @@ export function DashboardSidebar({
           <nav className="space-y-1">
             {navItems.map((tab) => {
               const isTabActive = activeTab === tab.id && !showSearchResults;
+              const isPageNavigation = tab.id === "configuration" || tab.id === "admin";
               
               const handleClick = (e: React.MouseEvent) => {
-                if (tab.action) {
-                  e.preventDefault();
-                  tab.action();
-                } else {
-                  e.preventDefault();
-                  onTabChange(tab.id as any);
+                // For items that navigate to different pages (admin, configuration),
+                // let the native <Link> handle it for instant loading.tsx display.
+                if (isPageNavigation) {
+                  // Let <Link> navigate natively — don't preventDefault
+                  return;
                 }
+                e.preventDefault();
+                onTabChange(tab.id as any);
               };
 
               return (
                 <Link
                   key={tab.id}
                   href={tab.href}
+                  prefetch={isPageNavigation}
                   onClick={handleClick}
                   title={tab.label}
                   className={`flex items-center rounded-lg text-base transition-all text-left relative group ${

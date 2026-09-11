@@ -55,7 +55,7 @@ export default async function SettingsPage() {
       >
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-            <Link href="/dashboard">
+            <Link href="/dashboard" prefetch>
               <Button
                 variant="outline"
                 size="icon"
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
 
           <div className="flex items-center gap-2 shrink-0">
             <ModeToggle />
-            <Link href="/dashboard">
+            <Link href="/dashboard" prefetch>
               <Button
                 size="sm"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-xs h-8 sm:h-9 px-3 sm:px-4 rounded-xl shadow-sm transition-all cursor-pointer"
