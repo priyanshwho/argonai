@@ -433,7 +433,7 @@ export function AdminClient() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <ModeToggle />
+            <ModeToggle animated={false} />
             <Link href="/dashboard" prefetch>
               <Button
                 size="sm"

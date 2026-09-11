@@ -76,7 +76,7 @@ export default async function SettingsPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <ModeToggle />
+            <ModeToggle animated={false} />
             <Link href="/dashboard" prefetch>
               <Button
                 size="sm"
@@ -275,7 +275,7 @@ export default async function SettingsPage() {
                 Switch between dark and light themes for your workspace.
               </p>
             </div>
-            <ModeToggle />
+            <ModeToggle animated={false} />
           </Card>
         </section>
 

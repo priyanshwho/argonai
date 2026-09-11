@@ -40,10 +40,14 @@ export interface ThemeToggleProps {
   buttonSize?: number;
   /** Curtain animation duration in ms. Default: 550 */
   duration?: number;
+  /** Whether to enable full-screen curtain animation. Default: true */
+  animated?: boolean;
   /** Called after each theme change completes */
   onThemeChange?: (theme: Theme) => void;
   /** Page content rendered below the bar */
   children?: ReactNode;
+  /** Optional className */
+  className?: string;
 }
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -148,8 +152,10 @@ export function ThemeToggle({
   barHeight: explicitBarHeight,
   buttonSize   = 36,
   duration     = 550,
+  animated     = true,
   onThemeChange,
   children,
+  className,
 }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const isAppBar = variant === "appbar";
@@ -172,8 +178,14 @@ export function ThemeToggle({
   const t = TOKENS[theme] || TOKENS.light;
 
   const toggle = useCallback(() => {
-    if (phase !== "idle") return;
     const next: Theme = theme === "light" ? "dark" : "light";
+    if (!animated) {
+      setThemeState(next);
+      setTheme(next);
+      onThemeChange?.(next);
+      return;
+    }
+    if (phase !== "idle") return;
     curtainColorRef.current = TOKENS[next].pageBg;
     setPhase("falling");
 
@@ -185,7 +197,7 @@ export function ThemeToggle({
       setPhase("rising");
       setTimeout(() => setPhase("idle"), duration + 60);
     }, duration);
-  }, [phase, theme, duration, onThemeChange, setTheme]);
+  }, [animated, phase, theme, duration, onThemeChange, setTheme]);
 
   // ── Derived styles ──────────────────────────────────────────────────────────
 
@@ -260,9 +272,10 @@ export function ThemeToggle({
   if (isIcon) {
     return (
       <>
-        <div aria-hidden="true" style={curtainStyle} />
+        {animated && <div aria-hidden="true" style={curtainStyle} />}
         <button
           style={btnStyle}
+          className={className}
           onClick={toggle}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => { setHovered(false); setPressed(false); }}
@@ -280,7 +293,7 @@ export function ThemeToggle({
   return (
     <div style={pageStyle}>
       {/* Curtain overlay */}
-      <div aria-hidden="true" style={curtainStyle} />
+      {animated && <div aria-hidden="true" style={curtainStyle} />}
 
       {/* Fixed top bar */}
       <div style={barStyle}>
