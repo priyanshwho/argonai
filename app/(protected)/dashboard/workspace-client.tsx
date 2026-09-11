@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/components/providers/loading-provider";
@@ -324,6 +324,25 @@ export function WorkspaceClient({
   const [isListening, setIsListening] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
+  const recognitionRef = useRef<any>(null);
+  const isListeningRef = useRef<boolean>(false);
+  const baseTextRef = useRef<string>("");
+  const latestInputRef = useRef<string>("");
+
+  useEffect(() => {
+    latestInputRef.current = input;
+  }, [input]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (err) {}
+      }
+    };
+  }, []);
+
   const { messages, sendMessage, setMessages, status, addToolResult: defaultAddToolResult } = useChat({});
 
   const handleAddToolResult = (args: any) => {
@@ -569,6 +588,7 @@ export function WorkspaceClient({
     const dt = new DataTransfer();
     selectedFiles.forEach((f) => dt.items.add(f));
     sendMessage({ text: input, files: dt.files }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
+    stopListening();
     setInput("");
     setSelectedFiles([]);
   };
@@ -591,33 +611,104 @@ export function WorkspaceClient({
     sendMessage({ text: promptText }, { body: { conversationId: activeChatId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
   };
 
-  const toggleListening = () => {
-    if (isListening) {
-      setIsListening(false);
-      return;
+  const stopListening = () => {
+    isListeningRef.current = false;
+    setIsListening(false);
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {}
+      recognitionRef.current = null;
     }
+  };
+
+  const startListening = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Speech Recognition is not supported in this browser.");
       return;
     }
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (err) {}
+      recognitionRef.current = null;
+    }
+
+    baseTextRef.current = latestInputRef.current;
+
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognitionRef.current = recognition;
+    recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.onstart = () => setIsListening(true);
+
+    recognition.onstart = () => {
+      isListeningRef.current = true;
+      setIsListening(true);
+    };
+
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results)
         .map((r: any) => r[0].transcript)
         .join("");
-      setInput(transcript);
+
+      const base = baseTextRef.current.trimEnd();
+      const spoken = transcript.trimStart();
+      const newText = base
+        ? (spoken ? `${base} ${spoken}` : base)
+        : spoken;
+
+      latestInputRef.current = newText;
+      setInput(newText);
     };
+
     recognition.onerror = (event: any) => {
-      if (event.error !== "no-speech") console.error("Speech recognition error", event.error);
-      setIsListening(false);
+      if (event.error === "no-speech") return;
+      console.error("Speech recognition error:", event.error);
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        stopListening();
+      }
     };
-    recognition.onend = () => setIsListening(false);
-    recognition.start();
+
+    recognition.onend = () => {
+      if (isListeningRef.current) {
+        baseTextRef.current = latestInputRef.current;
+        try {
+          recognition.start();
+        } catch (err) {
+          setTimeout(() => {
+            if (isListeningRef.current) {
+              try {
+                recognition.start();
+              } catch (e) {
+                stopListening();
+              }
+            }
+          }, 200);
+        }
+      } else {
+        setIsListening(false);
+      }
+    };
+
+    try {
+      isListeningRef.current = true;
+      setIsListening(true);
+      recognition.start();
+    } catch (err) {
+      console.error("Failed to start speech recognition", err);
+      stopListening();
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListeningRef.current || isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
