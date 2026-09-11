@@ -523,7 +523,7 @@ export function ChatPanel({
 
         <form
           onSubmit={onSubmit}
-          className="w-full max-w-4xl mx-auto relative flex items-center bg-card border border-border rounded-2xl px-2 py-0.5 sm:px-2.5 sm:py-1 hover:border-border/80 focus-within:border-border transition-all shadow-sm"
+          className="chat-input-form w-full max-w-4xl mx-auto relative flex items-center bg-card border border-border rounded-2xl px-2 py-0.5 sm:px-2.5 sm:py-1 hover:border-border/80 focus-within:border-border transition-all shadow-sm"
         >
           <input
             type="text"
@@ -532,32 +532,32 @@ export function ChatPanel({
             onChange={(e) => setInput(e.target.value)}
             className="w-full bg-transparent text-sm sm:text-base text-foreground placeholder-muted-foreground py-2 pl-3 pr-20 sm:pr-24 focus:outline-none focus:ring-0"
           />
-          <div className="absolute right-1.5 sm:right-2 flex items-center gap-1 sm:gap-1.5 z-10">
+          <div className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-1.5 z-10">
             {/* Voice */}
             <button
               type="button"
               onClick={onToggleListening}
               title="Voice input"
-              className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm ${
+              className={`!w-8 !h-8 !min-w-8 !min-h-8 !max-w-8 !max-h-8 p-0 shrink-0 aspect-square rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm ${
                 isListening
-                  ? "bg-red-500 text-white animate-pulse"
+                  ? "bg-[#c41e3a] text-white animate-pulse"
                   : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Mic className="h-4 w-4" />
             </button>
             {/* Submit */}
             <button
               type="submit"
               disabled={isLoading || (!input.trim() && selectedFiles.length === 0)}
               title="Send message"
-              className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+              className={`chat-send-btn !w-8 !h-8 !min-w-8 !min-h-8 !max-w-8 !max-h-8 p-0 shrink-0 aspect-square rounded-full flex items-center justify-center transition-all shadow-sm ${
                 input.trim() || selectedFiles.length > 0
-                  ? "bg-foreground text-background hover:opacity-90 cursor-pointer"
+                  ? "bg-[#c41e3a] hover:bg-[#b01a34] text-white cursor-pointer shadow-sm shadow-[#c41e3a]/25"
                   : "bg-muted/40 text-muted-foreground/30 cursor-not-allowed"
               }`}
             >
-              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5" />
+              <Send className="h-3.5 w-3.5" />
             </button>
           </div>
         </form>

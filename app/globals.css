@@ -223,7 +223,7 @@ html, body {
   /* Larger touch targets for primary nav/action buttons */
   nav button,
   nav a,
-  form button[type="submit"] {
+  form:not(.chat-input-form) button[type="submit"]:not(.chat-send-btn) {
     min-height: 44px;
   }
 }
