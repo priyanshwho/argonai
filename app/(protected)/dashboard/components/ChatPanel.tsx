@@ -505,8 +505,8 @@ export function ChatPanel({
       </div>
 
       <div
-        className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-3" : "p-4"}`}
-        style={{ paddingBottom: `max(env(safe-area-inset-bottom, 0px), ${compact ? '0.75rem' : '1rem'})` }}
+        className={`border-t border-border bg-background/85 backdrop-blur-sm shrink-0 ${compact ? "p-2.5" : "px-3 py-2 sm:px-4 sm:py-3"}`}
+        style={{ paddingBottom: `max(env(safe-area-inset-bottom, 0px), ${compact ? '0.5rem' : '0.625rem'})` }}
       >
         {/* File chips */}
         {selectedFiles.length > 0 && (
@@ -523,32 +523,41 @@ export function ChatPanel({
 
         <form
           onSubmit={onSubmit}
-          className="w-full max-w-4xl mx-auto relative flex items-center bg-card border border-border rounded-xl px-2.5 py-1 hover:border-border/80 focus-within:border-border transition-all shadow-inner"
+          className="w-full max-w-4xl mx-auto relative flex items-center bg-card border border-border rounded-2xl px-2 py-0.5 sm:px-2.5 sm:py-1 hover:border-border/80 focus-within:border-border transition-all shadow-sm"
         >
           <input
             type="text"
             placeholder={compact ? "Ask Argon assistant..." : "Ask AI assistant to search mail or book meetings..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="w-full bg-transparent text-base text-foreground placeholder-muted-foreground py-2 pl-3 pr-28 focus:outline-none focus:ring-0"
+            className="w-full bg-transparent text-sm sm:text-base text-foreground placeholder-muted-foreground py-2 pl-3 pr-20 sm:pr-24 focus:outline-none focus:ring-0"
           />
-          <div className="absolute right-2 flex items-center gap-1.5 z-10">
+          <div className="absolute right-1.5 sm:right-2 flex items-center gap-1 sm:gap-1.5 z-10">
             {/* Voice */}
             <button
               type="button"
               onClick={onToggleListening}
               title="Voice input"
-              className={`p-1.5 rounded-xl transition-all cursor-pointer shadow-sm ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted hover:bg-muted/80 text-muted-foreground"}`}
+              className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-sm ${
+                isListening
+                  ? "bg-red-500 text-white animate-pulse"
+                  : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground"
+              }`}
             >
-              {isListening ? <Mic className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+              <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
             {/* Submit */}
             <button
               type="submit"
               disabled={isLoading || (!input.trim() && selectedFiles.length === 0)}
-              className="p-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-30 disabled:hover:bg-primary transition-all cursor-pointer shadow-sm"
+              title="Send message"
+              className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center transition-all shadow-sm ${
+                input.trim() || selectedFiles.length > 0
+                  ? "bg-foreground text-background hover:opacity-90 cursor-pointer"
+                  : "bg-muted/40 text-muted-foreground/30 cursor-not-allowed"
+              }`}
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5" />
             </button>
           </div>
         </form>
