@@ -16,6 +16,8 @@ import {
   ChevronUp,
   Crown,
   Loader2,
+  Check,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -85,13 +87,13 @@ function getRoleBadge(role: string) {
     case "admin":
       return {
         label: "Admin",
-        className: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/25",
+        className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/25",
         icon: ShieldCheck,
       };
     default:
       return {
         label: "Client",
-        className: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/25",
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
         icon: Users,
       };
   }
@@ -181,8 +183,8 @@ function RoleAction({
   const actionLabel = user.role === "admin" ? "Demote to Client" : "Promote to Admin";
   const actionColor =
     user.role === "admin"
-      ? "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/20"
-      : "text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 border-violet-500/20";
+      ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20"
+      : "text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border-rose-500/20";
 
   return (
     <button
@@ -451,8 +453,8 @@ export function AdminClient() {
           <StatCard icon={Activity} label="Active Today" value={data.stats.activeToday} color="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" />
           <StatCard icon={Mail} label="Gmail Connected" value={data.stats.gmailConnected} color="bg-red-500/10 text-red-500 border-red-500/20" />
           <StatCard icon={Calendar} label="Calendar Connected" value={data.stats.calendarConnected} color="bg-blue-500/10 text-blue-500 border-blue-500/20" />
-          <StatCard icon={ShieldCheck} label="Admins" value={data.stats.totalAdmins} color="bg-violet-500/10 text-violet-500 border-violet-500/20" />
-          <StatCard icon={Users} label="Clients" value={data.stats.totalClients} color="bg-slate-500/10 text-slate-500 border-slate-500/20" />
+          <StatCard icon={ShieldCheck} label="Admins" value={data.stats.totalAdmins} color="bg-red-500/10 text-red-500 border-red-500/20" />
+          <StatCard icon={Users} label="Clients" value={data.stats.totalClients} color="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" />
         </section>
 
         {/* ── Filters ── */}
@@ -607,20 +609,20 @@ export function AdminClient() {
                     <td className="px-4 py-3.5 text-center">
                       {user.hasGmail ? (
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500">
-                          <span className="text-xs">✓</span>
+                          <Check className="h-3 w-3" />
                         </span>
                       ) : (
-                        <span className="text-xs text-muted-foreground/50">✗</span>
+                        <X className="h-3.5 w-3.5 text-muted-foreground/50 mx-auto" />
                       )}
                     </td>
                     {/* Calendar */}
                     <td className="px-4 py-3.5 text-center">
                       {user.hasCalendar ? (
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/15 text-blue-500">
-                          <span className="text-xs">✓</span>
+                          <Check className="h-3 w-3" />
                         </span>
                       ) : (
-                        <span className="text-xs text-muted-foreground/50">✗</span>
+                        <X className="h-3.5 w-3.5 text-muted-foreground/50 mx-auto" />
                       )}
                     </td>
                     {/* Role */}
