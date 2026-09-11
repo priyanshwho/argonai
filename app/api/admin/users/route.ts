@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
+const SUPER_ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
+
 export async function GET() {
-  const { isAdmin: admin, session } = await isAdmin();
+  const { isAdmin: admin, isSuperAdmin, session } = await isAdmin();
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,7 +15,7 @@ export async function GET() {
   }
 
   try {
-    // Fetch all users with their accounts, latest session, conversations, messages counts
+    // Fetch all users with their accounts, latest session
     const users = await prisma.user.findMany({
       include: {
         accounts: {
@@ -28,14 +30,6 @@ export async function GET() {
           },
           orderBy: { updatedAt: "desc" },
           take: 1,
-        },
-        conversations: {
-          select: {
-            id: true,
-            _count: {
-              select: { messages: true },
-            },
-          },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -64,15 +58,16 @@ export async function GET() {
     const formattedUsers = users.map((user) => {
       const authMethods = user.accounts.map((a) => a.providerId);
       const lastSession = user.sessions[0];
-      const conversationCount = user.conversations.length;
-      const messageCount = user.conversations.reduce(
-        (sum, c) => sum + c._count.messages,
-        0
-      );
       const integrations = integrationMap.get(user.id) || {
         hasGmail: false,
         hasCalendar: false,
       };
+
+      // Determine effective role: Super Admin email always resolves to "super_admin"
+      let effectiveRole = user.role || "client";
+      if (SUPER_ADMIN_EMAIL && user.email === SUPER_ADMIN_EMAIL) {
+        effectiveRole = "super_admin";
+      }
 
       return {
         id: user.id,
@@ -83,8 +78,7 @@ export async function GET() {
         authMethods,
         hasGmail: integrations.hasGmail,
         hasCalendar: integrations.hasCalendar,
-        conversationCount,
-        messageCount,
+        role: effectiveRole,
         createdAt: user.createdAt.toISOString(),
         lastActive: lastSession?.updatedAt?.toISOString() || null,
       };
@@ -100,23 +94,20 @@ export async function GET() {
     ).length;
     const gmailConnected = formattedUsers.filter((u) => u.hasGmail).length;
     const calendarConnected = formattedUsers.filter((u) => u.hasCalendar).length;
-    const totalConversations = formattedUsers.reduce(
-      (sum, u) => sum + u.conversationCount,
-      0
-    );
-    const totalMessages = formattedUsers.reduce(
-      (sum, u) => sum + u.messageCount,
-      0
-    );
+    const totalAdmins = formattedUsers.filter(
+      (u) => u.role === "admin" || u.role === "super_admin"
+    ).length;
+    const totalClients = formattedUsers.filter((u) => u.role === "client").length;
 
     return NextResponse.json({
+      isSuperAdmin,
       stats: {
         totalUsers,
         activeToday,
         gmailConnected,
         calendarConnected,
-        totalConversations,
-        totalMessages,
+        totalAdmins,
+        totalClients,
       },
       users: formattedUsers,
     });

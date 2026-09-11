@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -8,12 +8,14 @@ import {
   Activity,
   Mail,
   Calendar,
-  MessageSquare,
-  MessagesSquare,
   Search,
   Shield,
+  ShieldCheck,
+  UserCog,
   ChevronDown,
   ChevronUp,
+  Crown,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -28,8 +30,7 @@ interface AdminUser {
   authMethods: string[];
   hasGmail: boolean;
   hasCalendar: boolean;
-  conversationCount: number;
-  messageCount: number;
+  role: string; // "client" | "admin" | "super_admin"
   createdAt: string;
   lastActive: string | null;
 }
@@ -39,11 +40,11 @@ interface AdminStats {
   activeToday: number;
   gmailConnected: number;
   calendarConnected: number;
-  totalConversations: number;
-  totalMessages: number;
+  totalAdmins: number;
+  totalClients: number;
 }
 
-type SortField = "name" | "email" | "createdAt" | "lastActive" | "conversationCount" | "messageCount";
+type SortField = "name" | "email" | "createdAt" | "lastActive" | "role";
 type SortDir = "asc" | "desc";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,6 +71,29 @@ function getAuthBadge(provider: string) {
       return { label: "Email", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" };
     default:
       return { label: provider, className: "bg-muted text-muted-foreground border-border" };
+  }
+}
+
+function getRoleBadge(role: string) {
+  switch (role) {
+    case "super_admin":
+      return {
+        label: "Super Admin",
+        className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25",
+        icon: Crown,
+      };
+    case "admin":
+      return {
+        label: "Admin",
+        className: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/25",
+        icon: ShieldCheck,
+      };
+    default:
+      return {
+        label: "Client",
+        className: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/25",
+        icon: Users,
+      };
   }
 }
 
@@ -113,19 +137,85 @@ function StatCard({
   );
 }
 
+// ─── Role Badge Component ─────────────────────────────────────────────────────
+function RoleBadge({ role }: { role: string }) {
+  const badge = getRoleBadge(role);
+  const BadgeIcon = badge.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border ${badge.className}`}>
+      <BadgeIcon className="h-3 w-3" />
+      {badge.label}
+    </span>
+  );
+}
+
+// ─── Role Action Button ───────────────────────────────────────────────────────
+function RoleAction({
+  user,
+  isSuperAdmin,
+  onRoleChange,
+  changingUserId,
+}: {
+  user: AdminUser;
+  isSuperAdmin: boolean;
+  onRoleChange: (userId: string, newRole: string) => void;
+  changingUserId: string | null;
+}) {
+  // Super Admin row — locked badge, no action
+  if (user.role === "super_admin") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-rose-500/70 px-2 py-1">
+        <Shield className="h-3 w-3" />
+        Protected
+      </span>
+    );
+  }
+
+  // Only Super Admin can change roles
+  if (!isSuperAdmin) {
+    return <span className="text-xs text-muted-foreground/50">—</span>;
+  }
+
+  const isChanging = changingUserId === user.id;
+  const newRole = user.role === "admin" ? "client" : "admin";
+  const actionLabel = user.role === "admin" ? "Demote to Client" : "Promote to Admin";
+  const actionColor =
+    user.role === "admin"
+      ? "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/20"
+      : "text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 border-violet-500/20";
+
+  return (
+    <button
+      onClick={() => onRoleChange(user.id, newRole)}
+      disabled={isChanging}
+      className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border bg-transparent transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${actionColor}`}
+    >
+      {isChanging ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : (
+        <UserCog className="h-3 w-3" />
+      )}
+      {isChanging ? "Updating..." : actionLabel}
+    </button>
+  );
+}
+
 // ─── Main Admin Client ───────────────────────────────────────────────────────
 export function AdminClient() {
   const [data, setData] = useState<{
+    isSuperAdmin: boolean;
     stats: AdminStats;
     users: AdminUser[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [changingUserId, setChangingUserId] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState("");
   const [authFilter, setAuthFilter] = useState<string>("all");
   const [integrationFilter, setIntegrationFilter] = useState<string>("all");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
 
   // Sorting
   const [sortField, setSortField] = useState<SortField>("createdAt");
@@ -146,6 +236,57 @@ export function AdminClient() {
     }
     fetchData();
   }, []);
+
+  // ── Role change handler ─────────────────────────────────────────────────
+  const handleRoleChange = useCallback(
+    async (userId: string, newRole: string) => {
+      if (!data) return;
+      setChangingUserId(userId);
+
+      // Optimistic update
+      const prevUsers = data.users;
+      const updatedUsers = data.users.map((u) =>
+        u.id === userId ? { ...u, role: newRole } : u
+      );
+      const totalAdmins = updatedUsers.filter(
+        (u) => u.role === "admin" || u.role === "super_admin"
+      ).length;
+      const totalClients = updatedUsers.filter((u) => u.role === "client").length;
+      setData({
+        ...data,
+        users: updatedUsers,
+        stats: { ...data.stats, totalAdmins, totalClients },
+      });
+
+      try {
+        const res = await fetch("/api/admin/users/role", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, role: newRole }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+      } catch (err: any) {
+        // Revert on failure
+        const revertAdmins = prevUsers.filter(
+          (u) => u.role === "admin" || u.role === "super_admin"
+        ).length;
+        const revertClients = prevUsers.filter((u) => u.role === "client").length;
+        setData({
+          ...data,
+          users: prevUsers,
+          stats: { ...data.stats, totalAdmins: revertAdmins, totalClients: revertClients },
+        });
+        alert(`Failed to update role: ${err.message}`);
+      } finally {
+        setChangingUserId(null);
+      }
+    },
+    [data]
+  );
 
   const filteredUsers = useMemo(() => {
     if (!data) return [];
@@ -177,6 +318,11 @@ export function AdminClient() {
       users = users.filter((u) => !u.hasGmail && !u.hasCalendar);
     }
 
+    // Role filter
+    if (roleFilter !== "all") {
+      users = users.filter((u) => u.role === roleFilter);
+    }
+
     // Sort
     users.sort((a, b) => {
       let cmp = 0;
@@ -195,18 +341,17 @@ export function AdminClient() {
             (a.lastActive ? new Date(a.lastActive).getTime() : 0) -
             (b.lastActive ? new Date(b.lastActive).getTime() : 0);
           break;
-        case "conversationCount":
-          cmp = a.conversationCount - b.conversationCount;
+        case "role": {
+          const order: Record<string, number> = { super_admin: 0, admin: 1, client: 2 };
+          cmp = (order[a.role] ?? 3) - (order[b.role] ?? 3);
           break;
-        case "messageCount":
-          cmp = a.messageCount - b.messageCount;
-          break;
+        }
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
 
     return users;
-  }, [data, search, authFilter, integrationFilter, sortField, sortDir]);
+  }, [data, search, authFilter, integrationFilter, roleFilter, sortField, sortDir]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -275,10 +420,12 @@ export function AdminClient() {
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold font-serif text-foreground truncate flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary shrink-0" />
-                Admin Dashboard
+                {data.isSuperAdmin ? "Super Admin Dashboard" : "Admin Dashboard"}
               </h1>
               <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                System overview and user management
+                {data.isSuperAdmin
+                  ? "Full control — system overview and user management"
+                  : "System overview — read-only access"}
               </p>
             </div>
           </div>
@@ -304,8 +451,8 @@ export function AdminClient() {
           <StatCard icon={Activity} label="Active Today" value={data.stats.activeToday} color="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" />
           <StatCard icon={Mail} label="Gmail Connected" value={data.stats.gmailConnected} color="bg-red-500/10 text-red-500 border-red-500/20" />
           <StatCard icon={Calendar} label="Calendar Connected" value={data.stats.calendarConnected} color="bg-blue-500/10 text-blue-500 border-blue-500/20" />
-          <StatCard icon={MessageSquare} label="Conversations" value={data.stats.totalConversations} color="bg-purple-500/10 text-purple-500 border-purple-500/20" />
-          <StatCard icon={MessagesSquare} label="Total Messages" value={data.stats.totalMessages} color="bg-amber-500/10 text-amber-500 border-amber-500/20" />
+          <StatCard icon={ShieldCheck} label="Admins" value={data.stats.totalAdmins} color="bg-violet-500/10 text-violet-500 border-violet-500/20" />
+          <StatCard icon={Users} label="Clients" value={data.stats.totalClients} color="bg-slate-500/10 text-slate-500 border-slate-500/20" />
         </section>
 
         {/* ── Filters ── */}
@@ -320,6 +467,16 @@ export function AdminClient() {
               className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
           </div>
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="bg-card border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+          >
+            <option value="all">All Roles</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="client">Client</option>
+          </select>
           <select
             value={authFilter}
             onChange={(e) => setAuthFilter(e.target.value)}
@@ -373,15 +530,9 @@ export function AdminClient() {
                   </th>
                   <th
                     className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-                    onClick={() => toggleSort("conversationCount")}
+                    onClick={() => toggleSort("role")}
                   >
-                    Chats <SortIcon field="conversationCount" />
-                  </th>
-                  <th
-                    className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-                    onClick={() => toggleSort("messageCount")}
-                  >
-                    Msgs <SortIcon field="messageCount" />
+                    Role <SortIcon field="role" />
                   </th>
                   <th
                     className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
@@ -395,6 +546,11 @@ export function AdminClient() {
                   >
                     Last Active (IST) <SortIcon field="lastActive" />
                   </th>
+                  {data.isSuperAdmin && (
+                    <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -467,13 +623,9 @@ export function AdminClient() {
                         <span className="text-xs text-muted-foreground/50">✗</span>
                       )}
                     </td>
-                    {/* Chats */}
-                    <td className="px-4 py-3.5 text-center text-sm font-medium text-foreground tabular-nums">
-                      {user.conversationCount}
-                    </td>
-                    {/* Messages */}
-                    <td className="px-4 py-3.5 text-center text-sm font-medium text-foreground tabular-nums">
-                      {user.messageCount}
+                    {/* Role */}
+                    <td className="px-4 py-3.5 text-center">
+                      <RoleBadge role={user.role} />
                     </td>
                     {/* Joined */}
                     <td className="px-4 py-3.5 text-xs text-muted-foreground whitespace-nowrap">
@@ -492,11 +644,22 @@ export function AdminClient() {
                         )}
                       </div>
                     </td>
+                    {/* Actions (Super Admin only) */}
+                    {data.isSuperAdmin && (
+                      <td className="px-4 py-3.5 text-center">
+                        <RoleAction
+                          user={user}
+                          isSuperAdmin={data.isSuperAdmin}
+                          onRoleChange={handleRoleChange}
+                          changingUserId={changingUserId}
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {filteredUsers.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                    <td colSpan={data.isSuperAdmin ? 8 : 7} className="px-4 py-12 text-center text-sm text-muted-foreground">
                       No users found matching your filters.
                     </td>
                   </tr>
@@ -526,6 +689,7 @@ export function AdminClient() {
                     <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
+                  <RoleBadge role={user.role} />
                 </div>
 
                 {/* Badges row */}
@@ -554,15 +718,7 @@ export function AdminClient() {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div className="bg-muted/30 rounded-lg py-1.5 px-2">
-                    <p className="text-xs font-bold text-foreground tabular-nums">{user.conversationCount}</p>
-                    <p className="text-[10px] text-muted-foreground">Chats</p>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg py-1.5 px-2">
-                    <p className="text-xs font-bold text-foreground tabular-nums">{user.messageCount}</p>
-                    <p className="text-[10px] text-muted-foreground">Msgs</p>
-                  </div>
+                <div className="grid grid-cols-2 gap-2 text-center">
                   <div className="bg-muted/30 rounded-lg py-1.5 px-2">
                     <p className="text-[10px] font-medium text-foreground">{formatIST(user.createdAt).split(",")[0]}</p>
                     <p className="text-[10px] text-muted-foreground">Joined</p>
@@ -572,6 +728,18 @@ export function AdminClient() {
                     <p className="text-[10px] text-muted-foreground">Active</p>
                   </div>
                 </div>
+
+                {/* Role action for mobile (Super Admin only) */}
+                {data.isSuperAdmin && user.role !== "super_admin" && (
+                  <div className="pt-1">
+                    <RoleAction
+                      user={user}
+                      isSuperAdmin={data.isSuperAdmin}
+                      onRoleChange={handleRoleChange}
+                      changingUserId={changingUserId}
+                    />
+                  </div>
+                )}
               </div>
             ))}
             {filteredUsers.length === 0 && (

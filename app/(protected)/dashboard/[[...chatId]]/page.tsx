@@ -81,6 +81,15 @@ export default async function DashboardPage({ params }: PageProps) {
     redirect(`/dashboard/chat-${Date.now()}`);
   }
 
+  // Check if user has admin access (Super Admin by env var OR admin/super_admin role in DB)
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  const userRole = dbUser?.role || "client";
+  const isSuperAdminByEmail = !!process.env.ADMIN_EMAIL && session.user.email === process.env.ADMIN_EMAIL;
+  const hasAdminAccess = isSuperAdminByEmail || userRole === "admin" || userRole === "super_admin";
+
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-foreground font-sans">
@@ -99,7 +108,7 @@ export default async function DashboardPage({ params }: PageProps) {
         initialHasCalendar={hasCalendar}
         initialConversations={initialConversations}
         activeChatIdParam={chatIdParam}
-        isAdmin={!!process.env.ADMIN_EMAIL && session.user.email === process.env.ADMIN_EMAIL}
+        isAdmin={hasAdminAccess}
       />
     </Suspense>
   );
