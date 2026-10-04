@@ -8,6 +8,16 @@ interface Attachment {
   content: string; // Base64 data URI or plain base64 string
 }
 
+function encodeMimeHeader(value: string): string {
+  // Sanitize any carriage returns or newlines to prevent header injection
+  const cleaned = value.replace(/[\r\n]+/g, ' ').trim();
+  // If string contains non-ASCII characters (code point > 127), encode via RFC 2047 base64
+  if (/[^\x00-\x7F]/.test(cleaned)) {
+    return `=?UTF-8?B?${Buffer.from(cleaned, 'utf-8').toString('base64')}?=`;
+  }
+  return cleaned;
+}
+
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -31,25 +41,28 @@ export async function POST(req: Request) {
     }
 
     const tenantClient = corsair.withTenant(session.user.id);
+    const encodedSubject = encodeMimeHeader(subject);
     let rawMessage = '';
 
     if (attachments.length === 0) {
-      // Simple raw email format
+      // Simple raw email format with RFC 2047 header and base64 body encoding
       const emailLines = [
+        'MIME-Version: 1.0',
         `To: ${to}`,
-        `Subject: ${subject}`,
+        `Subject: ${encodedSubject}`,
         'Content-Type: text/plain; charset="UTF-8"',
+        'Content-Transfer-Encoding: base64',
         '',
-        body
+        Buffer.from(body, 'utf-8').toString('base64')
       ];
       rawMessage = emailLines.join('\r\n');
     } else {
       // Multipart email format for attachments
       const boundary = `corsair_boundary_${Date.now()}`;
       const emailHeaders = [
-        `To: ${to}`,
-        `Subject: ${subject}`,
         'MIME-Version: 1.0',
+        `To: ${to}`,
+        `Subject: ${encodedSubject}`,
         `Content-Type: multipart/mixed; boundary="${boundary}"`
       ];
 
@@ -58,7 +71,7 @@ export async function POST(req: Request) {
         'Content-Type: text/plain; charset="UTF-8"',
         'Content-Transfer-Encoding: base64',
         '',
-        Buffer.from(body).toString('base64')
+        Buffer.from(body, 'utf-8').toString('base64')
       ];
 
       for (const att of attachments as Attachment[]) {
@@ -68,10 +81,12 @@ export async function POST(req: Request) {
           base64Data = base64Data.split(';base64,')[1];
         }
 
+        const safeFilename = att.filename.replace(/["\r\n]/g, '');
+
         parts.push(
           `--${boundary}`,
-          `Content-Type: application/octet-stream; name="${att.filename}"`,
-          `Content-Disposition: attachment; filename="${att.filename}"`,
+          `Content-Type: application/octet-stream; name="${safeFilename}"`,
+          `Content-Disposition: attachment; filename="${safeFilename}"`,
           'Content-Transfer-Encoding: base64',
           '',
           base64Data

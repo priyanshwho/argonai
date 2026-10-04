@@ -227,7 +227,7 @@ export async function POST(req: Request) {
       description: 'Use this tool to draft an email when the user wants to send an email or message via Gmail. This will present a draft card to the user for confirmation, editing, tone refinement, and attachment selection before sending.',
       inputSchema: z.object({
         to: z.string().describe('The email address of the recipient.'),
-        subject: z.string().describe('The subject line of the email.'),
+        subject: z.string().describe('The subject line of the email. Use standard clean ASCII characters (e.g. use standard hyphen "-" rather than unicode en-dash or em-dash).'),
         body: z.string().describe('The body text of the email.'),
         threadId: z.string().optional().describe('The threadId if this email is a reply to an existing conversation thread.')
       }),
