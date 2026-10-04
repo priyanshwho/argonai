@@ -5,6 +5,7 @@ import { getCorsairAiTools } from '@/lib/ai-tools';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
+import { unslopEmailText, cleanUnslopSubject } from '@/lib/unslop';
 
 function getMessageText(message: any): string {
   if (typeof message.content === 'string' && message.content) {
@@ -232,10 +233,15 @@ export async function POST(req: Request) {
         threadId: z.string().optional().describe('The threadId if this email is a reply to an existing conversation thread.')
       }),
       execute: async (args: any) => {
+        const cleanedSubject = cleanUnslopSubject(args.subject);
+        const cleanedBody = await unslopEmailText({
+          body: args.body,
+          senderName: session.user.name || undefined
+        });
         return {
           to: args.to,
-          subject: args.subject,
-          body: args.body,
+          subject: cleanedSubject,
+          body: cleanedBody,
           threadId: args.threadId || null,
           status: 'draft'
         };
@@ -276,6 +282,20 @@ When creating calendar events, ALWAYS generate startTime and endTime as ISO 8601
 CRITICAL: When the user wants to write an email, draft an email, reply to an email, or send an email, you MUST call the "draft_email" tool to present a draft card to the user. Do NOT write the email subject, recipient, or body as plain text in your chat response. You must always invoke the "draft_email" tool so that the user receives an interactive card.
 When the user wants to schedule, create, or book a calendar event, you MUST call the "draft_calendar_event" tool to present the event details to the user for approval. Do NOT write the event details as plain text in your chat response. You must always invoke the "draft_calendar_event" tool to render the animated visual conflict checker card.
 Do NOT execute send or event creation via "run_script". All writes must go through the user-approved "draft_email" and "draft_calendar_event" cards.
+
+CRITICAL EMAIL DRAFTING RULES (UNSLOP):
+Whenever drafting or writing an email via "draft_email":
+- Cut all AI tells. The email must read like it was written by a real, competent human.
+- Do NOT use superficial -ing phrases ("highlighting...", "ensuring...", "reflecting...", "showcasing...", "fostering...").
+- BANNED AI vocabulary: additionally, crucial, delve, enduring, enhance, fostering, garner, interplay, intricate, landscape, pivotal, showcase, tapestry, testament, underscore, vibrant, paramount. Use plain words.
+- Fancy ways to say "is": Avoid "serves as", "stands as", "boasts", "features". Just say "is" or "has".
+- Avoid "Not just X, but Y." State points directly.
+- Avoid the rule of three (forcing ideas into groups of three).
+- Avoid em dashes (—) and en dashes (–) entirely. Use standard periods, commas, or plain hyphens (-).
+- Avoid colon overuse as mid-sentence connectors.
+- Delete AI clichés and pleasantries: "I hope this email finds you well", "I hope this helps!", "Please let me know if you have any questions or need further assistance."
+- Cut filler phrases: "In order to" -> "To", "Due to the fact that" -> "Because". Delete "It is important to note that".
+- Say what it does, not how it feels. Be concrete and specific. Use active voice.
 
 ${(!hasGmail || !hasCalendar) ? `
 CRITICAL: Gmail and/or Google Calendar integrations are not configured for this user.

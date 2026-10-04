@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { generateText } from 'ai';
 import { getGoogleModel } from '@/lib/ai';
+import { UNSLOP_PROMPT, cleanPunctuationAndFormatting } from '@/lib/unslop';
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -30,7 +31,8 @@ export async function POST(req: Request) {
 - Output ONLY the single rewritten email body. Do not write subject, options, markdown format, code fences, headers, annotations, or tips.
 - Use plain text formatting only. Do not use bold tags like **, markdown headers, or other markdown punctuation.
 - Automatically use "${senderName}" as the sender's name at the end of the email (do not use placeholders like [Your Name] or [User Name]).
-- Automatically address the recipient based on the recipient identifier "${recipientInfo}" if provided (parse a friendly first name if it is an email address, e.g. "Saitama" from "saitama10k10@gmail.com", or if it contains a name, use it). If no recipient information is provided or no name can be parsed, start with a general polite greeting like "Dear Customer," "Hi," or "Hello," without brackets or placeholders. Never leave placeholders like [Recipient Name] or [Recipient's Name].`;
+- Automatically address the recipient based on the recipient identifier "${recipientInfo}" if provided (parse a friendly first name if it is an email address, e.g. "Saitama" from "saitama10k10@gmail.com", or if it contains a name, use it). If no recipient information is provided or no name can be parsed, start with a general polite greeting like "Dear Customer," "Hi," or "Hello," without brackets or placeholders. Never leave placeholders like [Recipient Name] or [Recipient's Name].
+${UNSLOP_PROMPT}`;
 
     let systemInstruction = 'You are a professional email editor assistant. Rewrite the provided email body to improve its tone and style. Write only the modified body text, without headers, subjects, placeholders, or templates.';
 
@@ -58,7 +60,8 @@ export async function POST(req: Request) {
       prompt: `Email body to rewrite:\n${body}`,
     });
 
-    return NextResponse.json({ refinedBody: result.text.trim() });
+    const refined = cleanPunctuationAndFormatting(result.text.trim());
+    return NextResponse.json({ refinedBody: refined });
   } catch (err: any) {
     console.error('Failed to refine email:', err);
     return NextResponse.json({ error: err.message || 'Failed to refine email' }, { status: 500 });

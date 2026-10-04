@@ -8,9 +8,11 @@ interface Attachment {
   content: string; // Base64 data URI or plain base64 string
 }
 
+import { cleanUnslopSubject } from '@/lib/unslop';
+
 function encodeMimeHeader(value: string): string {
   // Sanitize any carriage returns or newlines to prevent header injection
-  const cleaned = value.replace(/[\r\n]+/g, ' ').trim();
+  const cleaned = cleanUnslopSubject(value);
   // If string contains non-ASCII characters (code point > 127), encode via RFC 2047 base64
   if (/[^\x00-\x7F]/.test(cleaned)) {
     return `=?UTF-8?B?${Buffer.from(cleaned, 'utf-8').toString('base64')}?=`;

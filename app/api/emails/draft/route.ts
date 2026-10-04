@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { generateText } from 'ai';
 import { getGoogleModel } from '@/lib/ai';
+import { UNSLOP_PROMPT, cleanPunctuationAndFormatting } from '@/lib/unslop';
 
 function parseNameFromSender(sender: string): string {
   if (!sender) return '';
@@ -100,15 +101,17 @@ export async function POST(req: Request) {
 
     const result = await generateText({
       model,
-      system: `You are an email drafting assistant. Draft a professional, contextual reply to the provided email. Adhere to any special instructions.
+      system: `You are an email drafting assistant. Draft a human, contextual reply to the provided email. Adhere to any special instructions.
 - Output ONLY the single email reply text body. Do not write subject, options, markdown format, code fences, headers, annotations, or tips.
 - Use plain text formatting only. Do not use bold tags like **, markdown headers, or other markdown punctuation.
 - Automatically use "${senderName}" as the sender's name at the end of the email (do not use placeholders like [Your Name] or [User Name]).
-- Automatically address the recipient as "${recipientName}". If no name can be parsed or deduced, use a pleasant greeting like "Hi," or "Hello," without brackets or placeholders. Never leave placeholders like [Recipient's Name] or [Recipient Name].`,
+- Automatically address the recipient as "${recipientName}". If no name can be parsed or deduced, use a pleasant greeting like "Hi," or "Hello," without brackets or placeholders. Never leave placeholders like [Recipient's Name] or [Recipient Name].
+${UNSLOP_PROMPT}`,
       prompt: `Email received:\n${emailContext}\n\nDrafting instructions: ${instructions || 'Write a polite, professional reply.'}`,
     });
 
-    return NextResponse.json({ draft: result.text.trim() });
+    const cleanDraft = cleanPunctuationAndFormatting(result.text.trim());
+    return NextResponse.json({ draft: cleanDraft });
   } catch (err) {
     console.error('Failed to generate draft:', err);
     return NextResponse.json({ error: 'Failed to generate draft' }, { status: 500 });
