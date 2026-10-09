@@ -41,3 +41,37 @@ export interface EmailAttachment {
   filename: string;
   content: string; // Base64 data
 }
+
+export type OutreachRecipientStatus = "draft" | "generating" | "approved" | "sent" | "error";
+export type OutreachGroupStatus = "draft" | "generating" | "ready" | "sending" | "completed";
+
+export interface OutreachRecipientItem {
+  id: string;
+  groupId: string;
+  companyName: string;
+  email: string;
+  customNotes?: string | null;
+  subject?: string | null;
+  body?: string | null;
+  status: OutreachRecipientStatus;
+  sentAt?: string | null;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OutreachGroupItem {
+  id: string;
+  userId?: string;
+  name: string;
+  instructions: string;
+  attachmentName?: string | null;
+  hasAttachment?: boolean;
+  status: OutreachGroupStatus;
+  recipients?: OutreachRecipientItem[];
+  _count?: {
+    recipients: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}

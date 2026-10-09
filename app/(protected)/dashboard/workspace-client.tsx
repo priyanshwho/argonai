@@ -15,6 +15,7 @@ import { InboxPanel } from "./components/InboxPanel";
 import { CalendarPanel } from "./components/CalendarPanel";
 import { CalendarManualForm } from "./components/CalendarManualForm";
 import { ConfigurationPanel } from "./components/ConfigurationPanel";
+import { OutreachPanel } from "./components/OutreachPanel";
 import { SearchResultsPanel } from "./components/SearchResultsPanel";
 import { CommandPaletteDialog } from "./components/CommandPaletteDialog";
 import { PwaInstallDialog } from "@/components/ui/pwa-install-dialog";
@@ -43,7 +44,7 @@ export function WorkspaceClient({
   const searchParams = useSearchParams();
 
   // ── Tab / Layout state ───────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<"chat" | "inbox" | "calendar" | "configuration">("chat");
+  const [activeTab, setActiveTab] = useState<"chat" | "inbox" | "calendar" | "configuration" | "outreach">("chat");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openCommandPalette, setOpenCommandPalette] = useState(false);
   const [calendarRightPanelMode, setCalendarRightPanelMode] = useState<"assistant" | "manual">("assistant");
@@ -61,6 +62,8 @@ export function WorkspaceClient({
       setActiveTab("inbox");
     } else if (tab === "calendar") {
       setActiveTab("calendar");
+    } else if (tab === "outreach") {
+      setActiveTab("outreach");
     } else {
       setActiveTab("chat");
     }
@@ -491,7 +494,7 @@ export function WorkspaceClient({
     window.history.pushState(null, '', `/dashboard/${newId}`);
   };
 
-  const handleTabChange = (tabId: "chat" | "inbox" | "calendar" | "configuration") => {
+  const handleTabChange = (tabId: "chat" | "inbox" | "calendar" | "configuration" | "outreach") => {
     setActiveTab(tabId);
     setMobileMenuOpen(false);
     setMobileAssistantOpen(false);
@@ -836,6 +839,11 @@ export function WorkspaceClient({
             <CalendarPanel eventsLoading={eventsLoading} events={events} refreshEvents={fetchEvents} />
           )}
 
+          {/* Cold Outreach */}
+          {activeTab === "outreach" && !showSearchResults && (
+            <OutreachPanel hasGmail={initialHasGmail} />
+          )}
+
           {/* Configuration — redirects to /settings, kept for graceful fallback */}
           {activeTab === "configuration" && !showSearchResults && (
             <ConfigurationPanel
@@ -882,7 +890,7 @@ export function WorkspaceClient({
             </div>
           ) : (
             <>
-              {activeTab === "inbox" && (
+              {(activeTab === "inbox" || activeTab === "outreach") && (
                 <ChatPanel {...chatPanelProps} compact onCollapse={() => setRightPanelCollapsed(true)} />
               )}
               {activeTab === "calendar" && (

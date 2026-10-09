@@ -152,7 +152,7 @@ interface ChatPanelProps {
   selectedFiles: File[];
   setSelectedFiles: (fn: (prev: File[]) => File[]) => void;
   addToolResult: (args: any) => void;
-  activeTab: "chat" | "inbox" | "calendar" | "configuration";
+  activeTab: "chat" | "inbox" | "calendar" | "configuration" | "outreach";
   setCalendarRightPanelMode?: (v: "assistant" | "manual") => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

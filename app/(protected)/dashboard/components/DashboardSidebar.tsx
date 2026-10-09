@@ -3,7 +3,7 @@
 import React from "react";
 import {
   Bot, Plus, Settings, LogOut, Mail, Calendar,
-  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X, Shield
+  Inbox, ChevronRight, CalendarDays, MessageSquare, Trash2, X, Shield, Layers
 } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { ChatConversation } from "./types";
 interface DashboardSidebarProps {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
-  activeTab: "chat" | "inbox" | "calendar" | "configuration";
+  activeTab: "chat" | "inbox" | "calendar" | "configuration" | "outreach";
   showSearchResults: boolean;
   activeChatId: string;
   conversations: ChatConversation[];
@@ -25,7 +25,7 @@ interface DashboardSidebarProps {
   deleteConversation: (id: string, e: React.MouseEvent) => void;
   hasGmail: boolean;
   hasCalendar: boolean;
-  onTabChange: (tabId: "chat" | "inbox" | "calendar" | "configuration") => void;
+  onTabChange: (tabId: "chat" | "inbox" | "calendar" | "configuration" | "outreach") => void;
   onChatChange: (chatId: string) => void;
   mobileMenuOpen?: boolean;
   setMobileMenuOpen?: (v: boolean) => void;
@@ -62,6 +62,13 @@ export function DashboardSidebar({
       label: "Inbox Workspace",
       icon: Inbox,
       href: `/dashboard/${activeChatId}?tab=inbox`,
+      status: hasGmail,
+    },
+    {
+      id: "outreach",
+      label: "Cold Outreach",
+      icon: Layers,
+      href: `/dashboard/${activeChatId}?tab=outreach`,
       status: hasGmail,
     },
     {

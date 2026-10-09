@@ -5,7 +5,7 @@ import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardHeaderProps {
-  activeTab: "chat" | "inbox" | "calendar" | "configuration";
+  activeTab: "chat" | "inbox" | "calendar" | "configuration" | "outreach";
   showSearchResults: boolean;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
@@ -29,6 +29,8 @@ export function DashboardHeader({
     ? (chatTitle || "AI Assistant")
     : activeTab === "inbox"
     ? "Emails Inbox"
+    : activeTab === "outreach"
+    ? "Cold Outreach Hub"
     : activeTab === "calendar"
     ? "Calendar Events"
     : "Configuration";

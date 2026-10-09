@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  Bot, Sparkles, Calendar, Inbox, Settings,
+  Bot, Sparkles, Calendar, Inbox, Settings, Layers,
 } from "lucide-react";
 import {
   Command,
@@ -19,7 +19,7 @@ import { formatDateTimeLocal } from "./utils";
 interface CommandPaletteDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onNavigate: (tab: "chat" | "inbox" | "calendar") => void;
+  onNavigate: (tab: "chat" | "inbox" | "calendar" | "outreach") => void;
   onSettings: () => void;
   onAskAI: (prompt: string) => void;
   onScheduleTemplate: (title: string, start: Date, end: Date) => void;
@@ -53,15 +53,20 @@ export function CommandPaletteDialog({
               <span>Go to Emails Inbox</span>
               <CommandShortcut>⌘2</CommandShortcut>
             </CommandItem>
+            <CommandItem onSelect={() => { onNavigate("outreach"); close(); }}>
+              <Layers className="mr-2 h-4 w-4" />
+              <span>Go to Cold Outreach</span>
+              <CommandShortcut>⌘3</CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={() => { onNavigate("calendar"); close(); }}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Go to Calendar Board</span>
-              <CommandShortcut>⌘3</CommandShortcut>
+              <CommandShortcut>⌘4</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => { onSettings(); close(); }}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Go to Settings Panel</span>
-              <CommandShortcut>⌘4</CommandShortcut>
+              <CommandShortcut>⌘5</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 
