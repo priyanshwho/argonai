@@ -30,6 +30,7 @@ import {
 } from "./types";
 import { OutreachDraftCard } from "./OutreachDraftCard";
 import { CreateGroupDialog } from "./CreateGroupDialog";
+import { EditGroupDialog } from "./EditGroupDialog";
 import { AddRecipientsDialog } from "./AddRecipientsDialog";
 import { SendConfirmDialog } from "./SendConfirmDialog";
 
@@ -46,6 +47,7 @@ export function OutreachPanel({ hasGmail }: OutreachPanelProps) {
 
   // Dialog controls
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [addRecipientsOpen, setAddRecipientsOpen] = useState(false);
   const [sendConfirmOpen, setSendConfirmOpen] = useState(false);
 
@@ -472,8 +474,19 @@ export function OutreachPanel({ hasGmail }: OutreachPanelProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => setEditGroupOpen(true)}
+                      className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                      title="Edit Group"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDeleteGroup(activeGroupData.id)}
                       className="h-8 px-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+                      title="Delete Group"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -616,6 +629,18 @@ export function OutreachPanel({ hasGmail }: OutreachPanelProps) {
 
       {activeGroupData && (
         <>
+          <EditGroupDialog
+            isOpen={editGroupOpen}
+            group={activeGroupData}
+            onClose={() => setEditGroupOpen(false)}
+            onSuccess={(updated) => {
+              setActiveGroupData((prev) => (prev ? { ...prev, ...updated } : updated));
+              setGroups((prev) =>
+                prev.map((g) => (g.id === updated.id ? { ...g, ...updated } : g))
+              );
+            }}
+          />
+
           <AddRecipientsDialog
             isOpen={addRecipientsOpen}
             groupId={activeGroupData.id}
