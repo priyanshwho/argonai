@@ -21,6 +21,7 @@ model User {
   conversations  Conversation[]
   gmailCaches    GmailCache[]
   calendarEvents CalendarEvent[]
+  outreachGroups OutreachGroup[]
 
   @@unique([email])
   @@map("user")
@@ -185,5 +186,43 @@ model CorsairEvent {
   status    String?
 
   @@map("corsair_events")
+}
+
+// ── Outreach Feature ────────────────────────────────────────────────────
+
+model OutreachGroup {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  instructions   String   @default("")
+  attachmentName String?  // Original filename of the uploaded PDF
+  attachmentData Bytes?   // PDF file stored as raw bytes
+  status         String   @default("draft") // "draft" | "generating" | "ready" | "sending" | "sent"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  recipients     OutreachRecipient[]
+
+  @@index([userId])
+  @@map("outreach_group")
+}
+
+model OutreachRecipient {
+  id           String    @id @default(uuid())
+  groupId      String
+  group        OutreachGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  companyName  String
+  email        String
+  customNotes  String    @default("")
+  subject      String    @default("")
+  body         String    @default("")
+  status       String    @default("draft") // "draft" | "generating" | "approved" | "sending" | "sent" | "error"
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([groupId])
+  @@map("outreach_recipient")
 }
 
