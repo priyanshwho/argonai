@@ -53,6 +53,8 @@ export function WorkspaceClient({
   const [mobileAssistantOpen, setMobileAssistantOpen] = useState(false);
   const [pwaInstallOpen, setPwaInstallOpen] = useState(false);
 
+  const isOutreachAllowed = userEmail?.toLowerCase() === "priyanshu82711@gmail.com";
+
   // ── URL query param handling ─────────────────────────────────────────────
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -63,11 +65,11 @@ export function WorkspaceClient({
     } else if (tab === "calendar") {
       setActiveTab("calendar");
     } else if (tab === "outreach") {
-      setActiveTab("outreach");
+      setActiveTab(isOutreachAllowed ? "outreach" : "chat");
     } else {
       setActiveTab("chat");
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, isOutreachAllowed]);
 
   // Keyboard ⌘K shortcut
   useEffect(() => {
@@ -495,6 +497,7 @@ export function WorkspaceClient({
   };
 
   const handleTabChange = (tabId: "chat" | "inbox" | "calendar" | "configuration" | "outreach") => {
+    if (tabId === "outreach" && !isOutreachAllowed) return;
     setActiveTab(tabId);
     setMobileMenuOpen(false);
     setMobileAssistantOpen(false);
@@ -840,7 +843,7 @@ export function WorkspaceClient({
           )}
 
           {/* Cold Outreach */}
-          {activeTab === "outreach" && !showSearchResults && (
+          {activeTab === "outreach" && isOutreachAllowed && !showSearchResults && (
             <OutreachPanel hasGmail={initialHasGmail} />
           )}
 
@@ -890,7 +893,7 @@ export function WorkspaceClient({
             </div>
           ) : (
             <>
-              {(activeTab === "inbox" || activeTab === "outreach") && (
+              {(activeTab === "inbox" || (activeTab === "outreach" && isOutreachAllowed)) && (
                 <ChatPanel {...chatPanelProps} compact onCollapse={() => setRightPanelCollapsed(true)} />
               )}
               {activeTab === "calendar" && (
@@ -968,6 +971,7 @@ export function WorkspaceClient({
       <CommandPaletteDialog
         open={openCommandPalette}
         onOpenChange={setOpenCommandPalette}
+        showOutreach={isOutreachAllowed}
         onNavigate={(tab) => {
           if (tab === "chat") {
             handleTabChange("chat");

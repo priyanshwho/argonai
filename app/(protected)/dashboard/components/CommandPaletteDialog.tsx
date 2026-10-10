@@ -23,6 +23,7 @@ interface CommandPaletteDialogProps {
   onSettings: () => void;
   onAskAI: (prompt: string) => void;
   onScheduleTemplate: (title: string, start: Date, end: Date) => void;
+  showOutreach?: boolean;
 }
 
 export function CommandPaletteDialog({
@@ -32,6 +33,7 @@ export function CommandPaletteDialog({
   onSettings,
   onAskAI,
   onScheduleTemplate,
+  showOutreach = false,
 }: CommandPaletteDialogProps) {
   const close = () => onOpenChange(false);
 
@@ -53,11 +55,13 @@ export function CommandPaletteDialog({
               <span>Go to Emails Inbox</span>
               <CommandShortcut>⌘2</CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={() => { onNavigate("outreach"); close(); }}>
-              <Layers className="mr-2 h-4 w-4" />
-              <span>Go to Cold Outreach</span>
-              <CommandShortcut>⌘3</CommandShortcut>
-            </CommandItem>
+            {showOutreach && (
+              <CommandItem onSelect={() => { onNavigate("outreach"); close(); }}>
+                <Layers className="mr-2 h-4 w-4" />
+                <span>Go to Cold Outreach</span>
+                <CommandShortcut>⌘3</CommandShortcut>
+              </CommandItem>
+            )}
             <CommandItem onSelect={() => { onNavigate("calendar"); close(); }}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Go to Calendar Board</span>

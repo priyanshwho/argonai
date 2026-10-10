@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { generateText } from 'ai';
 import { getGoogleModel } from '@/lib/ai';
 import { UNSLOP_PROMPT, cleanPunctuationAndFormatting } from '@/lib/unslop';
+import { isOutreachAuthorized } from '@/lib/outreach-auth';
 
 type RouteParams = { params: Promise<{ groupId: string; recipientId: string }> };
 
@@ -12,6 +13,7 @@ type RouteParams = { params: Promise<{ groupId: string; recipientId: string }> }
 export async function POST(req: Request, { params }: RouteParams) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
+  if (!isOutreachAuthorized(session.user.email)) return new Response('Forbidden', { status: 403 });
 
   const { groupId, recipientId } = await params;
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
+import { isOutreachAuthorized } from '@/lib/outreach-auth';
 
 type RouteParams = { params: Promise<{ groupId: string; recipientId: string }> };
 
@@ -21,6 +22,7 @@ async function verifyOwnership(userId: string, groupId: string, recipientId: str
 export async function PUT(req: Request, { params }: RouteParams) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
+  if (!isOutreachAuthorized(session.user.email)) return new Response('Forbidden', { status: 403 });
 
   const { groupId, recipientId } = await params;
 
@@ -61,6 +63,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
 export async function DELETE(_req: Request, { params }: RouteParams) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
+  if (!isOutreachAuthorized(session.user.email)) return new Response('Forbidden', { status: 403 });
 
   const { groupId, recipientId } = await params;
 

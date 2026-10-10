@@ -56,6 +56,8 @@ export function DashboardSidebar({
   isAdmin = false,
   onAdmin,
 }: DashboardSidebarProps) {
+  const isOutreachUser = userEmail.toLowerCase() === "priyanshu82711@gmail.com";
+
   const navItems = [
     {
       id: "inbox",
@@ -64,13 +66,13 @@ export function DashboardSidebar({
       href: `/dashboard/${activeChatId}?tab=inbox`,
       status: hasGmail,
     },
-    {
+    ...(isOutreachUser ? [{
       id: "outreach",
       label: "Cold Outreach",
       icon: Layers,
       href: `/dashboard/${activeChatId}?tab=outreach`,
       status: hasGmail,
-    },
+    }] : []),
     {
       id: "calendar",
       label: "Calendar Board",

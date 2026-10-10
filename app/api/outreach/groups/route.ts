@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
+import { isOutreachAuthorized } from '@/lib/outreach-auth';
 
 // GET /api/outreach/groups — List all groups for the authenticated user
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
+  if (!isOutreachAuthorized(session.user.email)) return new Response('Forbidden', { status: 403 });
 
   const groups = await prisma.outreachGroup.findMany({
     where: { userId: session.user.id },
@@ -29,6 +31,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return new Response('Unauthorized', { status: 401 });
+  if (!isOutreachAuthorized(session.user.email)) return new Response('Forbidden', { status: 403 });
 
   try {
     const formData = await req.formData();
